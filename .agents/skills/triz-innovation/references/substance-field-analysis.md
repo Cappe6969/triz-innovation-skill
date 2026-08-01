@@ -76,7 +76,7 @@ itself** (self-service). This class is where ideality lives.
 3. Jump to the class above; pick 1–3 candidate moves.
 4. Translate each into a concrete change to *your* system. Tag `[SS Class 2: field
    upgrade]` etc. The recommender does steps 2–3:
-   `python .claude/skills/triz-innovation/scripts/triz_standard_solutions.py --state harmful`.
+   `python .agents/skills/triz-innovation/scripts/triz_standard_solutions.py --state harmful`.
 5. Hand the candidates to stage 8 (solution generation) and stage 9 (evaluation).
 
 ## Cross-domain field examples

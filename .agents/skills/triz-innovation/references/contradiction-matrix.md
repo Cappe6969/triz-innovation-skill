@@ -20,7 +20,7 @@ the 40 principles, not a separate method.
    - The thing that degrades as a side effect → **worsening** parameter.
 3. **Look up the cell** (improving row, worsening column) → a short list of
    inventive principle numbers. Run the tool:
-   `python .claude/skills/triz-innovation/scripts/triz_matrix.py 14 1`
+   `python .agents/skills/triz-innovation/scripts/triz_matrix.py 14 1`
    (improving = 14 Strength, worsening = 1 Weight of moving object).
 4. **Read each suggested principle** in `references/inventive-principles.md` and
    force a concrete interpretation onto *your* system. Reject the ones that don't

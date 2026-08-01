@@ -2,7 +2,7 @@
 
 > **Canonical source.** This document is the single, coherent body of TRIZ knowledge from which the `triz-innovation` skill (and future skills) are derived. Think of it as the textbook; the skill files are the quick-reference cards cut from it. Every method, checklist, principle, and procedure lives here first.
 
-## Table of Contents
+### Table of Contents
 
 - [0. How to use this document](#0-how-to-use-this-document)
 - [1. TRIZ foundations](#1-triz-foundations)
@@ -167,6 +167,8 @@ Persist the analysis as a reusable case file: `python .claude/skills/triz-innova
 
 **Example:** A reminder app — Tool: *push notification*, Action: *prompts*, Object: *patient*, U/H: U, N/I/E: I (adherence still low). Harmful twin: *push notification annoys patient* (H). Trimming candidate: the phone's calendar already nudges — could the calendar take over the prompt function?
 
+**Output:** A filled function table + a 3-bullet summary: main function (and its N/I/E grade), the worst harmful function, and the top trimming candidate.
+
 **Derives →** `references/function-analysis.md`
 
 ---
@@ -181,12 +183,16 @@ RCA+ (developed by Valeri Souchkov) extends classical RCA in two fundamental way
 
 **Procedure:**
 1. **Anchor the symptom:** State the observable problem as a measurable effect. Classify it: negative effect (something happens that we don't want), insufficient effect (desired result not achieved with required performance), excessive effect (wastes too much of a costly resource), or ineffective control (control process too slow/inaccurate/unreliable).
-2. **Build the cause–effect chain:** Repeatedly ask "What causes this effect to occur?" — not "Why?" Allow branching. Stop a branch at: an N+P cause (contradiction), an NC cause (non-changeable), or a requirement that cannot be changed.
-3. **Classify every cause:** Tag each node as N (purely negative), N+P (contradiction cause — has both a positive and negative effect), NC (non-changeable), or P (positive effect of N+P). Also tag surface vs deep, and check AND vs OR relationships.
+2. **Build the cause–effect chain:** Repeatedly ask "What causes this effect to occur?" — not "Why?" Allow branching (a node can have multiple contributing causes). State every cause as a complete sentence (function; relative parameter value; change of property; radical state change) and mark it **factual** (verified by data/observation) or **assumptive** (hypothesis requiring verification). Apply the **"stop at first contradiction cause" rule**: stop a branch at an N+P cause, an NC cause, or an unchangeable requirement — do NOT drill deeper below an N+P cause; the deeper causes only explain why its positive effect exists, so hand it to contradiction analysis instead.
+3. **Classify every cause:** Tag each node as N (purely negative), N+P (contradiction cause — has both a positive and negative effect), NC (non-changeable), or P (positive effect of N+P). Also tag surface vs deep, factual vs assumptive, and check AND vs OR relationships — in a specific known system causes are usually AND-related (all required; removing any one collapses the effect), while broad failure prevention across varied conditions tends to be OR-related (each contributes independently).
 4. **Find leverage points:** Rank causes by *(reach × controllability ÷ cost)* and pick the top 1–2. Closer to the top is generally preferred; system-level causes are preferred over super-system causes (easier to change).
 5. **Convert to a problem to solve:** For N-type causes → "How to eliminate/prevent [cause]?" For N+P causes → formulate as a technical contradiction ("How to ensure [cause] to enable [positive effect] but avoid [negative effect]?") and as a physical contradiction ("[Cause] should be present/high/strong to [positive effect] AND should be absent/low/weak to avoid [negative effect].").
 
 **Example:** "Patients stop doing exercises after week 2." Why? → Reminders feel annoying. Why? → They fire at random times. Why? → We don't know the patient's active hours. Leverage point: the unknown active window — an N-type cause (purely negative; no positive effect from not knowing). Solvable problem: "How do we learn or infer the active window without asking?" If the patient's fixed schedule were an N+P cause (it keeps them consistent but also makes them rigid and miss flexible opportunities), that would be handed to contradiction analysis.
+
+**RCA+ classification decision tree:** Does the cause also produce a positive/useful effect? → **N+P** — stop, document the positive effect, hand to contradiction analysis. Else can we eliminate or change it? → **N** — keep drilling deeper. Else (beyond control) → **NC** — stop, treat as a boundary condition. Tag N+P causes' beneficial side-effects as **P**.
+
+**Pitfalls:** single-line chains (you've missed AND branches) · one-word causes ("pressure" is a parameter, not a cause) · blame-the-user terminal nodes · expanding below an N+P cause · accepting NC too early ("too expensive" is not "non-changeable").
 
 **Derives →** `references/root-cause-analysis.md`
 
@@ -207,8 +213,8 @@ These are the standardized abstractions used to describe any engineering trade-o
 | 1 | Weight of moving object | 14 | Strength | 27 | Reliability |
 | 2 | Weight of stationary object | 15 | Duration of action of moving object | 28 | Measurement accuracy |
 | 3 | Length of moving object | 16 | Duration of action of stationary object | 29 | Manufacturing precision |
-| 4 | Length of stationary object | 17 | Temperature | 30 | Object-affected harmful factor |
-| 5 | Area of moving object | 18 | Illumination intensity | 31 | Object-generated harmful factor |
+| 4 | Length of stationary object | 17 | Temperature | 30 | Object-affected harmful factors |
+| 5 | Area of moving object | 18 | Illumination intensity | 31 | Object-generated harmful factors |
 | 6 | Area of stationary object | 19 | Use of energy by moving object | 32 | Ease of manufacture |
 | 7 | Volume of moving object | 20 | Use of energy by stationary object | 33 | Ease of operation |
 | 8 | Volume of stationary object | 21 | Power | 34 | Ease of repair |
@@ -232,7 +238,7 @@ These are the standardized abstractions used to describe any engineering trade-o
 - Empty cells: fall back to Resource Analysis + IFR.
 - For business/software/clinical problems, translate: "weight" → overhead/payload, "speed" → latency/throughput, "reliability" → uptime/adherence, "force" → load/pressure on a team.
 
-**Example:** Onboarding needs more validation (improve reliability) but each step adds signup friction (loss of time). Improving = 27 Reliability, worsening = 25 Loss of time. The matrix returns principles like 10 (Preliminary Action), 30 (Flexible Shells), 4 (Asymmetry), 34 (Discarding). Interpretation: pre-verify identity in the background before the user arrives, so the visible flow stays short. Tag: `[IP-10 Preliminary Action]`.
+**Example:** Onboarding needs more validation (improve reliability) but each step adds signup friction (loss of time). Improving = 27 Reliability, worsening = 25 Loss of time. The matrix returns principles like 10 (Preliminary Action), 30 (Flexible Shells), 4 (Asymmetry) — run `python triz_matrix.py 27 25` for the live answer, which is authoritative. Interpretation: pre-verify identity in the background before the user arrives, so the visible flow stays short. Tag: `[IP-10 Preliminary Action]`.
 
 **Derives →** `references/contradiction-analysis.md`, `references/contradiction-matrix.md`
 
@@ -244,10 +250,17 @@ These are the standardized abstractions used to describe any engineering trade-o
 
 **Core idea:** Altshuller extracted 40 recurring solution patterns from hundreds of thousands of patents. These are the "grammar" of invention — the same patterns appear across every field. Apply them by asking: "How would this principle manifest in my system?"
 
+**Procedure:**
+1. **Frame the contradiction** — as an engineering contradiction (§5) or a physical contradiction (§7).
+2. **Get candidate principles** — look up the matrix cell (step 3 of §5) for engineering contradictions, or pull the matching separation principle for physical ones.
+3. **Translate concretely** — read each candidate and force a specific interpretation: "How would this pattern manifest in my system?" Push every principle through the *soft* readings until it names a real change, not a slogan.
+4. **If the shortlist feels weak** — walk the "most universally useful" list (1, 2, 3, 10, 13, 15, 25, 35) or re-map the parameters (§5) to a different framing.
+5. **Tag every proposed change** `[IP-NN Name]`.
+
 ### Complete list of the 40 inventive principles
 
 1. **Segmentation** — divide into independent parts. *Soft:* microservices, modular pricing, split a workout into micro-sessions.
-2. **Separation** — extract the troublesome/needed part only. *Soft:* move a feature out of the core; remove the nagging channel, keep the nudge.
+2. **Taking out** — extract the troublesome/needed part only. *Soft:* move a feature out of the core; remove the nagging channel, keep the nudge.
 3. **Local Quality** — make parts non-uniform, each optimal for its role. *Soft:* per-segment UX, per-patient-phase protocol.
 4. **Asymmetry** — replace symmetry with asymmetry. *Soft:* asymmetric rate limits, tiered access.
 5. **Merging** — combine parallel operations/objects. *Soft:* batch jobs, bundle services, combine intake + assessment.
@@ -289,7 +302,7 @@ These are the standardized abstractions used to describe any engineering trade-o
 
 **Most universally useful when stuck:** 1, 2, 3, 10, 13, 15, 25, 35.
 
-**Example:** A hospital needs to reduce infection rates (improving reliability) without adding cost (worsening device complexity). Apply IP-2 Separation: move hand-sanitizer dispensers to the exact points where contamination happens (doorways, bedside) rather than mounting them everywhere. Apply IP-25 Self-service: make dispensers visible and easy to trigger so staff use them without thinking, making hygiene self-reinforcing. Tag: `[IP-2 Separation]`, `[IP-25 Self-service]`.
+**Example:** A hospital needs to reduce infection rates (improving reliability) without adding cost (worsening device complexity). Apply IP-2 Taking out: move hand-sanitizer dispensers to the exact points where contamination happens (doorways, bedside) rather than mounting them everywhere. Apply IP-25 Self-service: make dispensers visible and easy to trigger so staff use them without thinking, making hygiene self-reinforcing. Tag: `[IP-2 Taking out]`, `[IP-25 Self-service]`.
 
 **Derives →** `references/inventive-principles.md`
 
@@ -459,6 +472,8 @@ Push functions toward self-service: self-adjusting, self-correcting, self-monito
 
 **Example:** A physio app has a separate reminder engine (costly, complexity). Rule A: does the patient still need reminders? Yes — the need hasn't vanished. Rule B: can the patient remind themselves? Possibly — tie exercises to an existing habit. Rule C: does something else already nudge? The phone's calendar and the clinician's weekly check-in both do. Trim the reminder engine; the calendar handles scheduling and the clinician reinforces at visits. Net: lower cost, lower complexity, same adherence function.
 
+**Output:** For each trim: what's removed, which rule, who inherits the function, net effect on cost/complexity/harm, and any new contradiction created. Tag `[Trimming Rule A/B/C]`.
+
 **Derives →** `references/trimming.md`
 
 ---
@@ -493,6 +508,8 @@ Push functions toward self-service: self-adjusting, self-correcting, self-monito
 - Super/Future: wearables and calendars become the default reminder layer → the app may not need its own notifications at all.
 - Sub/Future: on-device activity sensing detects exercises automatically → reminders become confirmations, not nags.
 - System/Past: v1 sent fixed daily pushes → that's the origin of the annoyance.
+
+**Output:** The filled 9-window grid + 2–3 candidate intervention points it revealed.
 
 **Derives →** `references/system-operator.md`
 
@@ -555,7 +572,7 @@ Push functions toward self-service: self-adjusting, self-correcting, self-monito
 
 ### The 9 parts of ARIZ-85C
 
-1. **Problem & technical contradiction** — State the technical contradiction (TC) in both directions (TC-1: do A, gain X lose Y; TC-2: do not-A, keep Y lose X). Define the conflict pair (Tool & Object). Intensify the TC to extremes — extremes expose the real contradiction.
+1. **Problem & technical contradiction** — State the technical contradiction (TC) in both directions (TC-1: do A, gain X lose Y; TC-2: do not-A, keep Y lose X). Define the conflict pair (Tool & Object). Intensify the TC to extremes — extremes expose the real contradiction. Then **pick the TC that best preserves the main useful function** and state the *intensified* version (push the conflict to the extreme: "infinitely many", "zero", "instant").
 
 2. **Resources** — Define the operating zone (OZ: exact space of conflict) and operating time (OT: exact time window — before/during/after). List substance-field resources (SFR): everything available inside or around the OZ/OT — substances, fields, space, time, the object itself, voids, by-products.
 
@@ -757,7 +774,7 @@ These are the keyword/intent cues used by `triz_router.py` to recommend methods.
 
 **Example:** A pipe must be open (for flow) and closed (to prevent backflow). Smart little people: Group A stands at the opening and lets fluid pass in one direction; the moment fluid tries to reverse, Group B (triggered by the backward pressure) swings a door shut. Translation: a check valve — a real mechanism that emerged from modeling the conflict with agents. For a software analogy (a login page must be secure and fast): Group A (security agents) check credentials thoroughly; Group B (speed agents) pre-warm the session while Group A works, so the user sees no delay. Translation: background authentication with optimistic UI.
 
-Key router keywords (used by `triz_router.py`): FOS — "someone must have solved," "how do others," "is there a field that"; MOS — "we have a technology," "where can we apply," "find problems for."
+Key router keywords (used by `triz_router.py`): Smart Little People — "stuck," "no idea," "creative block" (Italian: "bloccato," "nessuna idea," "blocco creativo").
 
 **Derives →** `references/triz-method-map.md`
 
@@ -843,7 +860,7 @@ Numerator = value delivered to customer + revenue. Denominator = cost to serve +
 
 ### Recurring software contradictions → principles
 
-- **Latency vs cost** → [IP-10 Preliminary Action] precompute/cache; [IP-19 Periodic Action] batch; [IP-2 Separation] move work off the hot path.
+- **Latency vs cost** → [IP-10 Preliminary Action] precompute/cache; [IP-19 Periodic Action] batch; [IP-2 Taking out] move work off the hot path.
 - **Consistency vs availability (CAP)** → [IP-15 Dynamization] tunable consistency; [IP-13 The Other Way Around] eventual + reconcile.
 - **Flexibility vs simplicity** → [IP-1 Segmentation] plugins; [IP-6 Universality] one extension point; [IP-25 Self-service] config over code.
 - **Coupling vs performance** → [IP-24 Intermediary] queue/broker; [IP-7 Nesting] bounded contexts.
@@ -934,6 +951,10 @@ The `triz-innovation` skill includes helper scripts that automate lookups, gener
 | `triz_evolution.py` | Classifies S-curve stage from signals and suggests next-step evolution trends: `python triz_evolution.py --signals "gains shrinking, cost rising"` |
 | `triz_case_template.py` | Creates a pre-filled markdown case file in `cases/` for persisting a TRIZ analysis: `python triz_case_template.py "Short problem title"` |
 | `triz_evaluator.py` | Scores solutions from a CSV on impact, feasibility, cost, speed, risk, reversibility, complexity, and ideality. Returns a sorted table: `python triz_evaluator.py solutions.csv` |
+| `triz.py` | Master dispatcher — one entrypoint for every sub-tool, works from any directory: `python triz.py route "problem"` |
+| `triz_contradiction_network.py` | Builds/analyzes a contradiction network from parameter ids and finds conflicts: `python triz_contradiction_network.py --demo` |
+| `triz_effects.py` | Searches the scientific-effects catalog by function or keyword: `python triz_effects.py --function "separate"` |
+| `triz_branches.py` | Branch registry — lists field/language branches, resolves labels, checks schema: `python triz_branches.py list` |
 
 ---
 
@@ -972,6 +993,16 @@ This document is an **original operational synthesis** — every section is writ
 ### Primary sources
 
 The 18 reference files in `.claude/skills/triz-innovation/references/` and the pipeline in `.claude/skills/triz-innovation/SKILL.md`. Each is an original operational rewrite — condensed, procedural, and designed for use during a TRIZ session. This master document consolidates and enriches them without altering their core concepts.
+
+### Books used (conceptual reference only)
+
+The following books informed the synthesis as conceptual cross-checks only — no text was copied from them (mirrors `docs/source-map.md`):
+
+- **Simplified TRIZ, 3rd ed.** — most-used conceptual cross-check: practical framing of function analysis, ideality, and business application; "separate the best from the rest" → evaluation stage.
+- **Deep Dive into TRIZ — Engineering Problem Solving Algorithm** — best practices / optimization for running TRIZ projects; disciplined pipeline ordering and "always end with an experiment".
+- **TRIZ Engineering Problem-Solving Algorithm** (tips & tricks / project mgmt) — common mistakes, low-priority-task tips, operating rules ("don't skip a stage", method-over-inspiration).
+- **World Conference of AI-Powered Innovation and TRIZ Methodology** (2nd IFIP WG 5.2) — direction for future MCP/LLM integration; confirmed LLM-assisted FOS/MOS framing.
+- **TRIZ-Anwendertag 2020** (Oliver Mayer) — spot conceptual cross-check only.
 
 ### Secondary enrichment
 
