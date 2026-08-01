@@ -13,6 +13,8 @@ Usage:
 Standard library only — Python 3.8+.
 """
 
+from __future__ import annotations
+
 import sys
 import re
 from datetime import date

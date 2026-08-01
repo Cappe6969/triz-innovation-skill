@@ -11,21 +11,30 @@ Usage:
 Standard library only — Python 3.8+.
 """
 
+from __future__ import annotations
+
 import sys
 import json
+import re
 from typing import Any
+
+
+def _kw_match(kw: str, text: str) -> bool:
+    """Match a keyword with \\b word boundaries."""
+    return bool(re.search(rf"\b{re.escape(kw)}\b", text))
+
 
 # ── Rules table ──────────────────────────────────────────────────────────────
 # Each rule: (keywords_tuple, method, weight, why_template)
-# keywords are lowercase substrings matched against the lowercased problem.
+# keywords are lowercase whole words/phrases matched with \\b boundaries.
 # Extend this table to add new heuristics without restructuring the router.
 RULES: list[tuple[tuple[str, ...], str, int, str]] = [
     # -- Engineering Contradiction signals
     (
-        ("but ", " but ", "but", "but,", "but.", "trade-off", "tradeoff", "at the cost of",
-         "however", "increases", "decreases", "more ", " less ",
-         "ma ", " ma ", "ma", "ma,", "ma.", "però", "tuttavia", "a scapito di", "aumenta",
-         "diminuisce", "più ", " meno "),
+        ("but", "trade-off", "tradeoff", "at the cost of",
+         "however", "increases", "decreases", "more", "less",
+         "ma", "però", "tuttavia", "a scapito di", "aumenta",
+         "diminuisce", "più", "meno"),
         "Engineering Contradiction + 40 Inventive Principles",
         3, "contradiction cue detected (trade-off / conflict connector)"
     ),
@@ -118,7 +127,8 @@ RULES: list[tuple[tuple[str, ...], str, int, str]] = [
         ("pricing", "prezzo", "prezzi", "customer", "cliente", "clienti",
          "market", "mercato", "revenue", "ricavi", "fatturato", "team",
          "process", "processo", "org", "workflow", "flusso", "business",
-         "vendite", "marketing", "concorrenza"),
+         "vendite", "marketing", "concorrenza",
+         "vendita", "costo", "margine", "utenti", "fidelizzazione"),
         "Business TRIZ",
         2, "business / org / market domain keyword"
     ),
@@ -127,7 +137,9 @@ RULES: list[tuple[tuple[str, ...], str, int, str]] = [
         ("app", "code", "codice", "latency", "latenza", "api", "database",
          "deploy", "architecture", "architettura", "bug", "notification",
          "notifica", "notifiche", "server", "frontend", "backend", "software",
-         "programma", "algoritmo", "ui", "ux", "interfaccia"),
+         "programma", "algoritmo", "ui", "ux", "interfaccia",
+         "sito", "web", "pagina", "login", "accesso", "caricamento", "dati",
+         "errore", "connessione"),
         "Software TRIZ",
         2, "software / architecture domain keyword"
     ),
@@ -136,9 +148,17 @@ RULES: list[tuple[tuple[str, ...], str, int, str]] = [
         ("patient", "paziente", "pazienti", "exercise", "esercizio", "esercizi",
          "therapy", "terapia", "rehab", "riabilitazione", "adherence",
          "aderenza", "aderire", "clinic", "clinica", "physio", "fisioterapia",
-         "fisioterapista", "infortunio", "recupero", "cura", "trattamento"),
+         "fisioterapista", "infortunio", "recupero", "cura", "trattamento",
+         "dolore", "movimento", "muscolo", "ginocchio", "schiena",
+         "allenamento", "protocollo"),
         "Rehabilitation TRIZ",
         2, "rehabilitation / physio / clinical domain keyword"
+    ),
+    # -- Workflow/Task signals (Italian)
+    (
+        ("attività", "task", "compito", "passaggio", "ritardo", "attesa"),
+        "Business TRIZ",
+        1, "workflow/task cue"
     ),
     # -- Su-Field + 76 Standard Solutions signals
     (
@@ -178,7 +198,7 @@ RULES: list[tuple[tuple[str, ...], str, int, str]] = [
 ]
 
 # ── Contradiction detection cues (separate from method scoring) ─────────────
-# Italian + English contradiction connectors
+# Italian + English contradiction connectors (bare whole words — matched with \\b)
 _CONTRADICTION_CONNECTORS = [
     "but", "however", "trade-off", "tradeoff", "although",
     "ma", "però", "tuttavia", "eppure", "sebbene", "benché",
@@ -196,6 +216,12 @@ _PHYSICAL_TOPICS = [
     ("open", "closed"), ("aperto", "chiuso"), ("aperta", "chiusa"),
     ("loud", "quiet"), ("rumoroso", "silenzioso"),
     ("visible", "hidden"), ("visibile", "nascosto"), ("visibile", "nascosta"),
+    ("rigid", "flexible"), ("rigido", "flessibile"), ("rigida", "flessibile"),
+    ("transparent", "opaque"), ("trasparente", "opaco"), ("trasparente", "opaca"),
+    ("thick", "thin"), ("spesso", "sottile"), ("spessa", "sottile"),
+    ("dense", "sparse"), ("denso", "rado"), ("densa", "rada"),
+    ("precise", "imprecise"), ("preciso", "impreciso"), ("precisa", "imprecisa"),
+    ("cheap", "expensive"), ("economico", "costoso"), ("economica", "costosa"),
 ]
 
 _ANNOYANCE_WORDS = [
@@ -214,17 +240,14 @@ _DEFAULT_FALLBACK = [
 
 
 def _detect_engineering_contradiction(lower: str, problem: str) -> str | None:
-    """Try to produce a one-line 'improve X / worsens Y' guess."""
-    has_connector = any(c in lower for c in _CONTRADICTION_CONNECTORS)
-    if not has_connector:
-        return None
-
-    # Find the connector position and split around it
+    """Try to produce a one-line 'improve X / worsens Y' guess using word boundaries."""
+    # Find connectors with word-boundary matching
     connector_pos = -1
     found_conn = ""
     for c in _CONTRADICTION_CONNECTORS:
-        pos = lower.find(c)
-        if pos != -1:
+        m = re.search(rf"\b{re.escape(c)}\b", lower)
+        if m:
+            pos = m.start()
             if connector_pos == -1 or pos < connector_pos:
                 connector_pos = pos
                 found_conn = c
@@ -232,34 +255,53 @@ def _detect_engineering_contradiction(lower: str, problem: str) -> str | None:
     if connector_pos == -1:
         return None
 
-    before = problem[:connector_pos].strip().rstrip(".,;:!?")
-    after = problem[connector_pos + len(found_conn):].strip().lstrip(".,;:!? ")
+    # Extract text before and after the connector
+    before_raw = problem[:connector_pos].strip().rstrip(".,;:!?")
+    after_raw = problem[connector_pos + len(found_conn):].strip().lstrip(".,;:!? ")
 
-    # Try to extract short labels — prefer the last meaningful subject
-    before_label = _short_label(before, 40)
-    after_label = _short_label(after, 40)
+    # Extract nearest noun-phrase subject: last 2-3 whole words before, first 2-3 after
+    def _subject_words(text: str, count: int, from_end: bool = True) -> str:
+        words = text.split()
+        if not words:
+            return ""
+        if from_end:
+            selected = words[-min(count, len(words)):]
+        else:
+            selected = words[:min(count, len(words))]
+        return " ".join(selected)
 
-    if before_label and after_label:
-        return f"improve [{before_label}] / worsens [{after_label}]"
-    if before_label:
-        return f"trade-off near: {before_label}"
-    return f"trade-off detected in: {_short_label(problem, 80)}"
+    before_subject = _subject_words(before_raw, 3, from_end=True)
+    after_subject = _subject_words(after_raw, 3, from_end=False)
+
+    # Truncate each to 40 chars, never split mid-word
+    if len(before_subject) > 40:
+        before_subject = before_subject[:40].rstrip().rsplit(" ", 1)[0]
+    if len(after_subject) > 40:
+        after_subject = after_subject[:40].rstrip().rsplit(" ", 1)[0]
+
+    if before_subject and after_subject:
+        return f"improve [{before_subject}] / worsens [{after_subject}]"
+
+    # Fallback: no valid pre-connector subject — do NOT emit improve/worsens framing
+    short_text = problem[:80].rstrip()
+    if len(short_text) > 60:
+        short_text = short_text[:60].rstrip().rsplit(" ", 1)[0]
+    return f"trade-off near: {short_text}"
 
 
 def _detect_physical_contradiction(lower: str) -> str | None:
     """Try to produce a one-line 'must be A and not-A' guess."""
-    # Check explicit paired opposites
+    # Check explicit paired opposites with word boundaries
     for a, b in _PHYSICAL_TOPICS:
-        if a in lower and b in lower:
+        if _kw_match(a, lower) and _kw_match(b, lower):
             return f"element must be both {a} and {b}"
 
     # Check annoyance/presence patterns — common in notification/adherence problems
-    has_annoyance = any(w in lower for w in _ANNOYANCE_WORDS)
-    has_but = any(c in lower for c in _CONTRADICTION_CONNECTORS)
+    has_annoyance = any(_kw_match(w, lower) for w in _ANNOYANCE_WORDS)
+    has_but = any(_kw_match(c, lower) for c in _CONTRADICTION_CONNECTORS)
 
     if has_but and has_annoyance:
         # Look for the subject that's annoying / must be both present and absent
-        # Check for common subjects: notification, message, reminder, alert
         for subject in ["notification", "notifica", "notifiche", "message",
                         "messaggio", "reminder", "promemoria", "alert", "avviso",
                         "allarme", "email", "popup", "suono", "sound"]:
@@ -267,32 +309,13 @@ def _detect_physical_contradiction(lower: str) -> str | None:
                 return f"'{subject}' must be present (to help) and absent (to avoid annoyance)"
         return "element must be present (useful) and absent (avoids annoyance)"
 
-    # Check if we at least have a connector — give a generic
-    if has_but:
-        # Look for must-be / deve-essere patterns
-        for must_word in ["must be", "deve essere", "devono essere", "should be",
-                          "dovrebbe", "dovrebbero"]:
-            if must_word in lower:
-                return f"physical contradiction suspected near '{must_word}'"
+    # Check must-be / deve-essere patterns (no has_but gate — R3)
+    for must_word in ["must be", "deve essere", "devono essere", "should be",
+                      "dovrebbe", "dovrebbero"]:
+        if must_word in lower:
+            return f"physical contradiction suspected near '{must_word}'"
 
     return None
-
-
-def _short_label(text: str, max_len: int = 60) -> str:
-    """Truncate and clean a text fragment into a short label."""
-    # Take first sentence fragment
-    text = text.strip()
-    if not text:
-        return ""
-    # Cut at reasonable boundary
-    if len(text) > max_len:
-        # Try to cut at a word boundary
-        cut = text[:max_len].rstrip()
-        last_space = cut.rfind(" ")
-        if last_space > max_len // 2:
-            cut = cut[:last_space]
-        text = cut + "…"
-    return text
 
 
 def suggest_methods(problem: str) -> dict[str, Any]:
@@ -313,7 +336,7 @@ def suggest_methods(problem: str) -> dict[str, Any]:
 
     for keywords, method, weight, why_tpl in RULES:
         for kw in keywords:
-            if kw in lower:
+            if _kw_match(kw, lower):
                 prev = scored.get(method)
                 if prev is None:
                     scored[method] = (weight, [why_tpl])

@@ -6,6 +6,9 @@ Analyses problems involving multiple engineering contradictions where resolving
 one may affect others. Identifies shared parameters, conflict groups, and
 suggests resolution order prioritising the most-connected contradictions.
 
+It is a static one-shot ordering heuristic — it does not model propagation
+after hypothetical resolution.
+
 Usage:
     python triz_contradiction_network.py --add <id> <improving> <worsening> "<desc>"
     python triz_contradiction_network.py --analyze           # read JSON from stdin
@@ -14,9 +17,12 @@ Usage:
 Standard library only — Python 3.8+.
 """
 
+from __future__ import annotations
+
 import sys
 import json
 import csv
+import re as _re
 from pathlib import Path
 from typing import Any
 
@@ -37,6 +43,12 @@ def _load_parameter_names() -> dict[int, str]:
         for row in reader:
             params[int(row["id"])] = row["name"].strip()
     return params
+
+
+def _sort_cid(cid: str) -> int:
+    """Extract trailing integer from a contradiction ID like 'C2' or 'C10'."""
+    m = _re.search(r'\d+$', cid)
+    return int(m.group()) if m else 0
 
 
 # -- Core functions ------------------------------------------------------------
@@ -62,15 +74,18 @@ def add_contradiction(
 
     Raises:
         ValueError: if cid already exists in the network, or parameter IDs are
-                    outside 1..39.
+                    not int or outside 1..39.
     """
-    if not (1 <= improving_param <= 39):
+    # R9.1: Reject non-int including bool (mirror R6.2)
+    if not isinstance(improving_param, int) or isinstance(improving_param, bool) or not (1 <= improving_param <= 39):
         raise ValueError(
-            f"improving_param must be in 1..39, got {improving_param}"
+            f"improving_param must be an integer in 1..39, "
+            f"got {improving_param!r} (type={type(improving_param).__name__})"
         )
-    if not (1 <= worsening_param <= 39):
+    if not isinstance(worsening_param, int) or isinstance(worsening_param, bool) or not (1 <= worsening_param <= 39):
         raise ValueError(
-            f"worsening_param must be in 1..39, got {worsening_param}"
+            f"worsening_param must be an integer in 1..39, "
+            f"got {worsening_param!r} (type={type(worsening_param).__name__})"
         )
 
     # Reject duplicate IDs
@@ -131,6 +146,17 @@ def find_conflicts(network: dict[str, Any]) -> list[dict[str, Any]]:
         are listed separately for each role.
     """
     param_names = _load_parameter_names()
+
+    # R9.1: Validate all parameter IDs before any lookup
+    for contra in network["contradictions"]:
+        for key in ("improving", "worsening"):
+            pid = contra[key]
+            if not isinstance(pid, int) or isinstance(pid, bool) or not (1 <= pid <= 39):
+                raise ValueError(
+                    f"Invalid parameter {pid!r} in contradiction {contra.get('id', '?')} "
+                    f"(must be int in 1..39)"
+                )
+
     conflicts: list[dict[str, Any]] = []
 
     # Build index: (param_id, role) -> set of contradiction IDs
@@ -142,7 +168,6 @@ def find_conflicts(network: dict[str, Any]) -> list[dict[str, Any]]:
             key = (pid, role)
             if key not in role_index:
                 role_index[key] = set()
-            # For same-role sharing, both contradictions would have param as same role
             role_index[key].add(contra["id"])
 
     # Now also check cross-role sharing (param as improving in one, worsening in another)
@@ -172,11 +197,8 @@ def find_conflicts(network: dict[str, Any]) -> list[dict[str, Any]]:
                 })
 
     # Cross-role conflicts: same param, different roles across contradictions
-    # Only report when the param is 'improving' in at least one contradiction
-    # AND 'worsening' in at least one other — genuine role conflict.
     for pid, cids in cross_index.items():
         if len(cids) >= 2:
-            # Determine the roles this parameter plays across all involved contradictions
             roles_seen: set[str] = set()
             for contra in network["contradictions"]:
                 if contra["id"] in cids:
@@ -184,7 +206,6 @@ def find_conflicts(network: dict[str, Any]) -> list[dict[str, Any]]:
                         roles_seen.add("improving")
                     if contra["worsening"] == pid:
                         roles_seen.add("worsening")
-            # Only report if the parameter is genuinely used in both roles
             if roles_seen == {"improving", "worsening"}:
                 sorted_cids = sorted(cids)
                 group_key = ("cross", pid, tuple(sorted_cids))
@@ -209,31 +230,35 @@ def suggest_resolution_order(network: dict[str, Any]) -> list[dict[str, Any]]:
     Returns:
         List of dicts, each with:
         - "id": contradiction ID
-        - "connected_count": how many other contradictions share a parameter
+        - "connected_count": how many distinct other contradictions share a parameter
         - "shared_params": list of parameter_ids shared with other contradictions
         - "description": contradiction description
-        Ordered by connected_count descending, then by id.
+        Ordered by connected_count descending, ties broken numerically (C2 before C10).
     """
     shared = find_shared_parameters(network)
 
-    # Build connected_count per contradiction
-    connected: dict[str, set[int]] = {}  # cid -> set of parameters shared with others
+    # R9.2: Count distinct neighboring contradiction IDs, not shared params
+    neighbor_map: dict[str, set[str]] = {}  # cid -> set of neighbor contradiction IDs
+    param_map: dict[str, set[int]] = {}     # cid -> set of shared parameter IDs
     for pid, cids in shared.items():
         for cid in cids:
-            connected.setdefault(cid, set()).add(pid)
+            param_map.setdefault(cid, set()).add(pid)
+            neighbor_map.setdefault(cid, set()).update(c for c in cids if c != cid)
 
     result: list[dict[str, Any]] = []
     for contra in network["contradictions"]:
         cid = contra["id"]
-        shared_params = sorted(connected.get(cid, set()))
+        shared_params = sorted(param_map.get(cid, set()))
+        neighbor_count = len(neighbor_map.get(cid, set()))
         result.append({
             "id": cid,
-            "connected_count": len(shared_params),
+            "connected_count": neighbor_count,
             "shared_params": shared_params,
             "description": contra["description"],
         })
 
-    result.sort(key=lambda x: (-x["connected_count"], x["id"]))
+    # R9.3: Sort ties numerically by trailing integer
+    result.sort(key=lambda x: (-x["connected_count"], _sort_cid(x["id"])))
     return result
 
 
@@ -434,6 +459,16 @@ def _run_analyze() -> None:
                 file=sys.stderr,
             )
             sys.exit(1)
+        # R9.1: Validate improving/worsening are valid ints
+        for key in ("improving", "worsening"):
+            val = c[key]
+            if not isinstance(val, int) or isinstance(val, bool) or not (1 <= val <= 39):
+                print(
+                    f"Error: contradiction at index {i}: '{key}' must be an integer 1..39, "
+                    f"got {val!r}",
+                    file=sys.stderr,
+                )
+                sys.exit(1)
 
     result = analyze_network(contradictions)
     print(json.dumps(result, indent=2))

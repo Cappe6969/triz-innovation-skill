@@ -14,6 +14,8 @@ Usage:
 Standard library only — Python 3.8+.
 """
 
+from __future__ import annotations
+
 import sys
 import csv
 from pathlib import Path
@@ -83,15 +85,18 @@ def lookup(improving: int, worsening: int) -> dict[str, Any]:
         - "note": str or None
 
     Raises:
-        ValueError: if either id is outside 1..39.
+        ValueError: if either argument is not an int (including bool) or outside 1..39.
     """
-    if not isinstance(improving, int) or not (1 <= improving <= 39):
+    # R6.2: Reject non-int including bool
+    if not isinstance(improving, int) or isinstance(improving, bool) or not (1 <= improving <= 39):
         raise ValueError(
-            f"Improving parameter id must be an integer in 1..39, got {improving}"
+            f"Improving parameter id must be an integer in 1..39, "
+            f"got {improving!r} (type={type(improving).__name__})"
         )
-    if not isinstance(worsening, int) or not (1 <= worsening <= 39):
+    if not isinstance(worsening, int) or isinstance(worsening, bool) or not (1 <= worsening <= 39):
         raise ValueError(
-            f"Worsening parameter id must be an integer in 1..39, got {worsening}"
+            f"Worsening parameter id must be an integer in 1..39, "
+            f"got {worsening!r} (type={type(worsening).__name__})"
         )
 
     params = load_parameters()

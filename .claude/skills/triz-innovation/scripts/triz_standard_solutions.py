@@ -18,6 +18,8 @@ Usage:
 Standard library only -- Python 3.8+.
 """
 
+from __future__ import annotations
+
 import json
 import sys
 from pathlib import Path
@@ -229,7 +231,8 @@ def _iter_solutions(
 
     Each returned dict has keys: id, name, description, subfield_state,
     mechanism, class_id, group_id, class_name, group_name, and optionally
-    parent_id (for variants).
+    parent_id (for variants). Variants inherit the parent mechanism if
+    their own is empty.
     """
     results: list[dict[str, Any]] = []
     classes = db.get("classes", {})
@@ -246,7 +249,7 @@ def _iter_solutions(
                 })
                 # Recurse into variants if present.
                 for variant in sol.get("variants", []):
-                    results.append({
+                    entry = {
                         **variant,
                         "subfield_state": sol.get("subfield_state", ""),
                         "class_id": cls_id,
@@ -254,7 +257,11 @@ def _iter_solutions(
                         "class_name": cls_data.get("name", ""),
                         "group_name": grp_data.get("name", ""),
                         "parent_id": sol["id"],
-                    })
+                    }
+                    # R7.1: Inherit parent mechanism if variant has none
+                    if not entry.get("mechanism", "").strip():
+                        entry["mechanism"] = sol.get("mechanism", "")
+                    results.append(entry)
     return results
 
 
@@ -392,7 +399,8 @@ def _print_list_all() -> None:
     """Print all 76 Standard Solutions grouped by class, group, and solution."""
     db = load_solutions_db()
     classes = db.get("classes", {})
-    total = 0
+    base_count = 0
+    variant_count = 0
     for cls_id in sorted(classes, key=int):
         cls_data = classes[cls_id]
         print(f"{'=' * 70}")
@@ -406,17 +414,19 @@ def _print_list_all() -> None:
             print(f"    {grp_data.get('description', '')}")
             for sol in sorted(grp_data.get("solutions", []),
                               key=lambda s: _sort_key(s["id"])):
-                total += 1
+                base_count += 1
                 print(f"\n    [{sol['id']}] {sol['name']}")
                 print(f"        {sol.get('mechanism', '')}")
                 # Variants
                 for variant in sorted(sol.get("variants", []),
                                       key=lambda v: _sort_key(v["id"])):
-                    total += 1
+                    variant_count += 1
                     print(f"\n    [{variant['id']}] {variant['name']}  (variant)")
                     print(f"        {variant.get('description', '')}")
             print()
-    print(f"Total: {total} solutions listed.")
+    print(f"Total: {base_count} standard solutions")
+    if variant_count:
+        print(f"       + {variant_count} variant(s)")
 
 
 def _print_search_results(results: list[dict[str, Any]]) -> None:

@@ -13,7 +13,10 @@ Usage:
 Standard library only — Python 3.8+.
 """
 
+from __future__ import annotations
+
 import sys
+import re
 from typing import Any
 
 # ── S-curve stage cue table ────────────────────────────────────────────────────
@@ -21,6 +24,7 @@ from typing import Any
 # when tie-breaking among mixed signals.
 # Each entry: (stage int, stage name, tuple of lowercase cue substrings).
 # No match → stage 0 / Unknown.
+# Cues are matched with \\b word boundaries (R8.1).
 
 _STAGE_CUES: list[tuple[int, str, tuple[str, ...]]] = [
     (
@@ -167,10 +171,10 @@ def analyze(signals: str = "") -> dict[str, Any]:
     why = "No signals provided or no cues matched."
 
     if lower:
-        # Collect all matching cues, grouped by stage
+        # Collect all matching cues, grouped by stage (R8.1: word-boundary match)
         matches_by_stage: dict[int, dict[str, Any]] = {}
         for stage_val, stage_name, cues in _STAGE_CUES:
-            matched = [cue for cue in cues if cue in lower]
+            matched = [cue for cue in cues if re.search(rf"\b{re.escape(cue)}\b", lower)]
             if matched:
                 matches_by_stage.setdefault(stage_val, {
                     "name": stage_name,
@@ -179,7 +183,14 @@ def analyze(signals: str = "") -> dict[str, Any]:
 
         if matches_by_stage:
             # Pick stage with most matches; tie → later stage (higher number)
-            best_stage = max(matches_by_stage, key=lambda s: (len(matches_by_stage[s]["cues"]), s))
+            best_count = max(len(v["cues"]) for v in matches_by_stage.values())
+            best_stage = max(
+                (s for s, v in matches_by_stage.items() if len(v["cues"]) == best_count),
+                key=lambda s: s,
+            )
+            tie_broken = sum(
+                1 for s, v in matches_by_stage.items() if len(v["cues"]) == best_count
+            ) > 1
             stage = best_stage
             name = matches_by_stage[best_stage]["name"]
 
@@ -192,6 +203,8 @@ def analyze(signals: str = "") -> dict[str, Any]:
                 for sv in sorted(matches_by_stage)
             ]
             why = "Matched cues — " + "; ".join(groups)
+            if tie_broken:
+                why += " (tie broken toward the later stage)"
         else:
             why = "No recognised S-curve cues matched the provided signals."
 
@@ -213,6 +226,12 @@ def analyze(signals: str = "") -> dict[str, Any]:
 # ── CLI ────────────────────────────────────────────────────────────────────────
 
 def main() -> None:
+    # R12: Windows-safe stdout
+    try:
+        sys.stdout.reconfigure(encoding="utf-8", errors="replace")
+    except AttributeError:
+        pass
+
     signals = ""
 
     if len(sys.argv) >= 2:

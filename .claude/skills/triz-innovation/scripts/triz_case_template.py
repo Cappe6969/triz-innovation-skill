@@ -10,6 +10,8 @@ Usage:
 Standard library only — Python 3.8+.
 """
 
+from __future__ import annotations
+
 import sys
 import re
 from datetime import date
@@ -20,7 +22,7 @@ def _repo_root(script_file: str) -> Path:
     """Resolve the repository root from this script's location.
 
     Script lives at: .claude/skills/triz-innovation/scripts/
-    Repo root is 4 parent directories up.
+    Repo root is 5 parent directories up.
     """
     # Script is .claude/skills/triz-innovation/scripts/<file>.py — 5 levels to root
     return Path(script_file).resolve().parent.parent.parent.parent.parent

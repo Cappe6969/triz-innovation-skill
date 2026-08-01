@@ -22,13 +22,19 @@ Commands:
     evolution [--signals "..."]          -> S-curve stage + 8 evolution trends
     case "<title>"                       -> create a blank TRIZ case file
     evaluate [solutions.csv]             -> score & rank solutions from a CSV
+    effects --function <query>           -> search scientific effects by function
+    effects --keyword <query>            -> search scientific effects by keyword
+    network --demo                       -> contradiction network demo
+    network --analyze                    -> analyze network from stdin JSON
     master                               -> show the TRIZ-MASTER.md knowledge base
 
-Aliases: router->route, standard-solutions/su-field->sufield,
-         evaluator->evaluate, kb->master.
+Aliases: router->route, standard-solutions/standard_solutions/su-field->sufield,
+         evaluator->evaluate, kb/knowledge-base->master.
 
 Standard library only — Python 3.8+.
 """
+
+from __future__ import annotations
 
 import subprocess
 import sys
@@ -44,6 +50,8 @@ _COMMANDS = {
     "evolution": "triz_evolution.py",
     "case": "triz_case_template.py",
     "evaluate": "triz_evaluator.py",
+    "effects": "triz_effects.py",
+    "network": "triz_contradiction_network.py",
 }
 
 # friendly aliases -> canonical command
@@ -128,6 +136,12 @@ def dispatch(argv: list) -> int:
 
 
 def main() -> None:
+    # R12: Windows-safe stdout
+    try:
+        sys.stdout.reconfigure(encoding="utf-8", errors="replace")
+    except AttributeError:
+        pass
+
     sys.exit(dispatch(sys.argv[1:]))
 
 
