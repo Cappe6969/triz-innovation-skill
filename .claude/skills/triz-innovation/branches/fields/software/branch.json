@@ -1,5 +1,6 @@
 {
   "id": "software",
+  "method": "Software TRIZ",
   "name": "Software TRIZ",
   "name_it": "TRIZ software",
   "description": "Same TRIZ machinery with software vocabulary.",

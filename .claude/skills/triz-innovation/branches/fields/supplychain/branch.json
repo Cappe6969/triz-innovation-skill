@@ -1,5 +1,6 @@
 {
   "id": "supplychain",
+  "method": "Supply Chain TRIZ",
   "name": "Supply Chain TRIZ",
   "name_it": "TRIZ supply chain e logistica",
   "description": "Same TRIZ machinery with supply-chain / logistics vocabulary — inventory, lead times, demand, shipping, capacity.",

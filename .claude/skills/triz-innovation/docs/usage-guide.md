@@ -80,10 +80,11 @@ The skill is a mix of branches — pure-data JSON that tunes the same TRIZ core 
 field or a language, no code.
 
 - **Field branches** (`branches/fields/<id>/branch.json`) carry domain vocabulary:
-  keywords, parameter translations, soft readings of the 40 principles, and worked
-  examples. Shipped: `general`, `business`, `software`, `rehab`, `mechanical`,
-  `datascience`, `marketing`, `supplychain`, `energy`, `education`,
-  `construction`, `robotics`. `general` is the canonical core.
+  a `method` key (the TRIZ method that vocabulary triggers), keywords, parameter
+  translations, soft readings of the 40 principles, and worked examples. Shipped:
+  `general`, `business`, `software`, `rehab`, `mechanical`, `datascience`,
+  `marketing`, `supplychain`, `energy`, `education`, `construction`, `robotics`.
+  `general` is the canonical core.
 - **Language branches** (`branches/langs/<lang>/branch.json`) carry localized labels
   plus stopwords for auto-detection. Shipped: `en` (default), `it`.
 
@@ -96,17 +97,21 @@ python .../triz.py branches list|check|resolve --lang it
 `--branch <domain>` restricts the router to that field's domain rule; `--lang it`
 prints Italian labels; `--lang auto` detects the language. Worked examples for each
 field branch are in `references/use-cases.md`. Adding a branch is pure data: drop a
-`branch.json` in `branches/fields/<id>/` (or `branches/langs/<lang>/`) and the
-registry and router pick it up automatically — no code change.
+`branch.json` in `branches/fields/<id>/` — with a `method` key naming the TRIZ
+method its keywords trigger (e.g. `"method": "Business TRIZ"`) — or in
+`branches/langs/<lang>/`, and the registry and router pick it up automatically — no
+code change.
 
 ## 6. MCP server
 The skill ships a minimal local MCP server at
 `.claude/skills/triz-innovation/mcp/triz_mcp_server.py`. It is **pure stdlib**
 (`json`, `sys`, `io`, `argparse` only — no `mcp` SDK, no pip install, Python
-3.8+), speaking **newline-delimited JSON-RPC 2.0 over stdio** (not
-Content-Length framing): one JSON request object per stdin line, one JSON
-response object per stdout line; logs go to stderr only. On Windows the stdio
-streams are re-configured to UTF-8 so non-ASCII output never crashes.
+3.8+), speaking **standard MCP stdio framing with Content-Length headers**
+(as used by the official MCP SDK, Claude Code, and opencode) plus the legacy
+**newline-delimited JSON-RPC** for line-based clients. Framing is auto-detected
+per request; each reply uses the same framing as the request. Logs go to
+stderr only. On Windows the stdio streams are re-configured to UTF-8 so
+non-ASCII output never crashes.
 
 It exposes three tools mirroring the scripts:
 
@@ -146,6 +151,20 @@ must be on `PATH`.
       "type": "stdio",
       "command": "python",
       "args": ["C:\\Dev\\TRIZskill.md\\.claude\\skills\\triz-innovation\\mcp\\triz_mcp_server.py"]
+    }
+  }
+}
+```
+
+**OpenCode** (global `~/.config/opencode/opencode.json` or a project
+`opencode.json`):
+```json
+{
+  "mcp": {
+    "triz-innovation": {
+      "type": "local",
+      "command": ["python", "C:/Dev/TRIZskill.md/.claude/skills/triz-innovation/mcp/triz_mcp_server.py"],
+      "enabled": true
     }
   }
 }

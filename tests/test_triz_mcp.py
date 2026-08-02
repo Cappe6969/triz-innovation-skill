@@ -10,6 +10,8 @@ Usage:
 
 from __future__ import annotations
 
+import json
+import re
 import subprocess
 import sys
 import tempfile
@@ -254,6 +256,89 @@ class TestMCPSubprocess(unittest.TestCase):
         self.assertIn("SELF-TEST OK", proc.stdout)
         self.assertEqual(proc.stdout.count("\n"), 1,
                          "self-test should print exactly one line")
+
+
+class TestMCPWireProtocol(unittest.TestCase):
+    """End-to-end tests over the real stdio transport — proves the server speaks
+    BOTH the standard MCP Content-Length framing (official SDK / Claude Code /
+    opencode) and the legacy newline-delimited framing. One persistent
+    subprocess serves all three exchanges sequentially."""
+
+    @classmethod
+    def setUpClass(cls):
+        cls._proc = subprocess.Popen(
+            [sys.executable, str(_MCP_SERVER)],
+            stdin=subprocess.PIPE,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+        )
+
+    @classmethod
+    def tearDownClass(cls):
+        try:
+            cls._proc.stdin.close()
+            cls._proc.terminate()
+            cls._proc.wait(timeout=5)
+        except Exception:
+            pass
+
+    def _send(self, data: bytes) -> None:
+        self._proc.stdin.write(data)
+        self._proc.stdin.flush()
+
+    def test_content_length_initialize(self):
+        """A standard Content-Length framed initialize gets a framed reply."""
+        self._send(_cl_frame(_req(
+            "initialize", {"protocolVersion": "2025-06-18"}
+        )))
+        resp = _read_cl_frame(self._proc.stdout)
+        self.assertEqual(resp["id"], 1)
+        self.assertEqual(resp["result"]["protocolVersion"], "2025-06-18")
+        self.assertEqual(resp["result"]["serverInfo"]["name"], "triz-innovation")
+
+    def test_content_length_tools_call_route(self):
+        """A Content-Length framed tools/call returns the routed text."""
+        self._send(_cl_frame(_req(
+            "tools/call",
+            {"name": "triz_route",
+             "arguments": {"problem": "more speed but less reliability"}},
+            req_id=2,
+        )))
+        resp = _read_cl_frame(self._proc.stdout)
+        self.assertEqual(resp["id"], 2)
+        text = resp["result"]["content"][0]["text"]
+        self.assertIn("40 Inventive Principles", text)
+
+    def test_newline_initialize(self):
+        """Legacy newline-delimited framing still works line-by-line."""
+        self._send(json.dumps(_req(
+            "initialize", {"protocolVersion": "2025-06-18"}, req_id=3
+        )).encode("utf-8") + b"\n")
+        line = self._proc.stdout.readline()
+        resp = json.loads(line.decode("utf-8"))
+        self.assertEqual(resp["id"], 3)
+        self.assertEqual(resp["result"]["serverInfo"]["name"], "triz-innovation")
+
+
+def _cl_frame(msg: dict) -> bytes:
+    """Encode a request as a standard MCP Content-Length framed message."""
+    body = json.dumps(msg, ensure_ascii=False).encode("utf-8")
+    return (b"Content-Length: " + str(len(body)).encode("ascii")
+            + b"\r\n\r\n" + body)
+
+
+def _read_cl_frame(stdout) -> dict:
+    """Read one Content-Length framed response from a binary stdout pipe."""
+    headers = b""
+    while True:
+        line = stdout.readline()
+        if line in (b"", b"\r\n", b"\n"):
+            break
+        headers += line
+    m = re.search(br"Content-Length:\s*(\d+)", headers, re.IGNORECASE)
+    assert m is not None, f"no Content-Length header, got {headers!r}"
+    body = stdout.read(int(m.group(1)))
+    return json.loads(body.decode("utf-8"))
 
 
 if __name__ == "__main__":

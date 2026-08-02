@@ -1,5 +1,6 @@
 {
   "id": "energy",
+  "method": "Energy TRIZ",
   "name": "Energy & Power TRIZ",
   "name_it": "TRIZ energia e potenza",
   "description": "Same TRIZ machinery with energy / power vocabulary — generation, conversion, storage, transmission, efficiency and heat losses.",

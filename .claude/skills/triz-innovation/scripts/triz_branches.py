@@ -152,6 +152,13 @@ def validate() -> list[str]:
                 errors.append(f"{path}: domain branch keywords must be non-empty")
             if not data.get("examples"):
                 errors.append(f"{path}: domain branch examples must be non-empty")
+            method = data.get("method")
+            if not isinstance(method, str) or not method.strip():
+                errors.append(
+                    f"{path}: domain branch missing 'method' — the TRIZ method "
+                    f"name its keywords trigger (the router needs it to pick "
+                    f"the branch up automatically)"
+                )
         pm = data.get("parameter_map") or {}
         if isinstance(pm, dict) and pm:
             canonical = _canonical_parameter_names()

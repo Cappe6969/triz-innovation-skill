@@ -1,5 +1,6 @@
 {
   "id": "robotics",
+  "method": "Robotics TRIZ",
   "name": "Robotics TRIZ",
   "name_it": "TRIZ robotica e IoT",
   "description": "Same TRIZ machinery with robotics / IoT / embedded vocabulary — actuators, sensors, autonomy, motion control, calibration and edge compute.",

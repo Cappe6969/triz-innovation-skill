@@ -1229,13 +1229,13 @@ class TestTRIZ(unittest.TestCase):
 
 
     # ═══════════════════════════════════════════════════════════════════════
-    #  R14 NEW TESTS — branches + language axis + mirror (SPEC build 2)
+    #  R14 NEW TESTS — branches + language axis (SPEC build 2)
     # ═══════════════════════════════════════════════════════════════════════
 
 
 class TestBranchesAndLanguageAxis(unittest.TestCase):
     """Branch registry, language detection, router --lang/--branch,
-    case-template --lang, dispatcher flags, mirror, and master structure."""
+    case-template --lang, dispatcher flags, and master structure."""
 
     # ── Branch registry ────────────────────────────────────────────────────
 
@@ -1452,15 +1452,15 @@ class TestBranchesAndLanguageAxis(unittest.TestCase):
 
 
     # ═══════════════════════════════════════════════════════════════════════
-    #  R15 NEW TESTS — 8 field branches, data-driven validation, four new
-    #  domain rules, use-cases reference, mirror sync (SPEC build 3)
+    #  R15 NEW TESTS — field branches, data-driven validation, domain
+    #  rules, use-cases reference (SPEC build 3)
     # ═══════════════════════════════════════════════════════════════════════
 
 
 class TestFieldBranchesDataDriven(unittest.TestCase):
     """Phase-3/6 regression: 12 field branches in canonical order, data-driven
-    dispatcher/router branch validation, eight domain rules, the
-    use-cases reference file, and mirror sync."""
+    dispatcher/router branch validation, the domain rules, and the
+    use-cases reference file."""
 
     _EXPECTED_FIELDS = [
         "general", "business", "software", "rehab",
@@ -1607,6 +1607,51 @@ class TestFieldBranchesDataDriven(unittest.TestCase):
     def test_branch_bogus_raises(self):
         with self.assertRaises(ValueError):
             triz_router.suggest_methods("the model overfits", branch="bogus")
+
+    def test_branch_keywords_from_json_are_live(self):
+        """branch.json keywords not covered by the static rules must still fire
+        their branch's method — the router picks the vocabulary up from the data
+        (regression: business 'sales'/'competition', rehab 'movement'/'muscle'/
+        'recovery' were dead data)."""
+        cases = {
+            "business": ("our sales are flat and the competition is fierce",
+                         "Business TRIZ"),
+            "rehab": ("the patient's muscle recovery needs more movement",
+                      "Rehabilitation TRIZ"),
+        }
+        for fid, (text, method) in cases.items():
+            with self.subTest(branch=fid):
+                result = triz_router.suggest_methods(text, branch=fid)
+                methods = [m["method"] for m in result["methods"]]
+                self.assertIn(method, methods)
+
+    def test_router_accepts_every_registered_field_branch(self):
+        """Auto-pickup contract: every registry field id is a valid --branch for
+        the router (registry and router stay in lockstep — no hardcoded list)."""
+        for fid in triz_branches.list_branches()["fields"]:
+            with self.subTest(branch=fid):
+                result = triz_router.suggest_methods("sample problem", branch=fid)
+                self.assertGreater(len(result["methods"]), 0)
+
+    def test_branches_validate_requires_method(self):
+        """A domain branch.json without a 'method' key is flagged — the router
+        needs it to know which TRIZ method the vocabulary triggers."""
+        bad = {
+            "id": "widgets", "name": "Widgets TRIZ", "name_it": "TRIZ widget",
+            "description": "test", "keywords": ["widget"], "examples": ["x"],
+        }
+        with tempfile.TemporaryDirectory() as tmpdir:
+            field_dir = Path(tmpdir) / "widgets"
+            field_dir.mkdir()
+            (field_dir / "branch.json").write_text(
+                json.dumps(bad), encoding="utf-8"
+            )
+            with mock.patch.object(triz_branches, "_FIELDS_DIR", field_dir.parent):
+                errors = triz_branches.validate()
+        self.assertTrue(
+            any("'method'" in e for e in errors),
+            f"expected a missing-'method' error, got {errors}",
+        )
 
     def test_dispatcher_new_branch_route_exit0(self):
         proc = subprocess.run(

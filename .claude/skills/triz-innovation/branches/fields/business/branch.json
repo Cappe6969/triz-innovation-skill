@@ -1,5 +1,6 @@
 {
   "id": "business",
+  "method": "Business TRIZ",
   "name": "Business TRIZ",
   "name_it": "TRIZ aziendale",
   "description": "Same TRIZ machinery with business vocabulary.",

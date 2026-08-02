@@ -162,10 +162,11 @@ The skill is a mix of branches — pure-data JSON that tunes the same TRIZ core
 to a field or a language, no code.
 
 - **Field branches** (`branches/fields/<id>/branch.json`) carry domain
-  vocabulary: keywords, parameter translations, soft readings of the 40
-  principles, and worked examples. Shipped fields: `general`, `business`,
-  `software`, `rehab`, `mechanical`, `datascience`, `marketing`,
-  `supplychain`, `energy`, `education`, `construction`, `robotics`.
+  vocabulary: a `method` key (the TRIZ method that vocabulary triggers),
+  keywords, parameter translations, soft readings of the 40 principles, and
+  worked examples. Shipped fields: `general`, `business`, `software`, `rehab`,
+  `mechanical`, `datascience`, `marketing`, `supplychain`, `energy`,
+  `education`, `construction`, `robotics`.
   `general` is the canonical core. Worked examples for each
   field branch are in `references/use-cases.md`.
 - **Language branches** (`branches/langs/<lang>/branch.json`) carry localized
@@ -181,10 +182,12 @@ Manage branches through the registry:
 `python .../triz.py branches list` and `python .../triz.py branches check`.
 
 To add a field branch, drop a `branch.json` in `branches/fields/<id>/` with
-that field's keywords, parameter translations, soft principle readings, and
-examples. To add a language, drop a `branch.json` in `branches/langs/<lang>/`
-with the localized labels and stopwords. Nothing else changes — the registry
-and the router pick the new branch up automatically.
+that field's keywords, parameter translations, soft principle readings,
+examples, and a `method` key naming the TRIZ method that vocabulary triggers
+(e.g. `"method": "Business TRIZ"`). To add a language, drop a `branch.json`
+in `branches/langs/<lang>/` with the localized labels and stopwords. Nothing
+else changes — the registry and the router pick the new branch up
+automatically.
 
 ## Master tool (one entrypoint)
 Instead of remembering each script, call the dispatcher:

@@ -1,5 +1,6 @@
 {
   "id": "mechanical",
+  "method": "Mechanical TRIZ",
   "name": "Mechanical TRIZ",
   "name_it": "TRIZ meccanico / hardware",
   "description": "Same TRIZ machinery with mechanical / hardware vocabulary — moving parts, loads, wear, thermal and structural constraints.",

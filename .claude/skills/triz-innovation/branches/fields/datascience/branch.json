@@ -1,5 +1,6 @@
 {
   "id": "datascience",
+  "method": "Data Science TRIZ",
   "name": "Data Science TRIZ",
   "name_it": "TRIZ data science e AI",
   "description": "Same TRIZ machinery with data-science / ML / AI vocabulary — models, data, training, inference, accuracy trade-offs.",

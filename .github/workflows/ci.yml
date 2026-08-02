@@ -1,0 +1,29 @@
+name: CI
+
+# Full gate on every push and pull request: the unittest suite, the branch
+# registry validation, and the MCP server self-test. Mirrors
+# scripts/check_all.cmd so a green local gate == a green CI run.
+on:
+  push:
+  pull_request:
+
+jobs:
+  test:
+    name: unittest (${{ matrix.os }} / py${{ matrix.python-version }})
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+        python-version: ["3.9", "3.11", "3.13"]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+      - name: Full test suite
+        run: python -m unittest discover -s tests -p "test_*.py"
+      - name: Branch registry validation
+        run: python .claude/skills/triz-innovation/scripts/triz.py branches check
+      - name: MCP server self-test
+        run: python .claude/skills/triz-innovation/mcp/triz_mcp_server.py --self-test

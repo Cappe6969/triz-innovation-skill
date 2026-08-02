@@ -1,5 +1,6 @@
 {
   "id": "construction",
+  "method": "Construction TRIZ",
   "name": "Construction TRIZ",
   "name_it": "TRIZ edilizia e civile",
   "description": "Same TRIZ machinery with construction / civil vocabulary — structures, materials, foundations, scheduling, site and execution.",

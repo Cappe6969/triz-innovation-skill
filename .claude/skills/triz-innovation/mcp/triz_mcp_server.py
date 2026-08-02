@@ -6,9 +6,11 @@ Exposes the skill's three Python scripts as MCP tools:
     triz_new_case   -> triz_case_template.create_case
     triz_evaluate   -> triz_evaluator.score + format_table
 
-Protocol: newline-delimited JSON-RPC 2.0 over stdio (NOT Content-Length
-framing). One JSON request object per stdin line, one JSON response object per
-stdout line. Logs / progress go to stderr only — never stdout.
+Protocol: MCP stdio framing with Content-Length headers (as used by the
+official MCP SDK, Claude Code, and opencode), PLUS backward-compatible
+newline-delimited JSON-RPC. Framing is auto-detected per message; each reply
+uses the same framing as the request. Logs / progress go to stderr only —
+never stdout.
 
 Stdlib only (json, sys, io, argparse) — no `mcp` SDK, no pip install.
 Python 3.8+.
@@ -38,13 +40,16 @@ if _SCRIPTS_DIR not in sys.path:
 import triz_router
 import triz_evaluator
 import triz_case_template
-from triz_branches import detect_language  # noqa: E402  (after sys.path insert)
+from triz_branches import detect_language, list_branches  # noqa: E402  (after sys.path insert)
 
 _DEFAULT_PROTOCOL_VERSION = "2025-06-18"
 _SERVER_NAME = "triz-innovation"
 _SERVER_VERSION = "0.1.0"
 
 # ── Tool registry ───────────────────────────────────────────────────────────
+# The field-branch list is derived from the branch registry so the tool
+# description never drifts from the shipped branches.
+_BRANCH_IDS = ", ".join(list_branches()["fields"])
 _TOOLS = [
     {
         "name": "triz_route",
@@ -63,7 +68,9 @@ _TOOLS = [
                 },
                 "branch": {
                     "type": "string",
-                    "description": "Field branch id (general, business, software, rehab, mechanical, datascience, marketing, supplychain). Default: general.",
+                    "description": "Field branch id ("
+                    + _BRANCH_IDS
+                    + "). Default: general.",
                 },
             },
             "required": ["problem"],
@@ -148,6 +155,90 @@ def _write_response(response: dict) -> None:
     """Write one JSON-RPC response object as a single stdout line, then flush."""
     sys.stdout.write(json.dumps(response, ensure_ascii=False) + "\n")
     sys.stdout.flush()
+
+
+def _serve_stdio() -> None:
+    """Serve MCP over stdio, auto-detecting the framing of each request.
+
+    Two wire formats are supported, so the same server works with the official
+    MCP SDK / Claude Code / opencode (Content-Length headers) and with the
+    skill's original line-based clients (one JSON object per line):
+
+      * Content-Length framed:  `Content-Length: <n>\r\n\r\n<json>`
+      * newline-delimited:      `<json>\n`
+
+    Each response echoes the framing of the request that produced it. Reads are
+    line-driven (never a bulk `read(65536)`): on a pipe, `BufferedReader.read(n)`
+    blocks until n bytes or EOF arrive, which would deadlock a client that keeps
+    stdin open between requests — the official MCP SDK reads header lines first
+    and only then the exact body length, and we mirror that. Logs never touch
+    stdout.
+    """
+    raw_in = getattr(sys.stdin, "buffer", None)
+    raw_out = getattr(sys.stdout, "buffer", None)
+    if raw_in is None or raw_out is None:
+        # Non-pipe stream (rare): fall back to the line-based protocol.
+        for line in sys.stdin:
+            line = line.strip()
+            if not line:
+                continue
+            response = _handle_line(line)
+            if response is not None:
+                _write_response(response)
+        return
+
+    def _reply(payload: bytes, framed: bool) -> None:
+        if framed:
+            header = b"Content-Length: " + str(len(payload)).encode("ascii")
+            raw_out.write(header + b"\r\n\r\n" + payload)
+        else:
+            raw_out.write(payload + b"\n")
+        raw_out.flush()
+
+    def _process(payload: bytes, framed: bool) -> None:
+        text = payload.decode("utf-8", "replace")
+        response = _handle_line(text)
+        if response is not None:
+            _reply(json.dumps(response, ensure_ascii=False).encode("utf-8"),
+                   framed)
+
+    while True:
+        line = raw_in.readline()
+        if not line:
+            break  # EOF — client closed stdin
+        if not line.strip():
+            continue  # skip blank lines
+        # Newline-delimited messages start with JSON; Content-Length framed
+        # messages start with an HTTP-style header.
+        if line.lstrip().startswith((b"{", b"[")):
+            _process(line.rstrip(b"\r\n"), framed=False)
+            continue
+        # Header block: collect lines until the blank line, then parse the body.
+        header_lines = [line]
+        while True:
+            h = raw_in.readline()
+            if h in (b"", b"\r\n", b"\n"):
+                break
+            header_lines.append(h)
+        length = None
+        for h in header_lines:
+            name, _, value = h.partition(b":")
+            if name.strip().lower() == b"content-length":
+                try:
+                    length = int(value.strip())
+                except ValueError:
+                    length = None
+                break
+        if length is None or length < 0:
+            continue  # malformed framed message — drop it
+        body = b""
+        while len(body) < length:
+            chunk = raw_in.read(length - len(body))
+            if not chunk:
+                break  # EOF before the full body
+            body += chunk
+        if body:
+            _process(body, framed=True)
 
 
 def _response(req_id, result: dict) -> dict:
@@ -483,14 +574,9 @@ def main(argv=None) -> None:
         print("SELF-TEST OK")
         sys.exit(0)
 
-    # Serve: one JSON request per stdin line, one response per stdout line.
-    for line in sys.stdin:
-        line = line.strip()
-        if not line:
-            continue
-        response = _handle_line(line)
-        if response is not None:
-            _write_response(response)
+    # Serve MCP over stdio (Content-Length framing and the legacy
+    # newline-delimited protocol are both auto-detected).
+    _serve_stdio()
 
 
 if __name__ == "__main__":

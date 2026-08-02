@@ -25,7 +25,7 @@ import sys
 import re
 from typing import Any
 
-from triz_branches import detect_language, get_lang_branch
+from triz_branches import detect_language, get_field_branch, get_lang_branch, list_branches
 
 
 def _kw_match(kw: str, text: str) -> bool:
@@ -299,24 +299,61 @@ RULES: list[tuple[tuple[str, ...], str, int, str]] = [
 
 # Domain tag for each field branch: branch id -> set of domain-rule method
 # names. The router uses this to skip the other domains' rules when a --branch
-# is set.
-_DOMAIN_RULES = {
-    "business": {"Business TRIZ"},
-    "software": {"Software TRIZ"},
-    "rehab": {"Rehabilitation TRIZ"},
-    "mechanical": {"Mechanical TRIZ"},
-    "datascience": {"Data Science TRIZ"},
-    "marketing": {"Marketing TRIZ"},
-    "supplychain": {"Supply Chain TRIZ"},
-    "energy": {"Energy TRIZ"},
-    "education": {"Education TRIZ"},
-    "construction": {"Construction TRIZ"},
-    "robotics": {"Robotics TRIZ"},
-}
+# is set. Built from the branch registry (each branch.json declares its
+# "method") so a dropped-in branch.json is picked up automatically, matching
+# the registry's own data-driven acceptance in the dispatcher.
+def _load_domain_rules() -> dict[str, set[str]]:
+    rules: dict[str, set[str]] = {}
+    for fid in list_branches()["fields"]:
+        if fid == "general":
+            continue
+        try:
+            method = get_field_branch(fid).get("method")
+        except KeyError:
+            continue  # branch dir present but branch.json missing — `branches check` flags it
+        if method:
+            rules[fid] = {method}
+    return rules
+
+
+_DOMAIN_RULES = _load_domain_rules()
+
+
+def _branch_keyword_rules() -> list[tuple[tuple[str, ...], str, int, str]]:
+    """Extra keyword rules from each branch.json's own vocabulary.
+
+    The static RULES table already covers most domain keywords; a branch
+    keyword is added here only when it is NOT already matched for that
+    branch's method, so the branch.json data stays live without double-
+    counting. Both sources feed the same method, so a --branch filter treats
+    them identically."""
+    extra: list[tuple[tuple[str, ...], str, int, str]] = []
+    for fid, methods in _DOMAIN_RULES.items():
+        method = next(iter(methods))
+        already = {
+            kw for kw_tuple, m, _w, _why in RULES if m == method
+            for kw in kw_tuple
+        }
+        try:
+            keywords = tuple(
+                kw for kw in (get_field_branch(fid).get("keywords") or [])
+                if isinstance(kw, str) and kw and kw not in already
+            )
+        except KeyError:
+            continue
+        if keywords:
+            extra.append(
+                (keywords, method, 2, f"{fid} branch vocabulary (branch.json)")
+            )
+    return extra
+
+
+RULES = RULES + _branch_keyword_rules()
 
 
 def _valid_branches() -> tuple[str, ...]:
-    """Accepted --branch ids: 'general' plus every field-domain rule key."""
+    """Accepted --branch ids: 'general' plus every registered field branch that
+    declares a domain method."""
     return ("general", *_DOMAIN_RULES)
 
 # ── Contradiction detection cues (separate from method scoring) ─────────────
