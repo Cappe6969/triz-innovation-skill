@@ -6,8 +6,29 @@ Phase 4 (2026-08-02). All seven remaining open items were closed in Phase 5
 
 ## Open
 
-No open items remain — all seven items carried over from Phases 1–4 are resolved
-in Phase 5 (see Resolved → Phase 5 below).
+The seven Phase 1–4 TRIZ items are closed (see Resolved below). The items below
+are deferred from the **coding-method** skill build (Phase: Lazy Ideality,
+branch `swarm/coding-method-skill`). Reviewed with the user at the merge
+approval.
+
+- [Low] **Three curriculum books not yet on disk** — `Algorithm Design Manual`
+  (step 2), `Refactoring` (step 4), `Designing Data-Intensive Applications`
+  (step 7 fork) are marked `available: false` in `curriculum/README.md` with
+  interim substitutes (Levitin card for Skiena; Feathers+Dooley for Fowler;
+  FSWA default, DDD fork A, DDIA fork B). Unblock: drop the source books into
+  `CodingBooks-md/` and re-distill — ADM merges into
+  `references/algorithm-strategies.md`, Refactoring into
+  `references/red-flags.md` + `references/construction-checklist.md`, DDIA into
+  a new `references/data-systems.md` (see `curriculum/how-to-add-book.md`).
+- [Low] **Dijkstra, "A Discipline of Programming" — OCR pending** — the source
+  book still needs conversion before its content can be distilled into a
+  reference file. No placeholder in the curriculum; candidate merge target is
+  `references/design-recipe.md` (contract-first / weakest-precondition
+  verification).
+- [Low] **`references/data-systems.md` is a forward-reference** — `method-map.md`
+  ("Data-heavy system decision" row) and the `data-heavy` signal in
+  `scripts/method.py` point at a future `references/data-systems.md` (from
+  DDIA). Documented FUTURE, not a dead link; resolves when the DDIA book lands.
 
 ## Resolved
 
