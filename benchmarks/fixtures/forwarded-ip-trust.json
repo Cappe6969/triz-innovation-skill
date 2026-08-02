@@ -1,0 +1,18 @@
+{
+  "id": "forwarded-ip-trust",
+  "visibility": "anonymized-real",
+  "expected": {"initial_tests": "fail", "target_tests": "pass"},
+  "derived_from": "3ab8a717",
+  "prompt": "Harden client_ip. X-Forwarded-For is trustworthy only when the direct peer belongs to a configured trusted proxy network. Return the first valid forwarded address; otherwise return the peer. Standard library only.",
+  "test_command": [
+    "python",
+    "-m",
+    "unittest",
+    "-q",
+    "test_solution.py"
+  ],
+  "files": {
+    "solution.py": "def client_ip(peer, headers, trusted_proxies):\n    forwarded = headers.get('X-Forwarded-For')\n    return forwarded.split(',')[0].strip() if forwarded else peer\n",
+    "test_solution.py": "import unittest\nfrom solution import client_ip\n\n\nclass TestClientIp(unittest.TestCase):\n    def test_untrusted_peer_cannot_spoof(self):\n        self.assertEqual(client_ip('203.0.113.9', {'X-Forwarded-For': '10.0.0.1'}, ['10.0.0.0/8']), '203.0.113.9')\n\n    def test_trusted_proxy_forwards_first_valid_ip(self):\n        self.assertEqual(client_ip('10.1.2.3', {'X-Forwarded-For': '198.51.100.7, 10.2.3.4'}, ['10.0.0.0/8']), '198.51.100.7')\n\n    def test_invalid_forwarded_value_falls_back(self):\n        self.assertEqual(client_ip('10.1.2.3', {'X-Forwarded-For': 'not-an-ip'}, ['10.0.0.0/8']), '10.1.2.3')\n\n\nif __name__ == '__main__':\n    unittest.main()\n"
+  }
+}

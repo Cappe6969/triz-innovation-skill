@@ -1,0 +1,18 @@
+{
+  "id": "ghost-submodule",
+  "visibility": "anonymized-real",
+  "expected": {"initial_tests": "fail", "target_tests": "pass"},
+  "derived_from": "216cd7f2",
+  "prompt": "Implement clone_plan to parse .gitmodules text and return only unique submodules whose path is present in tree_paths. Preserve declaration order and return dictionaries with name, path, and url.",
+  "test_command": [
+    "python",
+    "-m",
+    "unittest",
+    "-q",
+    "test_solution.py"
+  ],
+  "files": {
+    "solution.py": "def clone_plan(gitmodules, tree_paths):\n    raise NotImplementedError\n",
+    "test_solution.py": "import unittest\nfrom solution import clone_plan\n\n\nTEXT = '''\n[submodule \"live\"]\n    path = vendor/live\n    url = https://example.invalid/live.git\n[submodule \"ghost\"]\n    path = vendor/removed\n    url = https://example.invalid/removed.git\n[submodule \"duplicate\"]\n    path = vendor/live\n    url = https://example.invalid/other.git\n'''\n\n\nclass TestClonePlan(unittest.TestCase):\n    def test_skips_ghost_and_duplicate(self):\n        self.assertEqual(clone_plan(TEXT, {'vendor/live/file.txt'}), [\n            {'name': 'live', 'path': 'vendor/live', 'url': 'https://example.invalid/live.git'}\n        ])\n\n    def test_empty(self):\n        self.assertEqual(clone_plan('', set()), [])\n\n\nif __name__ == '__main__':\n    unittest.main()\n"
+  }
+}

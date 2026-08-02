@@ -1,0 +1,17 @@
+{
+  "id": "file-upload-api",
+  "visibility": "public",
+  "expected": {"initial_tests": "fail", "target_tests": "pass"},
+  "prompt": "Implement the single-entry Uploader API. Reject empty or oversized content, scan before storage, deduplicate by content hash, and keep storage/scanner details behind upload(). Do not add dependencies.",
+  "test_command": [
+    "python",
+    "-m",
+    "unittest",
+    "-q",
+    "test_solution.py"
+  ],
+  "files": {
+    "solution.py": "class UploadError(ValueError):\n    pass\n\n\nclass Uploader:\n    def __init__(self, storage, scanner, max_bytes=1024):\n        self.storage = storage\n        self.scanner = scanner\n        self.max_bytes = max_bytes\n\n    def upload(self, content, name, mime):\n        raise NotImplementedError\n",
+    "test_solution.py": "import unittest\nfrom solution import Uploader, UploadError\n\n\nclass Storage:\n    def __init__(self): self.items = {}\n    def get(self, key): return self.items.get(key)\n    def put(self, key, content, metadata):\n        self.items[key] = {'url': 'mem://' + key, 'content': content, 'metadata': metadata}\n        return self.items[key]['url']\n\n\nclass Scanner:\n    def __init__(self, clean=True): self.clean = clean; self.calls = 0\n    def is_clean(self, content): self.calls += 1; return self.clean\n\n\nclass TestUpload(unittest.TestCase):\n    def test_upload_and_deduplicate(self):\n        storage, scanner = Storage(), Scanner()\n        uploader = Uploader(storage, scanner)\n        first = uploader.upload(b'abc', 'a.txt', 'text/plain')\n        second = uploader.upload(b'abc', 'other.txt', 'text/plain')\n        self.assertEqual(first['url'], second['url'])\n        self.assertTrue(first['is_new'])\n        self.assertFalse(second['is_new'])\n        self.assertEqual(len(storage.items), 1)\n\n    def test_validation_and_scan(self):\n        with self.assertRaises(UploadError): Uploader(Storage(), Scanner()).upload(b'', 'a', 'x')\n        with self.assertRaises(UploadError): Uploader(Storage(), Scanner(), 2).upload(b'abc', 'a', 'x')\n        storage, scanner = Storage(), Scanner(False)\n        with self.assertRaises(UploadError): Uploader(storage, scanner).upload(b'x', 'a', 'x')\n        self.assertEqual(storage.items, {})\n\n\nif __name__ == '__main__':\n    unittest.main()\n"
+  }
+}

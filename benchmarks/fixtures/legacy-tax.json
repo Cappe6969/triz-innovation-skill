@@ -1,0 +1,17 @@
+{
+  "id": "legacy-tax",
+  "visibility": "public",
+  "expected": {"initial_tests": "fail", "target_tests": "pass"},
+  "prompt": "Add tax to Checkout.checkout while preserving its signature and avoiding network calls in tests. Charge subtotal plus the configured tax rate exactly once. Keep the change small.",
+  "test_command": [
+    "python",
+    "-m",
+    "unittest",
+    "-q",
+    "test_solution.py"
+  ],
+  "files": {
+    "solution.py": "class Checkout:\n    def __init__(self, gateway, tax_rate):\n        self.gateway = gateway\n        self.tax_rate = tax_rate\n\n    def checkout(self, cart):\n        subtotal = sum(item['price'] * item.get('quantity', 1) for item in cart)\n        return self.gateway.charge(subtotal)\n",
+    "test_solution.py": "import unittest\nfrom decimal import Decimal\nfrom solution import Checkout\n\n\nclass Gateway:\n    def __init__(self): self.amounts = []\n    def charge(self, amount): self.amounts.append(amount); return {'charged': amount}\n\n\nclass TestCheckout(unittest.TestCase):\n    def test_taxed_total_charged_once(self):\n        gateway = Gateway()\n        result = Checkout(gateway, Decimal('0.20')).checkout([\n            {'price': Decimal('10.00'), 'quantity': 2},\n            {'price': Decimal('5.00')},\n        ])\n        self.assertEqual(result, {'charged': Decimal('30.0000')})\n        self.assertEqual(gateway.amounts, [Decimal('30.0000')])\n\n\nif __name__ == '__main__':\n    unittest.main()\n"
+  }
+}

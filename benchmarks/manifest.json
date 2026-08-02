@@ -1,0 +1,29 @@
+{
+  "version": 1,
+  "environment": {
+    "codex": "0.146.0",
+    "model": "gpt-5.6-luna",
+    "reasoning": "low",
+    "python": "3.11",
+    "node": "24"
+  },
+  "fixtures": [
+    "closest-pair",
+    "cache-freshness",
+    "file-upload-api",
+    "declarative-pipeline",
+    "legacy-tax",
+    "forwarded-ip-trust",
+    "backup-restore",
+    "ghost-submodule",
+    "auth-route-hardening",
+    "sqlite-desktop-mount"
+  ],
+  "gate": {
+    "treatment_tests_passed": 10,
+    "blind_treatment_preference": 7,
+    "no_regressions": true,
+    "median_production_lines_lte_baseline": true,
+    "no_unjustified_dependencies": true
+  }
+}

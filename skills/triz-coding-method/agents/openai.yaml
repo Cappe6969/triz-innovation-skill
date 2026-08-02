@@ -1,0 +1,6 @@
+interface:
+  display_name: "TRIZ Coding Method"
+  short_description: "Minimal-first coding decisions with TRIZ"
+  default_prompt: "Use $triz-coding-method to find the smallest safe solution to this coding trade-off."
+policy:
+  allow_implicit_invocation: true

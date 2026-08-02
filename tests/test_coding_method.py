@@ -25,9 +25,10 @@ from unittest import mock
 
 # ---- path setup: add the scripts directory so imports work ----
 _REPO_ROOT = Path(__file__).resolve().parent.parent
-_SKILL_DIR = _REPO_ROOT / ".claude" / "skills" / "coding-method"
+_SKILL_DIR = _REPO_ROOT / "skills" / "triz-coding-method"
 _SCRIPTS_DIR = _SKILL_DIR / "scripts"
 _REFERENCES_DIR = _SKILL_DIR / "references"
+_CASES_DIR = _REPO_ROOT / "docs" / "examples" / "coding"
 sys.path.insert(0, str(_SCRIPTS_DIR))
 
 import method  # noqa: E402
@@ -165,6 +166,39 @@ class TestRouteSignals(unittest.TestCase):
             any("[Define errors out of existence]" in h for h in hints),
             f"Expected 'define errors out of existence', got {hints}",
         )
+
+
+class TestRoutingModes(unittest.TestCase):
+    def test_auto_defaults_to_focused(self):
+        self.assertEqual(method.route("choose a module API")["mode"], "focused")
+
+    def test_auto_lite_for_mechanical_task(self):
+        self.assertEqual(method.route("mechanical rename")["mode"], "lite")
+
+    def test_auto_ultra_for_security_task(self):
+        self.assertEqual(method.route("harden auth permissions")["mode"], "ultra")
+
+    def test_explicit_modes(self):
+        for mode in ("lite", "focused", "ultra"):
+            self.assertEqual(method.route("task", mode)["mode"], mode)
+
+    def test_data_stage_is_conditional(self):
+        self.assertNotIn(4, method.route("rename a comment", "focused")["stages"])
+        self.assertIn(4, method.route("choose an array algorithm", "focused")["stages"])
+
+    def test_triz_only_for_remaining_contradiction(self):
+        plain = method.route("parse a JSON document", "focused")
+        conflict = method.route("make it faster but keep exact ordering", "focused")
+        self.assertFalse(plain["triz_escalated"])
+        self.assertNotIn(5, plain["stages"])
+        self.assertTrue(conflict["triz_escalated"])
+        self.assertIn(5, conflict["stages"])
+
+    def test_structured_fields_and_relative_references(self):
+        result = method.route("legacy database bug", "focused")
+        for key in ("mode", "stages", "ladder", "ifr", "almost_ifr", "remaining_contradiction", "references"):
+            self.assertIn(key, result)
+        self.assertTrue(all(path.startswith("references/") for path in result["references"]))
 
 
 class TestLadder(unittest.TestCase):
@@ -327,20 +361,19 @@ class TestTrizCrossInvocation(unittest.TestCase):
         self.assertNotEqual(result["exit"], 0)
 
 
-class TestCurriculum(unittest.TestCase):
-    """Curriculum README exists and describes the 7-step learning path."""
+class TestMaintainerDocs(unittest.TestCase):
+    """Source bibliography and worked examples stay outside the runtime skill."""
 
-    def test_curriculum_readme_exists(self):
-        path = _SKILL_DIR / "curriculum" / "README.md"
-        self.assertTrue(path.is_file(), "curriculum/README.md missing")
+    def test_bibliography_exists(self):
+        path = _REPO_ROOT / "docs" / "bibliography.md"
+        self.assertTrue(path.is_file(), "docs/bibliography.md missing")
         content = path.read_text(encoding="utf-8")
-        self.assertGreater(len(content.strip()), 0)
+        self.assertIn("Software design and engineering", content)
+        self.assertIn("TRIZ", content)
 
-    def test_curriculum_mentions_seven_steps(self):
-        content = (_SKILL_DIR / "curriculum" / "README.md").read_text(encoding="utf-8")
-        for step_num in ("1", "2", "3", "4", "5", "6", "7"):
-            self.assertIn(f"Step {step_num}", content,
-                          f"Curriculum missing 'Step {step_num}'")
+    def test_runtime_skill_has_no_curriculum_or_cases(self):
+        self.assertFalse((_SKILL_DIR / "curriculum").exists())
+        self.assertFalse((_SKILL_DIR / "cases").exists())
 
     def test_cases_complete(self):
         """All 5 canned cases exist and close with the mandatory test section."""
@@ -351,7 +384,7 @@ class TestCurriculum(unittest.TestCase):
             "2026-08-02-apidesign-file-upload.md",
             "2026-08-02-architecture-cache-invalidation.md",
         ]
-        cases_dir = _SKILL_DIR / "cases"
+        cases_dir = _CASES_DIR
         for name in expected:
             path = cases_dir / name
             self.assertTrue(path.is_file(), f"Canned case missing: {name}")
@@ -360,6 +393,16 @@ class TestCurriculum(unittest.TestCase):
                           f"Case {name} missing the test section (Stadio 8)")
             self.assertIn("Criterio di successo", content,
                           f"Case {name} missing the numeric success criterion")
+            result = content.split("## Risultati", 1)[1].split("## Follow-up", 1)[0].strip()
+            follow_up = content.split("## Follow-up", 1)[1].strip()
+            self.assertTrue(result, f"Case {name} has an empty Results section")
+            self.assertTrue(follow_up, f"Case {name} has an empty Follow-up section")
+
+    def test_examples_do_not_claim_known_false_metrics(self):
+        cache = (_CASES_DIR / "2026-08-02-architecture-cache-invalidation.md").read_text(encoding="utf-8")
+        closest = (_CASES_DIR / "2026-08-02-algorithm-closest-pair.md").read_text(encoding="utf-8")
+        self.assertNotIn("stale-rate 0%", cache)
+        self.assertIn("non è corretto", closest)
 
 
 class TestRouteSignalVariants(unittest.TestCase):

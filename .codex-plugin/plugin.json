@@ -1,0 +1,27 @@
+{
+  "name": "triz-coding-method",
+  "version": "0.1.0",
+  "description": "Minimal-first software decisions with TRIZ as a conditional escalation engine.",
+  "author": {
+    "name": "Cappe6969",
+    "url": "https://github.com/Cappe6969"
+  },
+  "homepage": "https://github.com/Cappe6969/triz-innovation-skill",
+  "repository": "https://github.com/Cappe6969/triz-innovation-skill",
+  "license": "MIT",
+  "keywords": ["coding", "triz", "ideality", "software-design", "minimalism"],
+  "skills": "./skills/",
+  "mcpServers": "./.mcp.json",
+  "interface": {
+    "displayName": "TRIZ Coding Method",
+    "shortDescription": "Minimal-first coding decisions with TRIZ",
+    "longDescription": "Find the smallest safe software solution, escalating to TRIZ only when a real contradiction remains.",
+    "developerName": "Cappe6969",
+    "category": "Developer Tools",
+    "capabilities": ["Read"],
+    "websiteURL": "https://github.com/Cappe6969/triz-innovation-skill",
+    "defaultPrompt": [
+      "Find the smallest safe solution to this coding trade-off."
+    ]
+  }
+}

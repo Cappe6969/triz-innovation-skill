@@ -1,0 +1,18 @@
+{
+  "id": "auth-route-hardening",
+  "visibility": "anonymized-real",
+  "expected": {"initial_tests": "fail", "target_tests": "pass"},
+  "derived_from": "1ab52e5f",
+  "prompt": "Harden authorized_route. Tokens must match exactly using a timing-safe comparison. Normalize the URL path, reject traversal, and allow only /admin or descendants of /admin, not prefix lookalikes.",
+  "test_command": [
+    "python",
+    "-m",
+    "unittest",
+    "-q",
+    "test_solution.py"
+  ],
+  "files": {
+    "solution.py": "def authorized_route(path, token, expected_token):\n    return path.startswith('/admin') and token == expected_token\n",
+    "test_solution.py": "import unittest\nfrom solution import authorized_route\n\n\nclass TestRoute(unittest.TestCase):\n    def test_exact_and_child(self):\n        self.assertTrue(authorized_route('/admin', 'secret', 'secret'))\n        self.assertTrue(authorized_route('/admin/users', 'secret', 'secret'))\n\n    def test_prefix_and_traversal_rejected(self):\n        self.assertFalse(authorized_route('/administrator', 'secret', 'secret'))\n        self.assertFalse(authorized_route('/admin/../public', 'secret', 'secret'))\n\n    def test_token_must_match(self):\n        self.assertFalse(authorized_route('/admin', 'secret ', 'secret'))\n        self.assertFalse(authorized_route('/admin', None, 'secret'))\n\n\nif __name__ == '__main__':\n    unittest.main()\n"
+  }
+}
