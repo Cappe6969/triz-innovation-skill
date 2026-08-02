@@ -62,7 +62,7 @@ def _expected_files() -> dict[Path, str]:
     """
     expected: dict[Path, str] = {}
 
-    for subdir in ("references", "scripts", "branches"):
+    for subdir in ("references", "scripts", "branches", "examples"):
         src_dir = _SOURCE / subdir
         if not src_dir.is_dir():
             continue
@@ -87,7 +87,7 @@ def _expected_files() -> dict[Path, str]:
 
 def build() -> None:
     """Wipe the mirror's SKILL.md + subdirs and write fresh copies from source."""
-    for name in ("SKILL.md", "references", "scripts", "branches"):
+    for name in ("SKILL.md", "references", "scripts", "branches", "examples"):
         target = _MIRROR / name
         if target.is_dir():
             shutil.rmtree(target)
@@ -103,7 +103,7 @@ def build() -> None:
 def _mirror_files() -> set[Path]:
     """Relative paths of every file currently present in the mirror."""
     files: set[Path] = set()
-    for subdir in ("references", "scripts", "branches"):
+    for subdir in ("references", "scripts", "branches", "examples"):
         target = _MIRROR / subdir
         if not target.is_dir():
             continue
