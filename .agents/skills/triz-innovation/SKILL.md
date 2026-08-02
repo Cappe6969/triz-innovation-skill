@@ -167,7 +167,8 @@ to a field or a language, no code.
   vocabulary: keywords, parameter translations, soft readings of the 40
   principles, and worked examples. Shipped fields: `general`, `business`,
   `software`, `rehab`, `mechanical`, `datascience`, `marketing`,
-  `supplychain`. `general` is the canonical core. Worked examples for each
+  `supplychain`, `energy`, `education`, `construction`, `robotics`.
+  `general` is the canonical core. Worked examples for each
   field branch are in `references/use-cases.md`.
 - **Language branches** (`branches/langs/<lang>/branch.json`) carry localized
   labels for method names and contradiction lines plus stopwords for language

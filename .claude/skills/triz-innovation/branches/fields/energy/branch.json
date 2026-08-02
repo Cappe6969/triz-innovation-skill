@@ -1,0 +1,38 @@
+{
+  "id": "energy",
+  "name": "Energy & Power TRIZ",
+  "name_it": "TRIZ energia e potenza",
+  "description": "Same TRIZ machinery with energy / power vocabulary — generation, conversion, storage, transmission, efficiency and heat losses.",
+  "keywords": [
+    "power grid", "smart grid", "inverter", "battery", "solar",
+    "photovoltaic", "turbine", "wind farm", "energy efficiency",
+    "heat loss", "power transmission", "outage", "blackout",
+    "load balancing", "peak load", "charging", "substation", "generator",
+    "voltage", "renewable", "energy storage", "storage capacity",
+    "power plant", "cogeneration", "power factor"
+  ],
+  "parameter_map": {
+    "Loss of energy": "efficiency losses — heat, line losses, conversion losses",
+    "Power": "rated / peak power output vs demand",
+    "Use of energy by stationary object": "standby consumption of fixed plant (pumps, fans, lighting)",
+    "Temperature": "operating temperature of cells, windings, power devices",
+    "Reliability": "grid availability / uptime / mean time between failures",
+    "Quantity of substance": "fuel / electrolyte / storage capacity / coolant volume",
+    "Adaptability or versatility": "load-following / dispatchability / fuel flexibility"
+  },
+  "principle_soft": {
+    "1": "segment the grid — microgrids and islandable sections that keep running alone",
+    "2": "take the outage off the critical path — UPS, backup generation, uninterruptible supply",
+    "5": "combine generation and storage — hybrid solar + wind + battery to smooth the curve",
+    "10": "pre-charge reserves and pre-heat before the peak hits",
+    "15": "dynamic load following; adaptive inverter setpoints as demand shifts",
+    "19": "periodic charge/discharge rhythms matched to the demand cycle",
+    "24": "intermediary buffer — battery bank or flywheel between generation and load",
+    "35": "change the working state — phase-change storage, voltage-level conversion"
+  },
+  "examples": [
+    "The inverter must handle more peak power, but adding cooling makes it too big for the cabinet.",
+    "Grid frequency must stay stable, but renewables inject power unpredictably.",
+    "The battery must charge faster, but fast charging degrades cell life and raises temperature."
+  ]
+}

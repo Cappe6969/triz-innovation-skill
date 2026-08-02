@@ -38,7 +38,8 @@ _LANG_REQUIRED = {"lang", "name", "labels", "contradiction_labels", "stopwords"}
 # Canonical ordering for the shipped branches; unknown ids are appended
 # alphabetically so the registry auto-extends when a new branch is added.
 _FIELD_IDS = ["general", "business", "software", "rehab",
-              "mechanical", "datascience", "marketing", "supplychain"]
+              "mechanical", "datascience", "marketing", "supplychain",
+              "energy", "education", "construction", "robotics"]
 _LANG_IDS = ["en", "it"]
 
 # Small English cue list used by the language heuristic. It is deliberately a

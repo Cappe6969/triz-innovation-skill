@@ -228,6 +228,73 @@ RULES: list[tuple[tuple[str, ...], str, int, str]] = [
         "Supply Chain TRIZ",
         2, "supply chain / logistics domain keyword"
     ),
+    # -- Energy / Power TRIZ signals
+    (
+        ("power grid", "rete elettrica", "smart grid", "rete intelligente",
+         "inverter", "battery", "batteria", "batterie", "solar", "solare",
+         "photovoltaic", "fotovoltaico", "turbine", "turbina", "wind farm",
+         "parco eolico", "energy efficiency", "efficienza energetica",
+         "heat loss", "dispersione termica", "power transmission",
+         "trasmissione di energia", "outage", "interruzione", "blackout",
+         "load balancing", "bilanciamento del carico", "peak load",
+         "picco di carico", "charging", "ricarica", "substation",
+         "sottostazione", "generator", "generatore", "voltage", "tensione",
+         "renewable", "rinnovabile", "energy storage", "accumulo di energia",
+         "storage capacity", "capacità di accumulo", "power plant",
+         "centrale elettrica", "cogeneration", "cogenerazione",
+         "power factor", "fattore di potenza"),
+        "Energy TRIZ",
+        2, "energy / power domain keyword"
+    ),
+    # -- Education / Learning TRIZ signals
+    (
+        ("student", "students", "studente", "studenti", "teacher",
+         "insegnante", "school", "scuola", "university", "università",
+         "curriculum", "assessment", "valutazione", "lesson", "lezione",
+         "homework", "compiti", "grading", "voto", "voti", "pedagogy",
+         "pedagogia", "tutoring", "tutoraggio", "exam", "esame", "syllabus",
+         "distraction", "distrazione", "motivation", "motivazione",
+         "attention span", "capacità di attenzione", "e-learning", "lms",
+         "dropout", "abbandono scolastico", "knowledge retention", "ritenzione",
+         "learning outcomes", "risultati di apprendimento", "classroom", "aula",
+         "study habits", "abitudini di studio", "vocational training",
+         "formazione professionale", "didactic", "didattica"),
+        "Education TRIZ",
+        2, "education / learning domain keyword"
+    ),
+    # -- Construction / Civil TRIZ signals
+    (
+        ("concrete", "calcestruzzo", "cement", "cemento", "steel", "acciaio",
+         "beam", "trave", "foundation", "fondazione", "crane", "gru",
+         "scaffolding", "ponteggio", "excavation", "scavo", "structural",
+         "strutturale", "load-bearing", "portante", "rebar", "armatura",
+         "prefabrication", "prefabbricazione", "construction site", "cantiere",
+         "contractor", "appaltatore", "waterproofing", "impermeabilizzazione",
+         "insulation", "isolamento", "facade", "facciata", "settlement",
+         "assestamento", "curing", "stagionatura", "formwork", "cassero",
+         "erection", "montaggio", "demolition", "demolizione", "seismic",
+         "sismico", "shoring", "puntellamento", "construction", "edilizia",
+         "building", "edificio", "bridge", "tunnel", "galleria"),
+        "Construction TRIZ",
+        2, "construction / civil engineering domain keyword"
+    ),
+    # -- Robotics / IoT / Embedded TRIZ signals
+    (
+        ("actuator", "attuatore", "sensor", "sensors", "sensore", "sensori",
+         "autonomy", "autonomous", "autonomia", "firmware", "gripper", "pinza",
+         "calibration", "calibrazione", "telemetry", "telemetria",
+         "motion control", "controllo del movimento", "embedded", "ros",
+         "edge device", "dispositivo edge", "servo", "kinematics", "cinematica",
+         "path planning", "pianificazione del percorso", "obstacle", "ostacolo",
+         "lidar", "imu", "end effector", "effettore finale", "robot arm",
+         "braccio robotico", "odometry", "odometria", "closed loop",
+         "anello chiuso", "sensor fusion", "fusione sensoriale", "localization",
+         "localizzazione", "microcontroller", "microcontrollore", "robot",
+         "drone", "oscillation", "oscillazione", "motor controller",
+         "controllore motore", "encoder"),
+        "Robotics TRIZ",
+        2, "robotics / IoT / embedded domain keyword"
+    ),
 ]
 
 # Domain tag for each field branch: branch id -> set of domain-rule method
@@ -241,6 +308,10 @@ _DOMAIN_RULES = {
     "datascience": {"Data Science TRIZ"},
     "marketing": {"Marketing TRIZ"},
     "supplychain": {"Supply Chain TRIZ"},
+    "energy": {"Energy TRIZ"},
+    "education": {"Education TRIZ"},
+    "construction": {"Construction TRIZ"},
+    "robotics": {"Robotics TRIZ"},
 }
 
 
