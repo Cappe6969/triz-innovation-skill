@@ -6,15 +6,15 @@ returns ranked methods plus contradiction guesses.
 
 Usage:
     python triz_router.py "problem description text"
-    python triz_router.py [--lang en|it|auto] [--branch general|business|software|rehab] "problem description text"
+    python triz_router.py [--lang en|it|auto] [--branch <id>] "problem description text"
     python triz_router.py --list          # list available --branch/--lang values
     python triz_router.py                  # prints usage
 
 --lang:  en (default, English labels), it (Italian labels), auto (detect the
          language of the problem text and use the matching overlay).
 --branch: restrict the domain rules to a single field branch: general (all
-         domain rules run), business, software, or rehab (only that domain's
-         rules run).
+         domain rules run), or any registered field branch id (only that
+         domain's rules run).
 
 Standard library only — Python 3.8+.
 """
@@ -204,6 +204,30 @@ RULES: list[tuple[tuple[str, ...], str, int, str]] = [
         "ARIZ (escalation)",
         5, "stuck / hard-contradiction / escalation cue"
     ),
+    # -- Mechanical TRIZ signals
+    (
+        ("torque", "coppia", "vibration", "vibrazione", "vibrazioni", "fatigue", "fatica", "stress", "tolerance", "tolleranza", "wear", "usura", "friction", "attrito", "gear", "ingranaggio", "bearing", "cuscinetto", "stiffness", "rigidità", "deflection", "deformazione", "crack", "cricca", "corrosion", "corrosione", "shaft", "albero", "weld", "saldatura", "thermal", "termico", "heat", "calore", "machining", "lavorazione", "spindle", "mandrino", "clearance", "gioco", "seal", "tenuta", "spring", "molla", "piston", "pistone", "hydraulic", "idraulico", "pneumatic", "pneumatico", "clutch", "frizione", "brake", "freno", "motor", "motore", "gearbox", "cambio", "bolt", "vite", "fastener", "bullone"),
+        "Mechanical TRIZ",
+        2, "mechanical / hardware domain keyword"
+    ),
+    # -- Data Science TRIZ signals
+    (
+        ("model", "modello", "training", "addestramento", "dataset", "feature", "caratteristica", "accuracy", "accuratezza", "precision", "precisione", "recall", "overfitting", "underfitting", "bias", "distorsione", "gradient", "gradiente", "inference", "inferenza", "prediction", "previsione", "machine learning", "deep learning", "neural", "rete neurale", "embedding", "hyperparameter", "iperparametro", "loss", "metrica", "metric", "cluster", "clustering", "classification", "classificazione", "regression", "regressione", "anomaly", "anomalia", "outlier", "drift", "validation", "validazione", "gpu", "batch", "epoch", "epoca", "weights", "pesi", "tuning", "ottimizzazione", "prompt", "llm", "transformer", "token"),
+        "Data Science TRIZ",
+        2, "data science / ML / AI domain keyword"
+    ),
+    # -- Marketing TRIZ signals
+    (
+        ("conversion", "conversione", "funnel", "imbuto", "campaign", "campagna", "churn", "abbandono", "retention", "fidelizzazione", "acquisition", "acquisizione", "engagement", "brand", "click", "cta", "lead", "landing page", "bounce", "rimbalzo", "audience", "pubblico", "segment", "segmento", "positioning", "posizionamento", "pricing", "prezzo", "a/b test", "persona", "market", "mercato", "growth", "crescita", "virality", "viralità", "reach", "copertura", "impression", "impressioni", "ctr", "roi", "content", "contenuto", "social", "influencer", "marketing", "advertising", "pubblicità", "onboarding", "activation", "attivazione", "upsell", "cross-sell"),
+        "Marketing TRIZ",
+        2, "marketing / growth domain keyword"
+    ),
+    # -- Supply Chain TRIZ signals
+    (
+        ("inventory", "scorte", "stock", "lead time", "tempi di consegna", "demand", "domanda", "forecast", "previsione", "logistics", "logistica", "warehouse", "magazzino", "supplier", "fornitore", "stockout", "esaurimento", "backorder", "capacity", "capacità", "throughput", "flusso", "replenishment", "riassortimento", "dispatch", "spedizione", "shipping", "trasporto", "freight", "cargo", "routing", "percorso", "bullwhip", "effetto frusta", "safety stock", "scorta di sicurezza", "order", "ordine", "lot", "lotto", "picking", "stoccaggio", "pallet", "container", "customs", "dogana", "distribution", "distribuzione", "supply chain", "catena di approvvigionamento", "sourcing", "approvvigionamento", "procurement", "acquisti", "fulfillment", "evasione ordini", "delivery", "consegna", "transportation", "trasporti"),
+        "Supply Chain TRIZ",
+        2, "supply chain / logistics domain keyword"
+    ),
 ]
 
 # Domain tag for each field branch: branch id -> set of domain-rule method
@@ -213,7 +237,16 @@ _DOMAIN_RULES = {
     "business": {"Business TRIZ"},
     "software": {"Software TRIZ"},
     "rehab": {"Rehabilitation TRIZ"},
+    "mechanical": {"Mechanical TRIZ"},
+    "datascience": {"Data Science TRIZ"},
+    "marketing": {"Marketing TRIZ"},
+    "supplychain": {"Supply Chain TRIZ"},
 }
+
+
+def _valid_branches() -> tuple[str, ...]:
+    """Accepted --branch ids: 'general' plus every field-domain rule key."""
+    return ("general", *_DOMAIN_RULES)
 
 # ── Contradiction detection cues (separate from method scoring) ─────────────
 # Italian + English contradiction connectors (bare whole words — matched with \\b)
@@ -342,9 +375,10 @@ def suggest_methods(problem: str, branch: str = "general") -> dict[str, Any]:
     Args:
         problem: Free-text problem description (any language, English + Italian
                  well supported).
-        branch: Field branch filter: "general" (all domain rules run),
-                "business", "software", or "rehab" (only that domain's rules
-                run). Method keys returned are always English.
+        branch: Field branch filter: "general" (all domain rules run), or any
+                registered field branch id such as "mechanical" or
+                "datascience" (only that domain's rules run). Method keys
+                returned are always English.
 
     Returns:
         dict with keys:
@@ -355,7 +389,7 @@ def suggest_methods(problem: str, branch: str = "general") -> dict[str, Any]:
     Raises:
         ValueError: for an unknown branch id.
     """
-    if branch not in ("general", "business", "software", "rehab"):
+    if branch != "general" and branch not in _DOMAIN_RULES:
         raise ValueError(f"Unknown branch: {branch!r}")
 
     # When a field branch is set, skip the domain rules of every other field.
@@ -511,14 +545,17 @@ def main() -> None:
                 value = arg.split("=", 1)[1]
             else:
                 if i + 1 >= len(args):
-                    print("Error: --branch requires a value (general, business, software or rehab).", file=sys.stderr)
+                    print(
+                        f"Error: --branch requires a value ({', '.join(_valid_branches())}).",
+                        file=sys.stderr,
+                    )
                     sys.exit(1)
                 value = args[i + 1]
                 i += 1
-            if value not in ("general", "business", "software", "rehab"):
+            if value not in _valid_branches():
                 print(
                     f"Error: unknown --branch value {value!r} "
-                    f"(expected general, business, software or rehab).",
+                    f"(expected {', '.join(_valid_branches())}).",
                     file=sys.stderr,
                 )
                 sys.exit(1)
@@ -528,12 +565,12 @@ def main() -> None:
         i += 1
 
     if show_list:
-        print("--branch ids: general, business, software, rehab")
+        print("--branch ids: " + ", ".join(_valid_branches()))
         print("--lang values: en, it, auto")
         sys.exit(0)
 
     if not positional:
-        print("Usage: python triz_router.py [--lang en|it|auto] [--branch general|business|software|rehab] \"problem description text\"")
+        print(f"Usage: python triz_router.py [--lang en|it|auto] [--branch {'|'.join(_valid_branches())}] \"problem description text\"")
         print()
         print("Heuristic TRIZ method router. Analyzes the problem text and suggests")
         print("which TRIZ methods to apply, ranked by relevance score.")

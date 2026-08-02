@@ -11,7 +11,7 @@ heavier or larger.
 `Mechanical TRIZ` rule; the `--branch mechanical` filter isolates that rule and
 skips the other domains.
 
-**Route:** `python .agents/skills/triz-innovation/scripts/triz.py --branch mechanical route "The gearbox must transmit more torque, but the housing cannot grow heavier or larger."`
+**Route:** `python .claude/skills/triz-innovation/scripts/triz.py --branch mechanical route "The gearbox must transmit more torque, but the housing cannot grow heavier or larger."`
 Live output — top methods: Engineering Contradiction + 40 Inventive Principles
 (7), then Mechanical TRIZ (4). The "must ... but" trade-off is detected as a
 contradiction (score 7); the mechanical keywords add the domain rule (2 keyword
@@ -41,7 +41,7 @@ too slow.
 **Branch detection:** The router matched `model`, `features`, `training` from
 the `Data Science TRIZ` rule; the `--branch datascience` filter isolates it.
 
-**Route:** `python .agents/skills/triz-innovation/scripts/triz.py --branch datascience route "The model must be more accurate, but adding features makes training too slow."`
+**Route:** `python .claude/skills/triz-innovation/scripts/triz.py --branch datascience route "The model must be more accurate, but adding features makes training too slow."`
 Live output — top methods: Engineering Contradiction + 40 Inventive Principles
 (7), Physical Contradiction + Separation (6), then Data Science TRIZ (4), with
 Resource Analysis, Ideality / IFR, and System Operator (9 Windows) suggested as
@@ -76,7 +76,7 @@ data-capture form hurts sign-ups.
 **Branch detection:** The router matched `landing page` from the `Marketing TRIZ`
 rule; the `--branch marketing` filter isolates it.
 
-**Route:** `python .agents/skills/triz-innovation/scripts/triz.py --branch marketing route "The landing page must convert more visitors, but adding a data-capture form hurts sign-ups."`
+**Route:** `python .claude/skills/triz-innovation/scripts/triz.py --branch marketing route "The landing page must convert more visitors, but adding a data-capture form hurts sign-ups."`
 Live output — top methods: Engineering Contradiction + 40 Inventive Principles
 (7), then Marketing TRIZ (2). The conversion vs. friction trade-off reads as a
 contradiction; the single `landing page` keyword hit adds the domain rule.
@@ -107,7 +107,7 @@ cost.
 `inventory` from the `Supply Chain TRIZ` rule (4 hits); the `--branch
 supplychain` filter isolates it.
 
-**Route:** `python .agents/skills/triz-innovation/scripts/triz.py --branch supplychain route "Lead time must drop, but holding more safety stock raises inventory cost."`
+**Route:** `python .claude/skills/triz-innovation/scripts/triz.py --branch supplychain route "Lead time must drop, but holding more safety stock raises inventory cost."`
 Live output — top methods: Supply Chain TRIZ (8, 4 keyword hits × 2), then
 Engineering Contradiction + 40 Inventive Principles (7), then Marketing TRIZ (2
 — the word "lead" in "lead time" also matches the marketing `lead` keyword; an

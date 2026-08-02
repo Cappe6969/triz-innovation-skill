@@ -20,6 +20,7 @@ Standard library only — Python 3.8+.
 
 from __future__ import annotations
 
+import csv
 import json
 import re
 import sys
@@ -36,7 +37,8 @@ _LANG_REQUIRED = {"lang", "name", "labels", "contradiction_labels", "stopwords"}
 
 # Canonical ordering for the shipped branches; unknown ids are appended
 # alphabetically so the registry auto-extends when a new branch is added.
-_FIELD_IDS = ["general", "business", "software", "rehab"]
+_FIELD_IDS = ["general", "business", "software", "rehab",
+              "mechanical", "datascience", "marketing", "supplychain"]
 _LANG_IDS = ["en", "it"]
 
 # Small English cue list used by the language heuristic. It is deliberately a
@@ -132,9 +134,32 @@ def validate() -> list[str]:
         for key in ("keywords", "examples"):
             if key in data and not isinstance(data[key], list):
                 errors.append(f"{path}: {key!r} must be a list")
+        is_general = field == "general"
         for key in ("parameter_map", "principle_soft"):
-            if key in data and not isinstance(data[key], dict):
-                errors.append(f"{path}: {key!r} must be a dict")
+            present = key in data and data[key] is not None
+            if is_general and present:
+                errors.append(f"{path}: 'general' must not define {key!r} (it IS the canonical core)")
+            elif not is_general:
+                if not present:
+                    errors.append(f"{path}: domain branch missing {key!r}")
+                elif not isinstance(data[key], dict):
+                    errors.append(f"{path}: {key!r} must be a dict")
+                elif not data[key]:
+                    errors.append(f"{path}: {key!r} must be non-empty for a domain branch")
+        if not is_general:
+            if not data.get("keywords"):
+                errors.append(f"{path}: domain branch keywords must be non-empty")
+            if not data.get("examples"):
+                errors.append(f"{path}: domain branch examples must be non-empty")
+        pm = data.get("parameter_map") or {}
+        if isinstance(pm, dict) and pm:
+            canonical = _canonical_parameter_names()
+            for key in pm:
+                if key.strip().lower() not in canonical:
+                    errors.append(
+                        f"{path}: parameter_map key {key!r} is not a canonical "
+                        f"39-parameter name (see scripts/data/parameters_39.csv)"
+                    )
 
     for lang in list_branches()["langs"]:
         path = _LANGS_DIR / lang / "branch.json"
@@ -164,6 +189,28 @@ def _load_json(path: Path, errors: list[str]) -> dict[str, Any] | None:
     except json.JSONDecodeError as exc:
         errors.append(f"{path}: invalid JSON: {exc}")
         return None
+
+
+def _canonical_parameter_names() -> set[str]:
+    """Lower-cased canonical 39-parameter names from scripts/data/parameters_39.csv.
+
+    The CSV lives beside this script (the mirror copies it too), so the check
+    works from both .claude and .agents. Returns an empty set if the CSV is
+    missing, which skips the canonical-key check rather than failing loudly.
+    """
+    csv_path = _SCRIPT_DIR / "data" / "parameters_39.csv"
+    if not csv_path.is_file():
+        return set()
+    names: set[str] = set()
+    try:
+        with csv_path.open(encoding="utf-8") as fh:
+            for row in csv.DictReader(fh):
+                name = (row.get("name") or "").strip().lower()
+                if name:
+                    names.add(name)
+    except (OSError, csv.Error):
+        return set()
+    return names
 
 
 def _strip_lang(argv: list) -> tuple[list, str | None]:

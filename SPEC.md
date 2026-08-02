@@ -1,409 +1,235 @@
-# Branch Architecture + Language Axis + TRIZ-MASTER Compliance (ship build 2)
+# Use Cases + New Domain Branches (ship build 3)
 
-Build on top of master (`6e8883e`, Phase 1 merged). Two workstreams in one build:
+Build on top of master (`9a6c849`, Phase 2 merged). Phase 2 established the
+branch architecture (`branches/fields/<id>/branch.json` × `branches/langs/<lang>/`
+with 4 fields + en/it) and a `triz_branches.py` registry. Phase 3 adds the
+four user-selected field branches — **mechanical/hardware, data science/ML/AI,
+marketing/growth, supply chain/logistics** — with worked use cases, and makes
+branch handling data-driven so adding a branch no longer requires editing the
+dispatcher or router.
 
-- **A — Branch architecture (Carpenter-built).** A thin, pure-data branch layer over the
-  canonical core: `branches/fields/<id>/branch.json` (domain vocabulary) ×
-  `branches/langs/<lang>/branch.json` (localized labels), a registry script
-  (`triz_branches.py`), `--branch`/`--lang` flags threaded through the dispatcher,
-  `detect_language()` auto-detection, and `build_mirror.py` to regenerate the
-  `.agents` mirror. This makes the skill a *mix of branches* that solve
-  field-specific tasks, with English as the default language and Italian as the
-  first additional branch (user-locked: bilingual en+it).
-- **B — TRIZ-MASTER.md compliance fixes (Architect-authored).** Content
-  synthesis only; per ADR-0011 the Architect authors these directly. The
-  Carpenter MUST NOT modify `TRIZ-MASTER.md` in this build.
+Two workstreams, same split as Phase 2:
+
+- **A — New field branches + use cases (Architect-authored content).** The four
+  `branches/fields/<id>/branch.json` data files and `references/use-cases.md`
+  are authored by the Architect and shipped in the working tree before the
+  build starts. Per ADR-0011, content synthesis is Architect work — the
+  Carpenter MUST NOT modify these files (the Reviewer verifies they are
+  untouched and schema-valid).
+- **B — Data-driven plumbing, router rules, docs, tests (Carpenter-built).**
+  Registry canonical order, dispatcher + router branch validation derived from
+  the registry, four new router domain rules, SKILL.md documentation, tests,
+  and the `.agents` mirror rebuild.
 
 ## Requirements
 
-### R1 — Branch data model
+### R1 — Four new field branches (Architect-authored; Carpenter MUST NOT modify)
 
-Create the `branches/` tree with pure-data JSON only (no code in branches/):
+Files already present in the working tree, one per new domain:
 
-- `branches/fields/general/branch.json` — the default identity branch.
-- `branches/fields/business/branch.json`
-- `branches/fields/software/branch.json`
-- `branches/fields/rehab/branch.json`
-- `branches/langs/en/branch.json` — identity overlay (empty `labels`).
-- `branches/langs/it/branch.json` — Italian overlay.
+- `branches/fields/mechanical/branch.json` — id `mechanical`, name "Mechanical TRIZ",
+  `name_it` "TRIZ meccanico / hardware", keywords covering torque, vibration,
+  fatigue, tolerance, wear, friction, bearings, stiffness, thermal, machining.
+- `branches/fields/datascience/branch.json` — id `datascience`, name
+  "Data Science TRIZ", `name_it` "TRIZ data science e AI", keywords covering
+  model/training/dataset/accuracy/overfitting/feature/inference/bias.
+- `branches/fields/marketing/branch.json` — id `marketing`, name "Marketing TRIZ",
+  `name_it` "TRIZ marketing e crescita", keywords covering conversion/funnel/
+  campaign/churn/retention/audience/persona/pricing/growth.
+- `branches/fields/supplychain/branch.json` — id `supplychain`, name
+  "Supply Chain TRIZ", `name_it` "TRIZ supply chain e logistica", keywords
+  covering inventory/lead time/demand/forecast/warehouse/supplier/stockout/
+  shipping/replenishment.
 
-Schema for `branches/fields/<id>/branch.json` (all required keys present in every
-field file):
-
-```json
-{
-  "id": "software",
-  "name": "Software TRIZ",
-  "name_it": "TRIZ software",
-  "description": "Same TRIZ machinery with software vocabulary.",
-  "keywords": ["app", "code", "api", "latency", "deploy", "bug", "server", "frontend", "backend", "database"],
-  "parameter_map": {
-    "Weight of moving object": "payload / request size",
-    "Speed": "latency / throughput"
-  },
-  "principle_soft": {
-    "1": "microservices",
-    "2": "move a feature out of the core"
-  },
-  "examples": [
-    "A login page must be secure and fast."
-  ]
-}
-```
-
-Constraints:
-- `id` must equal the directory name; `name_it` present in every field file
-  (it is the Italian branch's name even when the overlay is not loaded).
-- The four field ids are exactly `general`, `business`, `software`, `rehab`.
-  `general` has an empty `keywords` list and no `parameter_map`/`principle_soft`
-  (it IS the canonical core).
-- `branches/langs/en/branch.json` and `branches/langs/it/branch.json` follow:
+Every file follows the exact Phase-2 schema (all keys present):
 
 ```json
 {
-  "lang": "it",
-  "name": "Italiano",
-  "labels": {
-    "Engineering Contradiction + 40 Inventive Principles": "Contraddizione tecnica + 40 principi inventivi",
-    "Physical Contradiction + Separation": "Contraddizione fisica + principi di separazione",
-    "Trimming": "Riduzione (Trimming)",
-    "Root Cause Analysis": "Analisi delle cause",
-    "Resource Analysis": "Analisi delle risorse",
-    "Ideality / IFR": "Idealità / RIF",
-    "Function Analysis": "Analisi funzionale",
-    "System Operator (9 Windows)": "Operatore di sistema (9 finestre)",
-    "Smart Little People": "Ominetti intelligenti",
-    "Function-Oriented Search (FOS)": "Ricerca orientata alla funzione (FOS)",
-    "Method-Oriented Search (MOS)": "Ricerca orientata al metodo (MOS)",
-    "Business TRIZ": "TRIZ aziendale",
-    "Software TRIZ": "TRIZ software",
-    "Rehabilitation TRIZ": "TRIZ riabilitativo",
-    "Su-Field + 76 Standard Solutions": "Su-Field + 76 soluzioni standard",
-    "Evolution Trends + S-curve": "Tendenze evolutive + curva a S",
-    "Scientific Effects": "Effetti scientifici",
-    "ARIZ (escalation)": "ARIZ (escalation)"
-  },
-  "contradiction_labels": {
-    "engineering": "Contraddizione tecnica:",
-    "physical": "Contraddizione fisica:"
-  },
-  "stopwords": ["però", "perché", "più", "meno", "anche", "quindi", "questo", "questa", "questi", "queste", "essere", "avere", "già", "ancora", "tutto", "tutta", "tutti", "tutte", "loro", "cosa", "quale", "quando", "dove", "molto", "sempre", "mai", "dopo", "prima", "della", "delle", "degli", "nelle", "nella"]
+  "id": "<id>",
+  "name": "...",
+  "name_it": "...",
+  "description": "...",
+  "keywords": ["..."],
+  "parameter_map": {"<39-param name>": "<domain translation>", "...": "..."},
+  "principle_soft": {"<IP number>": "<soft reading>", "...": "..."},
+  "examples": ["..."]
 }
 ```
 
-- `en/branch.json` is `{"lang": "en", "name": "English", "labels": {}, "contradiction_labels": {}, "stopwords": []}` — the identity overlay.
+Constraints (presence + canonical keys enforced by `triz_branches.py validate()`;
+the ≥ counts are authoring guidance for new branches — the Phase 2 branches
+legitimately carry fewer):
+- `id` equals the directory name; `name_it` present.
+- `keywords` non-empty (≥ 10 entries for new branches, English + Italian where
+  sensible).
+- `parameter_map` non-empty (≥ 5 mappings for new branches) and `principle_soft`
+  non-empty (≥ 5 readings for new branches); every `parameter_map` key must be a
+  canonical 39-parameter name from `scripts/data/parameters_39.csv`.
+- `examples` non-empty (≥ 2 for new branches).
+- `general` must NOT define `parameter_map`/`principle_soft` (it IS the
+  canonical core).
 
-### R2 — `scripts/triz_branches.py` registry
+### R2 — Registry canonical order
 
-New stdlib-only script at `.claude/skills/triz-innovation/scripts/triz_branches.py`.
+In `scripts/triz_branches.py`, extend `_FIELD_IDS` (the canonical ordering) to:
 
-Public API:
-- `list_branches()` → dict `{"fields": ["general","business","software","rehab"], "langs": ["en","it"]}` (deterministic order).
-- `get_field_branch(field_id)` → parsed dict or raises `KeyError` for unknown id.
-- `get_lang_branch(lang)` → parsed dict or raises `KeyError` for unknown lang.
-- `resolve_labels(lang)` → merged label dict (field-independent; English = empty
-  overlay, Italian = the it labels). Unknown lang → `KeyError`.
-- `detect_language(text)` → `"it"` or `"en"` (see R4 for the algorithm).
-- `validate()` → walks `branches/fields/*` and `branches/langs/*`, checks every
-  file is valid JSON and has all required keys (the R1 schema), returns a list of
-  error strings (empty when valid). Does NOT raise; callers decide.
+```python
+_FIELD_IDS = ["general", "business", "software", "rehab",
+              "mechanical", "datascience", "marketing", "supplychain"]
+```
 
-CLI:
-- `python triz_branches.py list` → prints fields + langs lines.
-- `python triz_branches.py info <field_id>` → prints the parsed JSON of that
-  field branch; non-zero exit + stderr message for unknown id.
-- `python triz_branches.py resolve --lang it` → prints the resolved label dict
-  for the language; non-zero exit for unknown lang.
-- `python triz_branches.py check` → runs `validate()`; prints
-  `OK — N field branch(es), M language overlay(s)` on success, one error per
-  line + non-zero exit on any error.
-- `python triz_branches.py detect "<text>"` → prints `it` or `en`.
-- No args → usage, exit 1.
+`list_branches()` must then report exactly 8 fields in that order. The
+`resolve`/`validate`/`check` behavior is unchanged and must pass for all 8.
 
-The registry resolves all paths relative to its own file location (works from any
-working directory), exactly like the other scripts.
+### R3 — Dispatcher branch validation becomes data-driven
 
-### R3 — `triz.py` global `--branch` / `--lang` flags + `branches` command
+In `scripts/triz.py`:
 
-In `.claude/skills/triz-innovation/scripts/triz.py`:
+- Delete the hardcoded `_VALID_BRANCHES = ("general", "business", "software", "rehab")`.
+- Add `from triz_branches import list_branches` (same-directory import, exactly
+  like `triz_router.py` already does) and derive the valid set at flag-parse
+  time: `_valid_branches()` → `list_branches()["fields"]`. `_parse_global_flags`
+  calls it instead of reading a constant.
+- Keep `--lang` values `("en", "it", "auto")` as-is (a hardcoded list is fine;
+  languages are a closed, code-defined set).
+- Update the module docstring: the global `--branch` line and the "unknown
+  value rejected" note now say "any registered field branch" instead of
+  enumerating the ids.
+- Behavior: `python triz.py --branch mechanical route "..."` must exit 0 and
+  route with the mechanical branch; `--branch nonsense` still exits 1 with a
+  clear error.
 
-- Add `"branches": "triz_branches.py"` to `_COMMANDS`.
-- Accept two global flags anywhere in `argv` (before or after the command):
-  `--branch <id>` (default `general`) and `--lang <lang>` (default `en`).
-  Strip them from the argument list before forwarding.
-- When `--branch`/`--lang` were supplied, forward them to the sub-tool as
-  leading flags ONLY when that sub-tool supports them. Supported consumers:
-  `route` (→ `triz_router.py`) and `case` (→ `triz_case_template.py`).
-  Other sub-tools ignore the flags (do NOT forward to matrix/sufield/ariz/
-  evolution/evaluate/effects/network).
-- Update the module docstring usage block to document `--branch`/`--lang` and
-  the new `branches` command.
-- `python triz.py --lang it route "problema"` must produce Italian labels;
-  `python triz.py route "problema" --lang it` must behave identically
-  (flag position-independent).
-- Unknown `--branch`/`--lang` values → forward anyway and let the consumer
-  error, OR validate: either is acceptable, but the exit code must be non-zero
-  and the user must see a clear error. Choose ONE behavior and document it.
+This resolves the round-1 Medium finding "field and language branch data is not
+data-driven": adding a branch now only requires dropping a `branch.json` file.
 
-### R4 — `triz_router.py` `--lang` + `--branch` domain filtering
+### R4 — Router: four new domain rules + data-driven branch validation
 
-In `.claude/skills/triz-innovation/scripts/triz_router.py`:
+In `scripts/triz_router.py`:
 
-- `detect_language(text)`: score distinctive Italian stopwords from
-  `branches/langs/it/branch.json` `stopwords` against a small English cue list
-  (the/an/of/to/is/are/this/that/for/how/what/when/why/not/can/with/and).
-  Return `"it"` when Italian hits ≥ 1 AND Italian hits ≥ English hits,
-  else `"en"`. This is a heuristic, not a language detector — document that in
-  the docstring.
-- New CLI flags:
-  - `--lang <en|it|auto>` (default `en` — MUST NOT change the current default
-    output; existing tests assert English labels for Italian input).
-    - `en` → English labels (current behavior).
-    - `it` → Italian labels for the two contradiction lines and every method
-      name, looked up from the it overlay (`resolve_labels("it")`).
-    - `auto` → run `detect_language` on the problem text, then use the matching
-      overlay.
-  - `--branch <general|business|software|rehab>` (default `general`). When set
-    to a domain id, SKIP the domain rules for the other domains:
-    - `software` → only the `Software TRIZ` domain rule runs; `Business TRIZ`
-      and `Rehabilitation TRIZ` rules are skipped.
-    - `business` → only `Business TRIZ`.
-    - `rehab` → only `Rehabilitation TRIZ`.
-    - `general` (or omitted) → all domain rules run (current behavior).
-    This requires tagging each domain rule in the RULES table with its domain.
-    Add a module-level mapping `_DOMAIN_RULES = {"business": {"Business TRIZ"}, "software": {"Software TRIZ"}, "rehab": {"Rehabilitation TRIZ"}}`.
-  - `--list` → print available `--branch` ids and `--lang` values, exit 0.
-- Italian labels apply to the CLI print-out only; `suggest_methods()` keeps
-  returning English method keys (tests and callers depend on the keys).
+1. **Four new RULES entries** appended after the existing domain rules, each
+   with the method name and keyword set given below (score 2, reason
+   "<domain> domain keyword"). Use these EXACT keyword lists:
 
-### R5 — `triz_case_template.py` `--lang en|it`
+   - `Mechanical TRIZ`:
+     `("torque", "coppia", "vibration", "vibrazione", "vibrazioni", "fatigue", "fatica", "stress", "tolerance", "tolleranza", "wear", "usura", "friction", "attrito", "gear", "ingranaggio", "bearing", "cuscinetto", "stiffness", "rigidità", "deflection", "deformazione", "crack", "cricca", "corrosion", "corrosione", "shaft", "albero", "weld", "saldatura", "thermal", "termico", "heat", "calore", "machining", "lavorazione", "spindle", "mandrino", "clearance", "gioco", "seal", "tenuta", "spring", "molla", "piston", "pistone", "hydraulic", "idraulico", "pneumatic", "pneumatico", "clutch", "frizione", "brake", "freno", "motor", "motore", "gearbox", "cambio", "bolt", "vite", "fastener", "bullone")`
 
-In `.claude/skills/triz-innovation/scripts/triz_case_template.py`:
+   - `Data Science TRIZ`:
+     `("model", "modello", "training", "addestramento", "dataset", "feature", "caratteristica", "accuracy", "accuratezza", "precision", "precisione", "recall", "overfitting", "underfitting", "bias", "distorsione", "gradient", "gradiente", "inference", "inferenza", "prediction", "previsione", "machine learning", "deep learning", "neural", "rete neurale", "embedding", "hyperparameter", "iperparametro", "loss", "metrica", "metric", "cluster", "clustering", "classification", "classificazione", "regression", "regressione", "anomaly", "anomalia", "outlier", "drift", "validation", "validazione", "gpu", "batch", "epoch", "epoca", "weights", "pesi", "tuning", "ottimizzazione", "prompt", "llm", "transformer", "token")`
 
-- New file `cases/template-triz-case-en.md` — the existing
-  `cases/template-triz-case.md` translated to English section headers
-  (same section set, English): Problema originale → Original problem,
-  Problema riformulato → Restated problem, Sistema → System,
-  Sottosistemi → Sub-systems, Sovrasistema → Super-system,
-  Stakeholder → Stakeholders, Funzione utile principale → Primary useful
-  function, Funzioni dannose → Harmful functions, Vincoli → Constraints,
-  Cause principali → Root causes, Contraddizione tecnica → Technical
-  contradiction, Contraddizione fisica → Physical contradiction,
-  Risorse disponibili → Available resources, Ideal Final Result → Ideal Final
-  Result, Metodi TRIZ selezionati → Selected TRIZ methods,
-  Soluzioni generate → Generated solutions, Valutazione soluzioni → Solution
-  evaluation, Migliore esperimento → Best experiment, plus the English
-  evaluation-table header row and the six experiment bullets.
-  Keep `cases/template-triz-case.md` byte-identical (backward compatible —
-  it is Italian by default).
-- `create_case(title, cases_dir=None, lang=None)`: `lang=None` or `"it"` →
-  `template-triz-case.md`; `"en"` → `template-triz-case-en.md`; unknown lang →
-  `ValueError`.
-- CLI: `--lang en|it` before or after the title; `--lang it` == no flag.
-- Update the module docstring usage.
+   - `Marketing TRIZ`:
+     `("conversion", "conversione", "funnel", "imbuto", "campaign", "campagna", "churn", "abbandono", "retention", "fidelizzazione", "acquisition", "acquisizione", "engagement", "brand", "click", "cta", "lead", "landing page", "bounce", "rimbalzo", "audience", "pubblico", "segment", "segmento", "positioning", "posizionamento", "pricing", "prezzo", "a/b test", "persona", "market", "mercato", "growth", "crescita", "virality", "viralità", "reach", "copertura", "impression", "impressioni", "ctr", "roi", "content", "contenuto", "social", "influencer", "marketing", "advertising", "pubblicità", "onboarding", "activation", "attivazione", "upsell", "cross-sell")`
 
-### R6 — `scripts/build_mirror.py` (regenerate `.agents`)
+   - `Supply Chain TRIZ`:
+     `("inventory", "scorte", "stock", "lead time", "tempi di consegna", "demand", "domanda", "forecast", "previsione", "logistics", "logistica", "warehouse", "magazzino", "supplier", "fornitore", "stockout", "esaurimento", "backorder", "capacity", "capacità", "throughput", "flusso", "replenishment", "riassortimento", "dispatch", "spedizione", "shipping", "trasporto", "freight", "cargo", "routing", "percorso", "bullwhip", "effetto frusta", "safety stock", "scorta di sicurezza", "order", "ordine", "lot", "lotto", "picking", "stoccaggio", "pallet", "container", "customs", "dogana", "distribution", "distribuzione", "supply chain", "catena di approvvigionamento", "sourcing", "approvvigionamento", "procurement", "acquisti", "fulfillment", "evasione ordini", "delivery", "consegna", "transportation", "trasporti")`
 
-New stdlib-only script at repo root `scripts/build_mirror.py` (repo-level dev
-tool; a new `scripts/` directory at the repo root — separate from the skill's
-`scripts/`).
+   Note: overlap with the Business TRIZ rule (e.g. "fidelizzazione", "mercato",
+   "prezzo", "consegna") is expected and acceptable — the `--branch` filter
+   isolates a single domain's rule when the user picks one.
 
-Purpose: the `.agents/skills/triz-innovation/` mirror is currently broken — it
-has `SKILL.md` + `references/` but no `scripts/`, and its `SKILL.md` points at
-`.claude/skills/triz-innovation/scripts/...` paths that do not exist inside
-`.agents`. Regenerate it as a **self-contained copy** so Codex (and any other
-agent that reads `.agents/`) can run every script from inside the mirror.
+2. **`_DOMAIN_RULES` extended** to all seven domain branches:
 
-Behavior:
-- Source: `.claude/skills/triz-innovation/` (SKILL.md, references/**, scripts/**
-  including `scripts/data/**`).
-- Target: `.agents/skills/triz-innovation/` — wipe and re-copy
-  `references/`, `scripts/`, and `branches/`, plus `SKILL.md`.
-- In every copied text file (`.md`, `.py`, `.json`, `.csv`), rewrite the literal
-  prefix `.claude/skills/triz-innovation` → `.agents/skills/triz-innovation`.
-- Prepend a `GENERATED` banner to the mirror's `SKILL.md`:
-  `<!-- GENERATED by scripts/build_mirror.py — do not edit; edit the source under .claude/skills/triz-innovation/ -->`
-  (plus a `> GENERATED` line for non-comment readers).
-- The mirror's `SKILL.md` gets a `## Branches` note that the branch tree is
-  copied verbatim from source.
-- CLI:
-  - no args → rebuild the mirror.
-  - `--check` → compare the current mirror against what a rebuild would produce
-    (banner-aware); print `Mirror is in sync` and exit 0, or print the list of
-    drifted/missing files and exit 1. Do NOT modify anything in `--check` mode.
-- The builder must compute the repo root from its own location (repo-root
-  `scripts/build_mirror.py` → one parent up), so it works from any directory.
+   ```python
+   _DOMAIN_RULES = {
+       "business": {"Business TRIZ"},
+       "software": {"Software TRIZ"},
+       "rehab": {"Rehabilitation TRIZ"},
+       "mechanical": {"Mechanical TRIZ"},
+       "datascience": {"Data Science TRIZ"},
+       "marketing": {"Marketing TRIZ"},
+       "supplychain": {"Supply Chain TRIZ"},
+   }
+   ```
 
-### R7 — SKILL.md branches documentation
+3. **Branch validation data-driven.** Replace the hardcoded
+   `if branch not in ("general", "business", "software", "rehab")` in
+   `suggest_methods` with `if branch != "general" and branch not in _DOMAIN_RULES`
+   (so the accepted ids are exactly `general` + the `_DOMAIN_RULES` keys).
+   Update the CLI `--branch` validation, the `--list` output, and the usage
+   strings the same way (derive from `_DOMAIN_RULES`; never hardcode the id
+   list). The docstring keeps `general` described as "all domain rules run".
 
-In `.claude/skills/triz-innovation/SKILL.md`:
+### R5 — Use-cases reference (Architect-authored; Carpenter MUST NOT modify)
 
-- Add a `## Branches` section (placed right before `## Master tool`) that
-  documents:
-  - The branch model: `branches/fields/<id>/branch.json` (domain vocabulary:
-    keywords, parameter translations, soft principle readings, examples) ×
-    `branches/langs/<lang>/branch.json` (localized labels + stopwords).
-  - The orthogonal axes: FIELD (general, business, software, rehab) ×
-    LANGUAGE (en default, it).
-  - The flags: `python .../triz.py --branch <id> --lang <lang> route "..."`,
-    and `--lang auto` for auto-detection.
-  - The registry: `python .../triz.py branches list|check`.
-  - How to add a field branch (drop a `branch.json` in `branches/fields/<id>/`)
-    and a language (drop a `branch.json` in `branches/langs/<lang>/` + add
-    labels + stopwords). One short paragraph each; no code dumps.
-- Update the `## Master tool` command list to add `branches` and note
-  `--branch/--lang` global flags.
+New file `references/use-cases.md` (already in the working tree), mirroring the
+tone of the other reference files. Exactly four `##` sections — one per new
+branch: `## Mechanical / hardware`, `## Data science / ML / AI`,
+`## Marketing / growth`, `## Supply chain / logistics`. Each section contains,
+in order, these bold labels:
 
-### R8 — TRIZ-MASTER.md compliance fixes (Architect-authored; Carpenter must NOT touch this file)
+1. `**Problem:**` — a concrete, ultra-specific problem statement.
+2. `**Branch detection:**` — the branch keywords the router matched.
+3. `**Route:**` — the exact `python .../triz.py --branch <id> route "<problem>"`
+   command and a 2–4 line summary of the router's top methods.
+4. `**Parameter translation:**` — 2–3 `parameter_map` rows showing the 39-parameter
+   name → domain translation in action.
+5. `**Solution via soft principles:**` — 2–3 `principle_soft` readings applied to
+   the problem, each producing a concrete mechanism.
+6. `**Result:**` — the chosen mechanism, tagged `[IP-NN Name]` and
+   `[Separation ...]` where applicable.
 
-The following are **content-synthesis fixes** authored by the Architect per
-ADR-0011. They are REQUIRED acceptance criteria but are NOT Carpenter work — the
-Carpenter must leave `TRIZ-MASTER.md` untouched (the Reviewer verifies the
-changes exist and match these bullets; the Architect produces them).
+The file starts with a one-line `> ` intro stating it demonstrates each field
+branch with a worked example.
 
-1. **TOC is the 25th H2.** Demote `## Table of Contents` to
-   `### Table of Contents` so the document has exactly 24 `## ` sections.
-2. **§6 missing `**Procedure:**`.** Section 6 (The 40 inventive principles) is
-   the only method section lacking a Procedure label. Add a `**Procedure:**`
-   block between `**Core idea:**` and the complete list:
-   1. Frame the contradiction (engineering §5 or physical §7).
-   2. Get candidate principles from the matrix (step 3 of §5) or from §7's
-      separation principles for physical contradictions.
-   3. Read each candidate and force a concrete translation: "How would this
-      pattern manifest in my system?" — push every principle through the *soft*
-      readings until it names a real change.
-   4. If the shortlist feels weak, walk the "most universally useful" list
-      (1, 2, 3, 10, 13, 15, 25, 35) or re-map the parameters.
-   5. Tag every proposed change `[IP-NN Name]`.
-3. **§6 IP-2 name.** `2. **Separation** — extract…` → `2. **Taking out** —
-   extract…` (matches `inventive_principles.csv` row 2 = `Taking Out` and
-   `references/inventive-principles.md`). Update the §6 example tag
-   `[IP-2 Separation]` → `[IP-2 Taking out]` and the `[IP-2 Separation]` text.
-4. **§5 example hedge.** The §5 example claims the matrix returns
-   "10, 30, 4, 34 (Discarding)" for improving=27 / worsening=25, but
-   `python triz_matrix.py 27 25` returns exactly `10, 30, 4` (no 34). Rewrite
-   the sentence to list exactly `10, 30, 4` and add a hedge that the live tool
-   is authoritative (e.g. "— run `python triz_matrix.py 27 25` for the live
-   answer").
-5. **§5 parameter names 30/31.** In the 39-parameters table, rows 30 and 31 use
-   singular "Object-affected harmful factor" / "Object-generated harmful
-   factor"; `data/parameters_39.csv` uses plural "Object-affected harmful
-   factors" / "Object-generated harmful factors". Align the master table to the
-   CSV (plural).
-6. **§13 ARIZ Part 1 TC-selection.** Part 1 of ARIZ-85C must include the
-   TC-selection step from `references/ariz.md` Part 1.3: after stating the TC in
-   both directions, add "Pick the TC that best preserves the main useful
-   function." as an explicit step.
-7. **§17 router-keyword mislabel.** §17 (Smart Little People) line "Key router
-   keywords (used by triz_router.py): FOS — …; MOS — …" is wrong — those are
-   FOS/MOS keywords, not SLP keywords. Replace with the actual SLP router
-   keywords from `triz_router.py`: `"stuck"`, `"no idea"`, `"creative block"`
-   (+ Italian `"bloccato"`, `"nessuna idea"`, `"blocco creativo"`).
-8. **§3/§10/§11 output contracts.** Add a `**Output:**` line to each section
-   matching its reference file:
-   - §3: "A filled function table + a 3-bullet summary: main function (and its
-     N/I/E grade), the worst harmful function, the top trimming candidate."
-   - §10: "For each trim: what's removed, which rule, who inherits the function,
-     net effect on cost/complexity/harm, and any new contradiction created. Tag
-     `[Trimming Rule A/B/C]`."
-   - §11: "The filled 9-window grid + 2–3 candidate intervention points it
-     revealed."
-9. **§4 RCA inversion.** `references/root-cause-analysis.md` declares master §4
-   its "Canonical source" but contains roughly 17× the master's content — the
-   consolidation dropped the RCA+ machinery. Enrich §4 (compact, keep the
-   section's existing when-to-use/core-idea/procedure/example shape) with:
-   - the four RCA+ problem categories in the anchor step (negative,
-     insufficient, excessive, ineffective control),
-   - cause-formulation requirements (function + relative parameter value, change
-     of property, radical state change),
-   - factual vs assumptive cause tagging,
-   - AND/OR rules for building the cause tree,
-   - the stop rule: **stop a branch at the first contradiction cause (N+P)** —
-     do not drill deeper below an N+P cause,
-   - the classification decision tree and the pitfalls pointer, summarized in
-     ≤ 3 lines, with `**Derives →** references/root-cause-analysis.md` retained.
-10. **§21 Tooling table.** Add rows for `triz.py` (master dispatcher),
-    `triz_contradiction_network.py`, `triz_effects.py`, and
-    `triz_branches.py`, each with a one-line description and usage example
-    consistent with the existing rows.
-11. **§23 provenance.** Add a `### Books used (conceptual reference only)`
-    subsection under Primary sources crediting the books by title, mirroring
-    `docs/source-map.md`: **Simplified TRIZ, 3rd ed.**; **Deep Dive into TRIZ —
-    Engineering Problem Solving Algorithm**; **TRIZ Engineering Problem-Solving
-    Algorithm** (tips & tricks); **World Conference of AI-Powered Innovation and
-    TRIZ Methodology** (2nd IFIP WG 5.2); **TRIZ-Anwendertag 2020** (Oliver
-    Mayer). One line each, noting "used as conceptual cross-checks only; no text
-    copied."
+### R6 — SKILL.md documentation
 
-### R9 — Regression tests
+In `.claude/skills/triz-innovation/SKILL.md`, under the existing `## Branches`
+section:
 
-Extend `tests/test_triz.py` (unittest style, matching the existing suite) with
-new tests:
+- Update the shipped-fields list from "general, business, software, rehab" to
+  all eight: `general`, `business`, `software`, `rehab`, `mechanical`,
+  `datascience`, `marketing`, `supplychain`.
+- Add one sentence pointing at `references/use-cases.md` as the worked examples
+  for the field branches.
 
-- **Branches registry** (`triz_branches` import):
-  - `list_branches()` returns exactly the four field ids + two langs.
-  - `validate()` returns an empty error list for the shipped data.
-  - `get_field_branch("software")["id"] == "software"` and `parameter_map`
-    is a non-empty dict for the domain branches, empty/absent for `general`.
-  - unknown id/lang → `KeyError`.
-- **detect_language**:
-  - Italian string → `"it"`; English string → `"en"`.
-  - mixed with ≥ 1 Italian hit → `"it"`.
-- **Router `--lang`/`--branch`** (import `suggest_methods`, or CLI):
-  - `suggest_methods` keys stay English even for Italian input (default output
-    unchanged).
-  - `--lang it` CLI output contains an Italian label (e.g. "Contraddizione")
-    and not the English method header.
-  - `--branch software` with a business-only keyword string: the returned
-    methods do NOT include "Business TRIZ".
-  - `--branch general` (default) with the same string DOES include the business
-    rule.
-- **Case template `--lang en`**:
-  - `create_case("x", cases_dir=tmp, lang="en")` file contains "Restated
-    problem" and "Technical contradiction".
-  - `create_case(..., lang="it")` == default Italian template file (contains
-    "Problema riformulato").
-  - unknown lang → `ValueError`.
-- **Dispatcher**:
-  - `triz.py --lang it route "problema ma migliora"` exits 0 and prints an
-    Italian label.
-  - `triz.py branches list` exits 0 and prints `software`.
-  - `triz.py branches check` exits 0.
-- **Mirror**:
-  - `scripts/build_mirror.py --check` exits 0 when the mirror is in sync and
-    non-zero when a file is added to the source but not the mirror (run a real
-    drift test against a temp tree, not the real `.agents`).
-  - A mirrored script file has the `.claude/` prefix rewritten to `.agents/`.
-- **Master structure regression** (guards the R8 content fixes):
-  - Exactly 24 `## ` sections in `TRIZ-MASTER.md`.
-  - Every method section 3–20 contains `**Procedure:**` (or is explicitly not a
-    method section).
-  - `inventive_principles.csv` row 2 is `Taking Out`.
-  - `triz_matrix.py 27 25` returns exactly `[10, 30, 4]`.
+### R7 — Regression tests
 
-All new scripts and the modified scripts keep the `from __future__ import
-annotations` first-import and Windows-safe UTF-8 stdout
-(`sys.stdout.reconfigure(encoding="utf-8", errors="replace")`) conventions from
-Phase 1.
+Extend `tests/test_triz.py` (unittest style, matching the existing suite) with:
+
+- **Registry (8 fields):** `list_branches()["fields"]` has exactly 8 ids in the
+  canonical order (general first, supplychain last); `validate()` empty for the
+  shipped data.
+- **New branches data:** for each of mechanical/datascience/marketing/supplychain —
+  `get_field_branch(id)["id"] == id`, `parameter_map` and `principle_soft` are
+  non-empty dicts, `name_it` present, `keywords` ≥ 10, `examples` ≥ 2.
+- **Routing:** a mechanical-keyword problem (e.g. "the gear wears out under
+  vibration and high torque") makes `suggest_methods` include `Mechanical TRIZ`;
+  a marketing-keyword problem includes `Marketing TRIZ`; a supply-chain problem
+  includes `Supply Chain TRIZ`; a datascience problem includes `Data Science TRIZ`.
+- **`--branch` filter:** `suggest_methods(problem, branch="mechanical")` on a
+  marketing-only keyword string does NOT include `Marketing TRIZ`;
+  `branch="general"` on the same string DOES.
+- **Data-driven validation:** `suggest_methods(problem, branch="datascience")`
+  does not raise; `branch="bogus"` raises `ValueError`; dispatcher
+  `triz.py --branch supplychain route "..."` exits 0 and
+  `triz.py --branch bogus route "..."` exits 1.
+- **Use-cases file:** `references/use-cases.md` exists and contains exactly the
+  four required `## ` headings, each followed by the six `**Label:**` markers
+  in order (loop over the file text).
+- **Mirror:** `scripts/build_mirror.py --check` exits 0.
+
+### R8 — Mirror rebuild
+
+Run `python scripts/build_mirror.py` so the `.agents/skills/triz-innovation/`
+mirror carries the four new branch files, the router/registry changes, and
+`references/use-cases.md`; `build_mirror.py --check` must exit 0.
 
 ## Acceptance criteria
 
 | # | Criterion | Verified by |
 |---|-----------|-------------|
-| AC1 | `branches/` tree exists with exactly the 4 field + 2 lang JSON files, all schema-valid | `python .claude/skills/triz-innovation/scripts/triz_branches.py check` → `OK` |
-| AC2 | `triz_branches.py list` shows the 4 fields and 2 langs; `info`, `resolve --lang`, `detect` all work; unknown ids fail non-zero | manual + tests |
-| AC3 | `triz.py --lang it route "..."` and `triz.py route "..." --lang it` print Italian labels; `triz.py branches list|check` work; flags are position-independent | tests + manual |
-| AC4 | Router default output is unchanged (English labels for Italian input); `--lang it` localizes; `--branch <domain>` filters the other domains' rules; `--lang auto` detects | tests |
-| AC5 | `triz_case_template.py --lang en "title"` produces an English-template case; no flag / `--lang it` reproduces the existing Italian default; existing `template-triz-case.md` is byte-identical | tests |
-| AC6 | `.agents/skills/triz-innovation/` mirror is self-contained (scripts/ + references/ + branches/ present, `.claude/` paths rewritten, GENERATED banner) and `build_mirror.py --check` passes | tests + manual |
-| AC7 | `SKILL.md` has a `## Branches` section and documents `--branch/--lang` in the master-tool block | reviewer |
-| AC8 | All 11 TRIZ-MASTER.md compliance fixes present (TOC is H3; §6 Procedure + IP-2 Taking out; §5 hedge + plural params; §13 TC-selection; §17 SLP keywords; §3/§10/§11 Output; §4 RCA enrichment; §21 rows; §23 books) | reviewer + structural tests |
-| AC9 | Full test suite passes (existing 75 + new) via `python tests/test_triz.py` | command |
-| AC10 | No file outside the listed scope is created or modified (no stray files; `cases/`, `docs/`, `.gitignore` untouched unless named above) | reviewer diff |
+| AC1 | `branches/fields/` contains exactly 8 field branches; all schema-valid (incl. `name_it`, non-empty keywords/parameter_map/principle_soft/examples) | `python .claude/skills/triz-innovation/scripts/triz_branches.py check` → `OK — 8 field branch(es), 2 language overlay(s)` |
+| AC2 | `triz_branches.py list` shows the 8 fields in canonical order (general first, supplychain last) | command |
+| AC3 | `triz.py --branch <any-of-8> route "..."` works; `--branch bogus` exits non-zero with a clear error; no hardcoded branch-id tuple remains in `triz.py` | tests + grep |
+| AC4 | Router routes each new domain's keywords to its own rule; `--branch <domain>` excludes the other domains' rules; unknown branch raises `ValueError` | tests |
+| AC5 | `references/use-cases.md` exists with the 4 required `##` sections, each with the 6 `**Label:**` markers in order | tests |
+| AC6 | SKILL.md `## Branches` lists all 8 fields and points to `references/use-cases.md` | reviewer |
+| AC7 | Full suite passes (existing 100 + new) via `python tests/test_triz.py` | command |
+| AC8 | `.agents` mirror in sync (`build_mirror.py --check` exits 0) | command |
+| AC9 | No file outside the listed scope is created or modified (branch files, triz_branches.py, triz.py, triz_router.py, SKILL.md, use-cases.md, tests, mirror; SPEC.md/BACKLOG.md allowed) | reviewer diff |
 
-## Out of scope (ship build 3)
+## Out of scope (Phase 4)
 
-- New domain branches (mechanical/hardware, data science/ML/AI, marketing/growth,
-  supply chain/logistics) — user-selected for Phase 3.
-- `.agents` for any agent besides the generic mirror.
-- Any change to `Books/`, `triz-prompt-engineering-main/`, `reddit-post.md`.
+- Merging and final doc sync (SKILL.md, usage-guide, source-map, BACKLOG) —
+  handled in Phase 4 after this build is merged.
+- Any change to `Books/`, `triz-prompt-engineering-main/`, `reddit-post.md`,
+  `cases/`, `TRIZ-MASTER.md`.
