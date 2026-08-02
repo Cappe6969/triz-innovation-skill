@@ -6,7 +6,15 @@ returns ranked methods plus contradiction guesses.
 
 Usage:
     python triz_router.py "problem description text"
+    python triz_router.py [--lang en|it|auto] [--branch general|business|software|rehab] "problem description text"
+    python triz_router.py --list          # list available --branch/--lang values
     python triz_router.py                  # prints usage
+
+--lang:  en (default, English labels), it (Italian labels), auto (detect the
+         language of the problem text and use the matching overlay).
+--branch: restrict the domain rules to a single field branch: general (all
+         domain rules run), business, software, or rehab (only that domain's
+         rules run).
 
 Standard library only — Python 3.8+.
 """
@@ -14,9 +22,10 @@ Standard library only — Python 3.8+.
 from __future__ import annotations
 
 import sys
-import json
 import re
 from typing import Any
+
+from triz_branches import detect_language, get_lang_branch
 
 
 def _kw_match(kw: str, text: str) -> bool:
@@ -197,6 +206,15 @@ RULES: list[tuple[tuple[str, ...], str, int, str]] = [
     ),
 ]
 
+# Domain tag for each field branch: branch id -> set of domain-rule method
+# names. The router uses this to skip the other domains' rules when a --branch
+# is set.
+_DOMAIN_RULES = {
+    "business": {"Business TRIZ"},
+    "software": {"Software TRIZ"},
+    "rehab": {"Rehabilitation TRIZ"},
+}
+
 # ── Contradiction detection cues (separate from method scoring) ─────────────
 # Italian + English contradiction connectors (bare whole words — matched with \\b)
 _CONTRADICTION_CONNECTORS = [
@@ -318,23 +336,41 @@ def _detect_physical_contradiction(lower: str) -> str | None:
     return None
 
 
-def suggest_methods(problem: str) -> dict[str, Any]:
+def suggest_methods(problem: str, branch: str = "general") -> dict[str, Any]:
     """Suggest TRIZ methods for a problem description.
 
     Args:
         problem: Free-text problem description (any language, English + Italian
                  well supported).
+        branch: Field branch filter: "general" (all domain rules run),
+                "business", "software", or "rehab" (only that domain's rules
+                run). Method keys returned are always English.
 
     Returns:
         dict with keys:
         - "engineering_contradiction": str or None
         - "physical_contradiction": str or None
         - "methods": list of {"method", "score", "why"}, sorted score desc
+
+    Raises:
+        ValueError: for an unknown branch id.
     """
+    if branch not in ("general", "business", "software", "rehab"):
+        raise ValueError(f"Unknown branch: {branch!r}")
+
+    # When a field branch is set, skip the domain rules of every other field.
+    domain_skip: set[str] = set()
+    if branch != "general":
+        for domain, methods in _DOMAIN_RULES.items():
+            if domain != branch:
+                domain_skip |= methods
+
     lower = problem.lower()
     scored: dict[str, tuple[int, list[str]]] = {}
 
     for keywords, method, weight, why_tpl in RULES:
+        if method in domain_skip:
+            continue
         for kw in keywords:
             if _kw_match(kw, lower):
                 prev = scored.get(method)
@@ -399,33 +435,105 @@ def suggest_methods(problem: str) -> dict[str, Any]:
     }
 
 
-def _print_result(result: dict[str, Any]) -> None:
-    """Pretty-print the router result to stdout."""
+def _print_result(result: dict[str, Any], lang: str = "en") -> None:
+    """Pretty-print the router result to stdout.
+
+    Method keys stay English; the labels of the two contradiction lines and of
+    every method name are localized when lang is "it".
+    """
+    labels: dict[str, str] = {}
+    contradiction_labels: dict[str, str] = {}
+    if lang == "it":
+        it = get_lang_branch("it")
+        labels = it.get("labels", {})
+        contradiction_labels = it.get("contradiction_labels", {})
+
+    eng_head = contradiction_labels.get("engineering", "Engineering Contradiction:")
+    phys_head = contradiction_labels.get("physical", "Physical Contradiction:")
+
     if result["engineering_contradiction"]:
-        print(f"Engineering Contradiction: {result['engineering_contradiction']}")
+        print(f"{eng_head} {result['engineering_contradiction']}")
     else:
-        print("Engineering Contradiction: (none detected)")
+        print(f"{eng_head} (none detected)")
 
     if result["physical_contradiction"]:
-        print(f"Physical Contradiction:   {result['physical_contradiction']}")
+        print(f"{phys_head} {result['physical_contradiction']}")
     else:
-        print("Physical Contradiction:   (none detected)")
+        print(f"{phys_head} (none detected)")
 
     print()
     print(f"{'Method':<55} {'Score':>5}")
     print("-" * 62)
     for m in result["methods"]:
-        print(f"{m['method']:<55} {m['score']:>5}")
+        name = labels.get(m["method"], m["method"]) if lang == "it" else m["method"]
+        print(f"{name:<55} {m['score']:>5}")
     print()
     print("Reasons:")
     for m in result["methods"]:
         if m["why"]:
-            print(f"  [{m['method']}] {m['why']}")
+            name = labels.get(m["method"], m["method"]) if lang == "it" else m["method"]
+            print(f"  [{name}] {m['why']}")
 
 
 def main() -> None:
-    if len(sys.argv) < 2:
-        print("Usage: python triz_router.py \"problem description text\"")
+    try:
+        sys.stdout.reconfigure(encoding="utf-8", errors="replace")
+    except AttributeError:
+        pass
+
+    args = sys.argv[1:]
+    lang = "en"
+    branch = "general"
+    show_list = False
+    positional: list[str] = []
+
+    i = 0
+    while i < len(args):
+        arg = args[i]
+        if arg == "--list":
+            show_list = True
+            i += 1
+        elif arg == "--lang" or arg.startswith("--lang="):
+            if "=" in arg:
+                value = arg.split("=", 1)[1]
+            else:
+                if i + 1 >= len(args):
+                    print("Error: --lang requires a value (en, it or auto).", file=sys.stderr)
+                    sys.exit(1)
+                value = args[i + 1]
+                i += 1
+            if value not in ("en", "it", "auto"):
+                print(f"Error: unknown --lang value {value!r} (expected en, it or auto).", file=sys.stderr)
+                sys.exit(1)
+            lang = value
+        elif arg == "--branch" or arg.startswith("--branch="):
+            if "=" in arg:
+                value = arg.split("=", 1)[1]
+            else:
+                if i + 1 >= len(args):
+                    print("Error: --branch requires a value (general, business, software or rehab).", file=sys.stderr)
+                    sys.exit(1)
+                value = args[i + 1]
+                i += 1
+            if value not in ("general", "business", "software", "rehab"):
+                print(
+                    f"Error: unknown --branch value {value!r} "
+                    f"(expected general, business, software or rehab).",
+                    file=sys.stderr,
+                )
+                sys.exit(1)
+            branch = value
+        else:
+            positional.append(arg)
+        i += 1
+
+    if show_list:
+        print("--branch ids: general, business, software, rehab")
+        print("--lang values: en, it, auto")
+        sys.exit(0)
+
+    if not positional:
+        print("Usage: python triz_router.py [--lang en|it|auto] [--branch general|business|software|rehab] \"problem description text\"")
         print()
         print("Heuristic TRIZ method router. Analyzes the problem text and suggests")
         print("which TRIZ methods to apply, ranked by relevance score.")
@@ -433,9 +541,11 @@ def main() -> None:
         print("Supports English and Italian problem descriptions.")
         sys.exit(0)
 
-    problem = " ".join(sys.argv[1:])
-    result = suggest_methods(problem)
-    _print_result(result)
+    problem = " ".join(positional)
+    if lang == "auto":
+        lang = detect_language(problem)
+    result = suggest_methods(problem, branch=branch)
+    _print_result(result, lang=lang)
 
 
 if __name__ == "__main__":

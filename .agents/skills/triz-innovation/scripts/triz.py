@@ -16,9 +16,9 @@ Usage:
 Global flags (position-independent; stripped before forwarding):
     --branch <id>    field branch: general|business|software|rehab (default general)
     --lang <lang>    language overlay: en|it|auto (default en)
-    These are forwarded to `route` (both) and `case` (--lang only); every other
-    command ignores them. Unknown --branch/--lang values are rejected here with
-    a clear error (exit 1) rather than forwarded.
+    These are forwarded to `route` (both) and to `case`/`branches` (--lang
+    only); every other command ignores them. Unknown --branch/--lang values are
+    rejected here with a clear error (exit 1) rather than forwarded.
 
 Commands:
     route "<problem text>"               -> suggest TRIZ methods + contradictions
@@ -81,10 +81,11 @@ _VALID_BRANCHES = ("general", "business", "software", "rehab")
 _VALID_LANGS = ("en", "it", "auto")
 
 # Sub-tools that accept the global flags. route takes --branch + --lang;
-# case takes --lang only.
+# case and branches take --lang only (branches resolve requires it).
 _FLAG_CONSUMERS = {
     "route": ("branch", "lang"),
     "case": ("lang",),
+    "branches": ("lang",),
 }
 
 

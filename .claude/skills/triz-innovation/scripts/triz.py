@@ -9,8 +9,16 @@ any working directory.
 
 Usage:
     python triz.py <command> [args...]
+    python triz.py [--branch <id>] [--lang <lang>] <command> [args...]
     python triz.py                       # list commands
     python triz.py help                  # list commands
+
+Global flags (position-independent; stripped before forwarding):
+    --branch <id>    field branch: general|business|software|rehab (default general)
+    --lang <lang>    language overlay: en|it|auto (default en)
+    These are forwarded to `route` (both) and to `case`/`branches` (--lang
+    only); every other command ignores them. Unknown --branch/--lang values are
+    rejected here with a clear error (exit 1) rather than forwarded.
 
 Commands:
     route "<problem text>"               -> suggest TRIZ methods + contradictions
@@ -26,6 +34,7 @@ Commands:
     effects --keyword <query>            -> search scientific effects by keyword
     network --demo                       -> contradiction network demo
     network --analyze                    -> analyze network from stdin JSON
+    branches list|check|info|resolve|detect -> manage field + language branches
     master                               -> show the TRIZ-MASTER.md knowledge base
 
 Aliases: router->route, standard-solutions/standard_solutions/su-field->sufield,
@@ -52,6 +61,7 @@ _COMMANDS = {
     "evaluate": "triz_evaluator.py",
     "effects": "triz_effects.py",
     "network": "triz_contradiction_network.py",
+    "branches": "triz_branches.py",
 }
 
 # friendly aliases -> canonical command
@@ -66,6 +76,17 @@ _ALIASES = {
 }
 
 _SCRIPT_DIR = Path(__file__).resolve().parent
+
+_VALID_BRANCHES = ("general", "business", "software", "rehab")
+_VALID_LANGS = ("en", "it", "auto")
+
+# Sub-tools that accept the global flags. route takes --branch + --lang;
+# case and branches take --lang only (branches resolve requires it).
+_FLAG_CONSUMERS = {
+    "route": ("branch", "lang"),
+    "case": ("lang",),
+    "branches": ("lang",),
+}
 
 
 def _find_master() -> Optional[Path]:
@@ -99,6 +120,58 @@ def _run_master() -> int:
     return 0
 
 
+def _parse_global_flags(argv: list) -> tuple[dict, list, int]:
+    """Extract --branch/--lang from argv; return (flags, remaining, exit_code).
+
+    Flags may appear anywhere (before or after the command). `--flag value`
+    and `--flag=value` forms are both accepted. Unknown values produce a
+    non-zero exit code here so the user sees a clear error immediately.
+    """
+    flags: dict = {}
+    rest: list = []
+    i = 0
+    while i < len(argv):
+        arg = argv[i]
+        if arg == "--branch" or arg.startswith("--branch="):
+            if "=" in arg:
+                value = arg.split("=", 1)[1]
+            else:
+                if i + 1 >= len(argv):
+                    print("Error: --branch requires a value.", file=sys.stderr)
+                    return flags, rest, 1
+                value = argv[i + 1]
+                i += 1
+            if value not in _VALID_BRANCHES:
+                print(
+                    f"Error: unknown --branch value {value!r} "
+                    f"(expected {', '.join(_VALID_BRANCHES)}).",
+                    file=sys.stderr,
+                )
+                return flags, rest, 1
+            flags["branch"] = value
+        elif arg == "--lang" or arg.startswith("--lang="):
+            if "=" in arg:
+                value = arg.split("=", 1)[1]
+            else:
+                if i + 1 >= len(argv):
+                    print("Error: --lang requires a value.", file=sys.stderr)
+                    return flags, rest, 1
+                value = argv[i + 1]
+                i += 1
+            if value not in _VALID_LANGS:
+                print(
+                    f"Error: unknown --lang value {value!r} "
+                    f"(expected {', '.join(_VALID_LANGS)}).",
+                    file=sys.stderr,
+                )
+                return flags, rest, 1
+            flags["lang"] = value
+        else:
+            rest.append(arg)
+        i += 1
+    return flags, rest, 0
+
+
 def dispatch(argv: list) -> int:
     """Dispatch a master-tool invocation. Returns a process exit code.
 
@@ -108,11 +181,15 @@ def dispatch(argv: list) -> int:
     Returns:
         The exit code of the invoked sub-tool (0 on success).
     """
-    if not argv or argv[0] in ("help", "--help", "-h", "list", "--list"):
+    flags, rest, flag_err = _parse_global_flags(argv)
+    if flag_err:
+        return flag_err
+
+    if not rest or rest[0] in ("help", "--help", "-h", "list", "--list"):
         _print_usage()
         return 0
 
-    command = argv[0].lower()
+    command = rest[0].lower()
     command = _ALIASES.get(command, command)
 
     if command == "master":
@@ -120,7 +197,7 @@ def dispatch(argv: list) -> int:
 
     script = _COMMANDS.get(command)
     if script is None:
-        print(f"Unknown command: {argv[0]!r}", file=sys.stderr)
+        print(f"Unknown command: {rest[0]!r}", file=sys.stderr)
         print(file=sys.stderr)
         _print_usage(sys.stderr)
         return 2
@@ -130,13 +207,23 @@ def dispatch(argv: list) -> int:
         print(f"Sub-tool not found: {script_path}", file=sys.stderr)
         return 1
 
-    # Forward to the sub-tool with the same interpreter, preserving its exit code.
-    completed = subprocess.run([sys.executable, str(script_path), *argv[1:]])
+    # Forward the supplied global flags as leading flags, but only to sub-tools
+    # that support them. Other sub-tools ignore the flags entirely.
+    forward: list = []
+    supported = _FLAG_CONSUMERS.get(command, ())
+    if "branch" in flags and "branch" in supported:
+        forward += ["--branch", flags["branch"]]
+    if "lang" in flags and "lang" in supported:
+        forward += ["--lang", flags["lang"]]
+
+    completed = subprocess.run(
+        [sys.executable, str(script_path), *forward, *rest[1:]]
+    )
     return completed.returncode
 
 
 def main() -> None:
-    # R12: Windows-safe stdout
+    # Windows-safe stdout
     try:
         sys.stdout.reconfigure(encoding="utf-8", errors="replace")
     except AttributeError:

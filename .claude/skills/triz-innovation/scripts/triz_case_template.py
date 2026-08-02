@@ -1,11 +1,17 @@
 #!/usr/bin/env python3
 """
 TRIZ case template generator — creates a dated, pre-filled markdown case file
-in the cases/ directory from cases/template-triz-case.md.
+in the cases/ directory from cases/template-triz-case.md (Italian by default)
+or cases/template-triz-case-en.md (English).
 
 Usage:
     python triz_case_template.py "Short problem title"
+    python triz_case_template.py --lang en "Short problem title"
+    python triz_case_template.py "Short problem title" --lang en
     python triz_case_template.py              # prints usage, exits non-zero
+
+--lang en|it: which template to use. No flag and --lang it both produce the
+Italian template (the default); --lang en produces the English template.
 
 Standard library only — Python 3.8+.
 """
@@ -28,9 +34,16 @@ def _repo_root(script_file: str) -> Path:
     return Path(script_file).resolve().parent.parent.parent.parent.parent
 
 
-def _template_path(script_file: str) -> Path:
-    """Path to cases/template-triz-case.md relative to repo root."""
-    return _repo_root(script_file) / "cases" / "template-triz-case.md"
+def _template_path(script_file: str, lang: str | None = None) -> Path:
+    """Path to the case template relative to repo root.
+
+    lang=None or "it" selects the Italian template; "en" selects the English
+    one; any other value raises ValueError.
+    """
+    if lang not in (None, "it", "en"):
+        raise ValueError(f"Unknown language: {lang!r} (expected 'en' or 'it')")
+    name = "template-triz-case-en.md" if lang == "en" else "template-triz-case.md"
+    return _repo_root(script_file) / "cases" / name
 
 
 def _slugify(title: str) -> str:
@@ -46,30 +59,33 @@ def _slugify(title: str) -> str:
     return lower.strip("-")
 
 
-def create_case(title: str, cases_dir: str | Path | None = None) -> Path:
+def create_case(title: str, cases_dir: str | Path | None = None, lang: str | None = None) -> Path:
     """Create a new TRIZ case markdown file from the template.
 
     Args:
         title: Short problem title. Used for the slugified filename.
         cases_dir: Optional output directory. Defaults to the repo's cases/
                    folder relative to this script's location.
+        lang: Optional template language: None or "it" for the Italian
+              template, "en" for the English template.
 
     Returns:
         Path to the newly created case file.
 
     Raises:
         FileNotFoundError: if the template file is missing.
+        ValueError: if lang is not None, "it" or "en".
     """
     if cases_dir is None:
         cases_dir = _repo_root(__file__) / "cases"
     else:
         cases_dir = Path(cases_dir)
 
-    template_file = _template_path(__file__)
+    template_file = _template_path(__file__, lang=lang)
     if not template_file.is_file():
         raise FileNotFoundError(
             f"Template not found at {template_file}. "
-            f"Ensure cases/template-triz-case.md exists."
+            f"Ensure the template exists."
         )
 
     template_content = template_file.read_text(encoding="utf-8")
@@ -113,22 +129,55 @@ def create_case(title: str, cases_dir: str | Path | None = None) -> Path:
 
 
 def main() -> None:
-    if len(sys.argv) < 2:
-        print("Usage: python triz_case_template.py \"Short problem title\"", file=sys.stderr)
+    try:
+        sys.stdout.reconfigure(encoding="utf-8", errors="replace")
+    except AttributeError:
+        pass
+
+    args = sys.argv[1:]
+    lang: str | None = None
+    positional: list[str] = []
+
+    i = 0
+    while i < len(args):
+        arg = args[i]
+        if arg == "--lang":
+            if i + 1 >= len(args):
+                print("Error: --lang requires a value (en or it).", file=sys.stderr)
+                sys.exit(1)
+            value = args[i + 1]
+            if value not in ("en", "it"):
+                print(f"Error: unknown --lang value {value!r} (expected en or it).", file=sys.stderr)
+                sys.exit(1)
+            lang = value
+            i += 2
+        elif arg.startswith("--lang="):
+            value = arg.split("=", 1)[1]
+            if value not in ("en", "it"):
+                print(f"Error: unknown --lang value {value!r} (expected en or it).", file=sys.stderr)
+                sys.exit(1)
+            lang = value
+            i += 1
+        else:
+            positional.append(arg)
+            i += 1
+
+    if not positional:
+        print("Usage: python triz_case_template.py [--lang en|it] \"Short problem title\"", file=sys.stderr)
         print(file=sys.stderr)
         print("Creates a dated, pre-filled TRIZ case markdown file in cases/.", file=sys.stderr)
         print("The new file preserves the template section headings verbatim.", file=sys.stderr)
         sys.exit(1)
 
-    title = " ".join(sys.argv[1:]).strip()
+    title = " ".join(positional).strip()
     if not title:
         print("Error: title must not be empty.", file=sys.stderr)
         sys.exit(1)
 
     try:
-        path = create_case(title)
+        path = create_case(title, lang=lang)
         print(str(path))
-    except FileNotFoundError as e:
+    except (FileNotFoundError, ValueError) as e:
         print(f"Error: {e}", file=sys.stderr)
         sys.exit(1)
 

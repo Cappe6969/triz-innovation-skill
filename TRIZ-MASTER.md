@@ -332,7 +332,7 @@ These are the standardized abstractions used to describe any engineering trade-o
 
 Each separation maps to a cluster of the 40 principles:
 - **Time** → 9 (Preliminary Anti-action), 10 (Preliminary Action), 15 (Dynamization), 19 (Periodic Action), 21 (Skipping)
-- **Space** → 1 (Segmentation), 2 (Separation), 3 (Local Quality), 4 (Asymmetry), 7 (Nesting), 17 (Another Dimension)
+- **Space** → 1 (Segmentation), 2 (Taking out), 3 (Local Quality), 4 (Asymmetry), 7 (Nesting), 17 (Another Dimension)
 - **Condition** → 32 (Color Changes), 35 (Parameter Changes), 36 (Phase Transitions), 31 (Porous Materials)
 - **Parts/Whole** → 1 (Segmentation), 5 (Merging), 12 (Equipotentiality), 33 (Homogeneity), 40 (Composite Materials)
 
