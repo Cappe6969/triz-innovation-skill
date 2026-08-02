@@ -127,12 +127,12 @@ _SIGNALS = [
     ("data-heavy",
      r"\bdatabase\b|\bpipeline\b|\banalytics\b|\bdata model\b|\btable\b|\bquery\b",
      "Stages 4 + 5", ["data-systems.md", "computation-models.md"],
-     "Data-heavy system: consult references/data-systems.md (DDIA) — frame as a composite data system, derive caches/indexes from the source-of-truth log, pick the isolation level you actually need."),
+     "Data-heavy system: consult references/data-systems.md — frame as a composite data system, derive caches/indexes from the source-of-truth log, pick the isolation level you actually need."),
 ]
 
 _REF_INDEX = [
     ("Router/escalation", "method-map.md"),
-    ("HtDP design recipe", "design-recipe.md"),
+    ("Design recipe", "design-recipe.md"),
     ("Computation-model ladder", "computation-models.md"),
     ("Algorithm strategy catalog", "algorithm-strategies.md"),
     ("Deep modules + complexity", "deep-modules.md"),

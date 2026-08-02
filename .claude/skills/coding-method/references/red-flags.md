@@ -2,12 +2,10 @@
 
 The review audit for the coding-method: one checklist that catches complexity
 where it is introduced, not after it has compounded. It merges three catalogues —
-Ousterhout's ~16 design red flags (A Philosophy of Software Design), McConnell's
-class- and routine-design checklists (Code Complete), and Dooley's refactoring
-triggers (Software Development, Design and Coding). Reach for it when you finish
-a change and before you ship it, and as the training ground for reviews of
-others' code (it is far easier to spot complexity in someone else's code than in
-your own).
+the design red flags, the class- and routine-design filters, and the refactoring
+triggers. Reach for it when you finish a change and before you ship it, and as
+the training ground for reviews of others' code (it is far easier to spot
+complexity in someone else's code than in your own).
 
 Complexity is incremental — hundreds of small doses, never one big event — so a
 single red flag is a stop-and-redesign signal, not a cosmetic nit. Every flag
@@ -41,7 +39,7 @@ at once), or **unknown unknowns** (behavior no one can see coming).
 6. Reviews are practice: review someone else's code to sharpen your eye, then
    re-read your own diff with that eye.
 
-### Table 1 — the red-flag catalogue (Ousterhout)
+### Table 1 — the red-flag catalogue
 | Flag | What it looks like | Fix |
 |---|---|---|
 | [Shallow module] | Interface costs as much as the implementation; the module hides almost nothing | Merge into the caller or redesign the boundary so it hides more than it exposes |
@@ -60,7 +58,7 @@ at once), or **unknown unknowns** (behavior no one can see coming).
 | [Hard to describe] | You can't write a concise complete interface comment | Redesign; a good interface is describable in 1-2 sentences |
 | [Nonobvious code] | Behavior a reader can't safely guess from reading | Document the non-obvious decision, or restructure until it's obvious |
 
-### Table 2 — design filters (Code Complete)
+### Table 2 — design filters
 Check every class and routine boundary:
 - [Manage complexity] — a reader can hold this unit in one head; it works at the
   highest abstraction and speaks the problem's language, not the plumbing's.
@@ -83,7 +81,7 @@ Check every class and routine boundary:
   [Parameter discipline] (few params, consistent order, self-documenting names,
   no output-only surprises).
 
-### Table 3 — refactoring triggers (Dooley)
+### Table 3 — refactoring triggers
 Run these over any code you touch; each has a mechanical move:
 | Trigger | Move |
 |---|---|
@@ -143,6 +141,4 @@ function, remove the element); the software branch is
 `triz-innovation/branches/fields/software/branch.json`.
 
 ## Source
-A Philosophy of Software Design, 2nd ed. — John Ousterhout.
-Code Complete, 2nd ed. — Steve McConnell.
-Software Development, Design and Coding, 2nd ed. — John F. Dooley.
+Original operational synthesis from the design-review literature.

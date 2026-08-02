@@ -3,8 +3,8 @@
 How the 8-stage **Lazy Ideality** pipeline decides what to do and which
 reference file to load. Read this first — it is the index for the whole skill.
 The pipeline merges three sources: **ponytail** (the lazy default), **TRIZ**
-(the stuck-state engine), and the distilled methods of classic programming books
-(the field-branch catalog of standard moves).
+(the stuck-state engine), and the distilled method catalog (the field-branch
+catalog of standard moves).
 
 ## The pipeline at a glance
 | Stage | Name | Produces | Core tags |
@@ -24,7 +24,7 @@ The pipeline merges three sources: **ponytail** (the lazy default), **TRIZ**
 | Routine task, pattern known | Stages 1 → 2 → 6, skip the rest | `rewrite-ladder.md`, `ladder.py` |
 | Genuine trade-off ("I need X but that breaks Y") | Stages 1 → 5 | `triz-for-code.md`, `architecture-tradeoffs.md` |
 | Stuck after the basics | Stage 5 forced contradiction | `triz-for-code.md` + `triz_matrix.py` |
-| Legacy/untested code that must not break | Stages 1 → 6, full Feathers | `legacy-change.md` |
+| Legacy/untested code that must not break | Stages 1 → 6, full legacy-change | `legacy-change.md` |
 | System-level decision (architecture) | Stages 1 → 3 → 5 → 8 + ADR | `architecture-tradeoffs.md`, `domain-modeling.md` |
 | **Broken code / debugging** | Debugging loop (below) | `construction-checklist.md`, `pragmatic-etiquette.md` |
 | Novel structure, design unclear | Full recipe, stages 1 → 7 | `design-recipe.md`, `deep-modules.md` |
@@ -57,7 +57,7 @@ explicitly, never straight to the ladder:
 | Need | File |
 |------|------|
 | This router + escalation | `references/method-map.md` |
-| HtDP design recipe (data-first discipline) | `references/design-recipe.md` |
+| Design recipe (data-first discipline) | `references/design-recipe.md` |
 | Computation-model ladder + declarative default | `references/computation-models.md` |
 | Algorithm strategy catalog + complexity | `references/algorithm-strategies.md` |
 | Deep modules + complexity model | `references/deep-modules.md` |
@@ -65,7 +65,7 @@ explicitly, never straight to the ladder:
 | Construction craft + debugging loop | `references/construction-checklist.md` |
 | Safe change on legacy code | `references/legacy-change.md` |
 | Architecture trade-offs, ADRs, katas | `references/architecture-tradeoffs.md` |
-| Domain modeling (DDD) | `references/domain-modeling.md` |
+| Domain modeling | `references/domain-modeling.md` |
 | Time/scale/tradeoffs engineering | `references/sustainable-engineering.md` |
 | ETC/DRY/orthogonality mindset | `references/pragmatic-etiquette.md` |
 | Rewrite ladder (plain → library → one line) | `references/rewrite-ladder.md` |

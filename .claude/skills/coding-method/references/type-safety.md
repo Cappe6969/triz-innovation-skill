@@ -1,8 +1,8 @@
 # type-safety
 
-The method of *Types and Programming Languages* (Pierce): define a structure
-with total precision (inductive definition + inference rules), then **prove its
-safety properties before trusting it**. Reach for it when adding a capability to
+The formal type-safety method: define a structure with total precision
+(inductive definition + inference rules), then **prove its safety properties
+before trusting it**. Reach for it when adding a capability to
 an existing system that must not break, when an error class must be eliminated at
 compile time rather than caught at runtime, or as the proof-pass verification at
 the end of the pipeline.
@@ -91,7 +91,7 @@ the end of the pipeline.
   code and execution.
 
 ## Translation table
-| TAPL concept | Software concept |
+| Type-theory concept | Software concept |
 |---|---|
 | Typing context Γ | Resource inventory / list of assumptions in scope |
 | Inductive definition | Precise data definition (define the data first) |
@@ -150,4 +150,4 @@ vanishes once proven unnecessary), `references/contradiction-analysis.md`,
 `branches/fields/software`.
 
 ## Source
-*Types and Programming Languages* — Benjamin C. Pierce, MIT Press, 2002.
+Original operational synthesis from the type-safety literature.

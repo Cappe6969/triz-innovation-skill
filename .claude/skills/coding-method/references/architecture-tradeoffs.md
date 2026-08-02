@@ -1,11 +1,10 @@
 # architecture-tradeoffs
 
-System-level decision method from Richards & Ford's *Fundamentals of Software
-Architecture*: how to answer "it depends" with weighted evidence instead of
-taste. Reach for it when two viable options both carry real trade-offs — a
-shared library vs a shared service, sync vs async, a style choice. Companion to
-the DDD fork (`domain-modeling.md`) and Google SE's time/scale/tradeoffs lens
-(`sustainable-engineering.md`).
+System-level decision method: how to answer "it depends" with weighted evidence
+instead of taste. Reach for it when two viable options both carry real
+trade-offs — a shared library vs a shared service, sync vs async, a style
+choice. Companion to the domain fork (`domain-modeling.md`) and the
+time/scale/tradeoffs lens (`sustainable-engineering.md`).
 
 ## When to use it
 - A choice between two viable options: queue vs topic, shared library vs shared
@@ -121,17 +120,17 @@ with information). Avoids both analysis paralysis and premature commitment.
 ### TRIZ reconciliation
 The First Law IS contradiction detection: "reuse is implemented via coupling" is
 an engineering contradiction — improving one parameter degrades another. Where
-the book settles for the least-worst compromise [Least worst], TRIZ goes one step
+the architecture frame settles for the least-worst compromise [Least worst], TRIZ goes one step
 further and separates in time/space/part/condition to ELIMINATE it
 (`triz-for-code.md`). Separation GENERATES candidates; the matrix VERIFIES the
 residual. IFR is the generation north-star; this file is the evaluation
-instrument [IFR]. The book's style catalog (microkernel, event-driven, pipeline)
+instrument [IFR]. The style catalog (microkernel, event-driven, pipeline)
 is a softer analog of the 40 inventive principles; "it depends on environment,
 budgets, skill set" is TRIZ resource analysis.
 
 ### Ponytail reconciliation
 The default path stays the ladder — cheap, existing, one line. Escalate to this
-file exactly when BOTH options carry significant trade-offs — the book's own
+file exactly when BOTH options carry significant trade-offs — the frame's own
 definition of an architecturally significant decision. The Frozen Caveman
 antipattern is the warning that the lazy default can rot into defaulting to pet
 tech; the 20-minute rule is how a lazy senior dev knows the ladder's rungs exist.
@@ -167,12 +166,11 @@ functions are tests. Feeds **stage 1** (characteristics extraction is the frame)
 (component-based thinking = structure from data at system level), and **stage 7**
 (risk storming + fitness-function governance as the audit). Cross-links:
 `method-map.md` (system-level path), `triz-for-code.md` (contradiction/separation
-engine), `domain-modeling.md` (DDD fork — bounded contexts ≈ separation in
+engine), `domain-modeling.md` (domain fork — bounded contexts ≈ separation in
 condition), `sustainable-engineering.md` (same evaluation lens at scale),
 `red-flags.md` (design audit), `legacy-change.md` (characterization tests as
 fitness functions). triz-innovation: `references/software-triz.md`,
 `branches/fields/software`.
 
 ## Source
-*Fundamentals of Software Architecture: An Engineering Approach* (2nd ed.) —
-Mark Richards & Neal Ford, O'Reilly.
+Original operational synthesis from the software-architecture literature.

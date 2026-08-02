@@ -3,7 +3,7 @@
 Safe change on code that has no tests. The problem is never "this code is ugly" —
 it's "I can't change this safely" — so the method is: put a test net in place
 first, then make the change in baby steps. Legacy code is simply code without
-tests. Source: *Working Effectively with Legacy Code* — Michael C. Feathers.
+tests.
 
 ## When to use it
 - Any change to untested code: a new feature, a bug fix, a refactor.
@@ -117,7 +117,7 @@ hits the network; there are no tests. You must add tax before the charge.
 5. Ship: one getter extraction + new method + one characterization test + one behavioral test. Old logic untouched.
 
 ## How it feeds the pipeline
-Powers **stage 6 (Make the minimal safe change)** — the full Feathers path
+Powers **stage 6 (Make the minimal safe change)** — the full legacy-change path
 (change points → test points → seams → tests → change). Also feeds **stage 1
 (Frame the task)** (what is safe to change), **stage 7 (Review with red flags)**
 (did the diff preserve every useful function; was a dependency trimmed, not the
@@ -128,4 +128,4 @@ the proof).
 - TRIZ files: `triz-innovation/references/software-triz.md` and `triz-innovation/branches/fields/software` (seam = resource, dependency-break = trimming, feedback/intermediary principles).
 
 ## Source
-*Working Effectively with Legacy Code* — Michael C. Feathers.
+Original operational synthesis from the legacy-change literature.

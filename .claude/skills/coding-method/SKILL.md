@@ -1,6 +1,6 @@
 ---
 name: coding-method
-description: Use this skill for any coding problem where the solution is not obvious, the first idea feels too complex, or a trade-off must be resolved. Triggers: "simplify/refactor/make this smaller", "I need X but that breaks Y", choosing between two approaches (library, algorithm, data structure, architecture), changing legacy code that must not break, reviewing code for complexity, debugging untested behavior, designing a module/API/algorithm, or any request wanting the minimal technical fix without over-engineering. Runs one 8-stage pipeline merging ponytail (minimum code, shortest diff), TRIZ (contradiction, Ideal Final Result, trimming), and the distilled methods of classic programming books.
+description: Use this skill for any coding problem where the solution is not obvious, the first idea feels too complex, or a trade-off must be resolved. Triggers: "simplify/refactor/make this smaller", "I need X but that breaks Y", choosing between two approaches (library, algorithm, data structure, architecture), changing legacy code that must not break, reviewing code for complexity, debugging untested behavior, designing a module/API/algorithm, or any request wanting the minimal technical fix without over-engineering. Runs one 8-stage pipeline merging ponytail (minimum code, shortest diff), TRIZ (contradiction, Ideal Final Result, trimming), and the distilled method catalog.
 ---
 
 # Coding Method — Lazy Ideality
@@ -9,7 +9,7 @@ A disciplined pipeline for coding problems. You are NOT typing the first thing
 that comes to mind. You run a fixed method that reaches the **Ideal Final
 Result of the code** — the behavior happening with the *least code that stays
 least code next month* — by climbing ponytail's ladder first, then applying TRIZ
-and the book methods only when the ladder stalls. Default to method over
+and the method catalog only when the ladder stalls. Default to method over
 inspiration.
 
 The three sources are one method at three depths:
@@ -18,9 +18,9 @@ The three sources are one method at three depths:
   deep abstraction already hides the complexity.
 - **TRIZ** is the stuck-state engine: contradiction, IFR, trimming, resources,
   separation — used when the catalog alone can't reach the one-liner.
-- **The books** are the field-branch catalog: deep modules, the design recipe,
-  strategy catalogs, seams, red flags — the standard moves that converge on the
-  target.
+- **The method catalog** is the field-branch catalog: deep modules, the design
+  recipe, strategy catalogs, seams, red flags — the standard moves that converge
+  on the target.
 
 ## When to use
 Any coding task with a real decision in it: design, refactor, debugging,
@@ -49,7 +49,7 @@ trivial one-liner with a known pattern, run stages 1–3 (lite) and ship.
 | Need | File |
 |------|------|
 | Which path/when, escalation, debugging | `references/method-map.md` |
-| HtDP design recipe (data-first) | `references/design-recipe.md` |
+| Design recipe (data-first) | `references/design-recipe.md` |
 | Computation-model ladder, declarative default | `references/computation-models.md` |
 | Algorithm strategy catalog + complexity | `references/algorithm-strategies.md` |
 | Deep modules + complexity model | `references/deep-modules.md` |
@@ -57,13 +57,13 @@ trivial one-liner with a known pattern, run stages 1–3 (lite) and ship.
 | Construction craft + debugging loop | `references/construction-checklist.md` |
 | Safe change on legacy code | `references/legacy-change.md` |
 | Architecture trade-offs, ADRs, katas | `references/architecture-tradeoffs.md` |
-| Domain modeling (DDD) | `references/domain-modeling.md` |
+| Domain modeling | `references/domain-modeling.md` |
 | Time/scale/tradeoffs engineering | `references/sustainable-engineering.md` |
 | ETC/DRY/orthogonality mindset | `references/pragmatic-etiquette.md` |
 | Rewrite ladder (plain → library → one line) | `references/rewrite-ladder.md` |
 | Proof-pass / type-safety verification | `references/type-safety.md` |
 | TRIZ ↔ code bridge | `references/triz-for-code.md` |
-| Data-system decisions (DDIA) | `references/data-systems.md` |
+| Data-system decisions | `references/data-systems.md` |
 
 ## The pipeline
 

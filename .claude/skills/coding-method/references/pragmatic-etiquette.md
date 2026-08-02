@@ -1,9 +1,9 @@
 # pragmatic-etiquette
 
-The Pragmatic Programmer mindset layer for coding-method: ETC, DRY,
-orthogonality, tracer bullets, broken windows, design by contract, find the box,
-and the debugging discipline (Hunt & Thomas). Not a technique catalog — a set of
-judgment habits that decide **how big** a change should be (ponytail answers
+The pragmatic mindset layer for coding-method: ETC, DRY, orthogonality, tracer
+bullets, broken windows, design by contract, find the box, and the debugging
+discipline. Not a technique catalog — a set of judgment habits that decide
+**how big** a change should be (ponytail answers
 this) and **which direction** it should take (this file answers that). Reach for
 it when two minimal options tie, when code is rotting, or when a bug looks
 impossible.
@@ -116,4 +116,4 @@ fixing), `triz-for-code.md` (box = contradiction reframe); triz-innovation
 `branches/fields/software`.
 
 ## Source
-The Pragmatic Programmer — Andrew Hunt & David Thomas (1999; 20th-anniversary ed. 2019).
+Original operational synthesis from the software-pragmatics literature.

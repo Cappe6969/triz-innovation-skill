@@ -1,8 +1,7 @@
 # computation-models
 
-Computation-model literacy from *Concepts, Techniques, and Models of Computer
-Programming* (Van Roy & Haridi). Underneath the variety of languages sits a small
-set of computation models, each built from a tiny kernel language by adding ONE
+Computation-model literacy: underneath the variety of languages sits a small set
+of computation models, each built from a tiny kernel language by adding ONE
 concept at a time; default to the declarative model ("what, not how") where
 referential transparency makes correctness reasoning nearly free. Reach for this
 when choosing an abstraction level, a data structure, a concurrency style, or
@@ -146,5 +145,4 @@ Cross-links (same folder): `design-recipe.md`, `deep-modules.md`,
 `references/ideal-final-result.md`, `branches/fields/software`.
 
 ## Source
-*Concepts, Techniques, and Models of Computer Programming* — Peter Van Roy &
-Seif Haridi (MIT Press, 2004).
+Original operational synthesis from the computation-models literature.

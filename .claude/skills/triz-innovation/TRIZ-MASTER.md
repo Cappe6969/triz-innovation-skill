@@ -994,15 +994,15 @@ This document is an **original operational synthesis** — every section is writ
 
 The 18 reference files in `.claude/skills/triz-innovation/references/` and the pipeline in `.claude/skills/triz-innovation/SKILL.md`. Each is an original operational rewrite — condensed, procedural, and designed for use during a TRIZ session. This master document consolidates and enriches them without altering their core concepts.
 
-### Books used (conceptual reference only)
+### Source material (conceptual reference only)
 
-The following books informed the synthesis as conceptual cross-checks only — no text was copied from them (mirrors `docs/source-map.md`):
-
-- **Simplified TRIZ, 3rd ed.** — most-used conceptual cross-check: practical framing of function analysis, ideality, and business application; "separate the best from the rest" → evaluation stage.
-- **Deep Dive into TRIZ — Engineering Problem Solving Algorithm** — best practices / optimization for running TRIZ projects; disciplined pipeline ordering and "always end with an experiment".
-- **TRIZ Engineering Problem-Solving Algorithm** (tips & tricks / project mgmt) — common mistakes, low-priority-task tips, operating rules ("don't skip a stage", method-over-inspiration).
-- **World Conference of AI-Powered Innovation and TRIZ Methodology** (2nd IFIP WG 5.2) — direction for future MCP/LLM integration; confirmed LLM-assisted FOS/MOS framing.
-- **TRIZ-Anwendertag 2020** (Oliver Mayer) — spot conceptual cross-check only.
+The source material in `Books/` (gitignored) informed the synthesis as
+conceptual cross-checks only — no text was copied from it (mirrors
+`docs/source-map.md`). The consulted material covered: practical framing of
+function analysis, ideality, and business application; project-pipeline best
+practices ("always end with an experiment"); common pitfalls and operating rules
+("don't skip a stage", method-over-inspiration); and direction for future
+MCP/LLM integration.
 
 ### Secondary enrichment
 

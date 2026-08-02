@@ -1,10 +1,8 @@
 # deep-modules
 
-Ousterhout's *A Philosophy of Software Design*: complexity is the enemy, and
-modular design is how you fight it. Reach for this whenever you draw a
-module/class/function boundary, choose an API, or a design feels tangled but
-you can't say why. Source book: *A Philosophy of Software Design, 2nd ed.*
-(John Ousterhout).
+Complexity is the enemy, and modular design is how you fight it. Reach for this
+whenever you draw a module/class/function boundary, choose an API, or a design
+feels tangled but you can't say why.
 
 ## When to use it
 - Drawing any module, class, function, or API boundary.
@@ -32,9 +30,9 @@ A module is **deep** when its interface is much simpler than its implementation:
 a lot of hidden functionality behind a small, simple interface. [Deep module]
 - A module's **benefit is its functionality**; its **cost to the system is its interface**.
 - Depth = the fraction of complexity that is invisible to the module's users.
-- The ideal module approaches **zero interface** — Ousterhout's garbage
-  collector: the `free()` the user used to call is simply gone. In TRIZ terms
-  that is trimming the function away, not hiding it.
+- The ideal module approaches **zero interface** — the garbage-collector ideal:
+  the `free()` the user used to call is simply gone. In TRIZ terms that is
+  trimming the function away, not hiding it.
 - **Anti-classitis rule:** deep classes beat many small shallow ones. Do not
   split a method just because it is "long" or "does too much" — split it only
   when the parts are independently useful. Refuse structure that does not earn
@@ -164,4 +162,4 @@ Cross-links: siblings in this folder — `design-recipe.md` (data-first structur
 `triz-innovation/branches/fields/software`.
 
 ## Source
-*A Philosophy of Software Design, 2nd edition* — John Ousterhout.
+Original operational synthesis from the modular-design literature.

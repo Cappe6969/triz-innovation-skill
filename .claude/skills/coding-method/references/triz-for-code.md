@@ -46,8 +46,8 @@ When an element must be A and not-A, separate instead of compromising:
 ## IFR for code
 > The **[behavior]** happens **by itself** — no new module, no new dependency,
 > no added complexity — because an existing or deep abstraction already performs
-> it. The ideal module has **no interface** (Ousterhout's garbage collector:
-> the function the user had to invoke is gone).
+> it. The ideal module has **no interface** (the garbage-collector ideal: the
+> function the user had to invoke is gone).
 
 State the IFR, then the **almost-IFR**: the smallest thing that must still be
 written. Work backwards from there. If a one-liner already exists in stdlib or
@@ -84,5 +84,5 @@ S-curve; the dynamization trend maps to `--branch software` field readings.
 
 ## How it feeds the pipeline
 Powers **stage 5 (Resolve contradictions)** — the default when the ladder and
-the book catalogs stall. Also feeds stage 3 (IFR) and stage 7 (trimming). Load
+the method catalog stall. Also feeds stage 3 (IFR) and stage 7 (trimming). Load
 the triz-innovation files only when a stage needs depth.

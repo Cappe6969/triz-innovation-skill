@@ -2,12 +2,11 @@
 
 The strategy catalog: a computational problem is solved by **matching its
 signature onto a small catalog of reusable attack plans**, not by inventing an
-algorithm. This merges Levitin's catalog (brute force, decrease/divide/transform-
-and-conquer, space-time, dynamic programming, greedy, iterative improvement) with
-SICP's process shapes (linear recursion, tree recursion, iteration) and orders of
-growth. Reach for it at stage 4 whenever a non-trivial computation shows up.
-Sources: Levitin *Introduction to the Design and Analysis of Algorithms, 3e* and
-Abelson & Sussman *SICP, 2e (JS edition)*.
+algorithm. The catalog spans brute force, decrease / divide / transform-and-
+conquer, space-time tradeoffs, dynamic programming, greedy, and iterative
+improvement, plus the process shapes (linear recursion, tree recursion,
+iteration) and orders of growth that size them. Reach for it at stage 4
+whenever a non-trivial computation shows up.
 
 ## When to use it
 - Writing a loop you've seen before: pairwise scan, repeated lookup, recomputation, pathfinding.
@@ -21,7 +20,7 @@ Abelson & Sussman *SICP, 2e (JS edition)*.
 ## Core method
 
 ### Step 0 — the problem-solving plan [Problem-solving plan]
-Before any code, walk six steps (Levitin's adaptation of Pólya):
+Before any code, walk six steps (a classic problem-solving plan):
 1. State the problem precisely — inputs, outputs, constraints, edge cases.
 2. Decide the computational means — what memory and data structures are available.
 3. Design the algorithm — match the catalog below.
@@ -63,7 +62,7 @@ checked is how an O(2^n) accident ships.
 - Recurrence solving — T(n) = 2T(n/2) + n → O(n log n). Count basic operations per level; sum the levels.
 - [Asymptotic class] — state every candidate as Big-O/Theta/Omega, worst and typical, and compare on paper before coding.
 
-### Abstraction layer (SICP) — only when complexity is real
+### Abstraction layer — only when complexity is real
 - [Wishful thinking] — write the consumer code against the interface you wish existed (constructors, selectors, the function you want), then implement the assumptions.
 - [Black-box abstraction] — a function is its contract (inputs/outputs), not its body; anything with the same behavior is swappable.
 - [Abstraction barrier] — separate *use* from *representation*; expose only constructor/selector functions and forbid clients from assuming internals. Gate: justified only when the representation may genuinely change — building it preemptively is over-engineering ([YAGNI]).
@@ -103,5 +102,4 @@ strategy paying for itself at the real input size?). TRIZ depth:
 `triz-innovation/branches/fields/software`.
 
 ## Source
-- Anany Levitin, *Introduction to the Design and Analysis of Algorithms*, 3rd edition.
-- Harold Abelson, Gerald Jay Sussman, Julie Sussman, *Structure and Interpretation of Computer Programs*, 2nd edition (JavaScript edition).
+Original operational synthesis from the classic algorithms literature.

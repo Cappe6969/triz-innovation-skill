@@ -1,11 +1,11 @@
 # data-systems
 
-Data-system decisions from Kleppmann's *Designing Data-Intensive Applications*:
-how to choose and combine storage, replication, and processing so the composite
-data system stays reliable, scalable, and maintainable — and your code is thin
-glue, not the correctness mechanism. Reach for it when the data-heavy signal
-fires: databases, pipelines, analytics, caches, indexes, queues, or any place
-several tools must stay consistent with one source of truth.
+Data-system decisions: how to choose and combine storage, replication, and
+processing so the composite data system stays reliable, scalable, and
+maintainable — and your code is thin glue, not the correctness mechanism. Reach
+for it when the data-heavy signal fires: databases, pipelines, analytics,
+caches, indexes, queues, or any place several tools must stay consistent with
+one source of truth.
 
 ## When to use it
 - A **composite data system** — a database plus a cache, search index, analytics
@@ -145,7 +145,8 @@ coordination service (ZooKeeper) — never write your own. Leaderless and
 multi-leader skip global consensus by accepting conflicts and merging.
 
 ### Derived data: separate source of truth from derived systems [Derived data]
-The book's master idea (Part III): distinguish the **source of truth** (the
+The master idea of the derived-data frame (Part III): distinguish the **source
+of truth** (the
 system of record) from **derived data systems** (caches, search indexes,
 materialized views, analytics stores). A derived system can always be **rebuilt
 by replaying history** — that property is what makes it disposable, recomputable,
@@ -166,7 +167,8 @@ and eventually consistent without manual patching.
   writes.
 
 ## TRIZ reconciliation
-DDIA is TRIZ applied to data systems; the vocabulary maps cleanly:
+The data-system frame is TRIZ applied to storage and processing; the vocabulary
+maps cleanly:
 - **The single-machine default IS ideality** — "if you can avoid it, keep it on
   one machine" = increase ideality by NOT adding the distributed denominator
   [IFR]. Distributed is only justified by a real contradiction (fault tolerance,
@@ -195,14 +197,14 @@ DDIA is TRIZ applied to data systems; the vocabulary maps cleanly:
 ## Ponytail reconciliation
 The ladder is the default: YAGNI (is this system needed at all?), stdlib (one
 node, the platform handles it), existing-dep (a real database engine instead of
-hand-rolled storage). DDIA is the **deliberate-escalation gate**: it tells you
-when the data-heavy / distributed rung is actually required and makes that step
-safe. "No magic scaling sauce" is the anti-[YAGNI] warning — scaling architecture
-is load-specific, nothing is free. "Keep the database on one node until forced"
-is ponytail verbatim. When you DO escalate, DDIA's guarantees (derived data,
-exactly-once, the isolation ladder) are what make the added complexity pay — the
-framework that hides distributed problems is the existing-dep rung taken
-seriously.
+hand-rolled storage). The data-system frame is the **deliberate-escalation
+gate**: it tells you when the data-heavy / distributed rung is actually required
+and makes that step safe. "No magic scaling sauce" is the anti-[YAGNI] warning —
+scaling architecture is load-specific, nothing is free. "Keep the database on one
+node until forced" is ponytail verbatim. When you DO escalate, the guarantees
+(derived data, exactly-once, the isolation ladder) are what make the added
+complexity pay — the framework that hides distributed problems is the
+existing-dep rung taken seriously.
 
 ## Worked example
 An e-commerce read path that has grown: `orders` in PostgreSQL, plus a Redis
@@ -251,4 +253,4 @@ Google scale). triz-innovation: `references/software-triz.md`,
 `branches/fields/software`, `branches/fields/datascience`.
 
 ## Source
-*Designing Data-Intensive Applications* — Martin Kleppmann, O'Reilly.
+Original operational synthesis from the data-systems literature.

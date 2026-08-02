@@ -3,8 +3,7 @@
 Time, scale, and tradeoffs as first-class design inputs: the discipline of
 keeping code useful, changeable, and cheap across its whole life span and across
 a team — programming integrated over time. Reach for it when code must survive,
-be consumed by others, or be changed years from now. Source: *Software
-Engineering at Google* (Winters, Manshreck, Wright).
+be consumed by others, or be changed years from now.
 
 ## When to use it
 - The code must live for years and be touched by people other than its author.
@@ -36,16 +35,16 @@ minimum process that survives that horizon [Program integrated over time].
 Short-lived → write and ship. Long-lived → review, tests, ownership, deprecation
 plan. Same decision, different input.
 
-### Hyrum's Law — budget for observable behavior
+### Budget for observable behavior (the implicit-contract effect)
 Any behavior an interface exposes — documented or not — becomes part of its
 implicit contract as soon as callers rely on it. Plan for that drift instead of
 assuming the written API is the whole deal.
 - Treat the documented contract as the floor, not the ceiling, of what you owe
-  users [Hyrum's Law].
+  users [Observable behavior].
 - Before changing a shared interface, inventory which behaviors are *actually*
   relied on (tests, callers, the data) — not just what you documented.
 - Undocumented behavior is frozen the moment users depend on it; changing it
-  costs a migration, not a commit [Hyrum's Law].
+  costs a migration, not a commit [Observable behavior].
 
 ### Code is a liability — the default answer is no
 - Every line is a future maintenance task; added code costs development,
@@ -109,9 +108,9 @@ services. It must accept a new middle-name field — but callers pass a single
 string today, and one caller concatenates two fields itself and expects the
 helper to match.
 
-1. [Hyrum's Law] Before touching it, grep all callers and read the tests: one
-   service asserts the old concatenation order. That behavior is now part of the
-   contract — budget for it.
+1. [Observable behavior] Before touching it, grep all callers and read the
+   tests: one service asserts the old concatenation order. That behavior is now
+   part of the contract — budget for it.
 2. [Shift left] Add a CI test for the new field before writing the change, so
    the intended behavior is pinned the moment it exists.
 3. [Large-Scale Changes] Split the change: (a) add an optional `middle` argument
@@ -139,9 +138,10 @@ one-liner because the migration happened in small, tested steps.
   future change is free; the almost-IFR is the minimum change that keeps the
   system changeable [Sustainability]. See
   `triz-innovation/references/ideal-final-result.md`.
-- **Stage 5 (Resolve contradictions):** Hyrum's Law = [IP-22 Convert harm into
-  benefit] (budget for the latent resource of observable behavior); LSC and
-  small changes = [IP-1 Segmentation] (split the big change into small steps);
+- **Stage 5 (Resolve contradictions):** observable behavior = [IP-22 Convert
+  harm into benefit] (budget for the latent resource of what callers already
+  rely on); LSC and small changes = [IP-1 Segmentation] (split the big change
+  into small steps);
   the Churn Rule = [IP-24 Intermediary] (do the work where the expertise lives —
   move the code, not the users). See `triz-for-code.md` and
   `triz-innovation/references/software-triz.md`.
@@ -158,5 +158,4 @@ one-liner because the migration happened in small, tested steps.
   [Test as proof]. See `method-map.md` for routing.
 
 ## Source
-*Software Engineering at Google: Lessons Learned from Programming Over Time*,
-edited by Titus Winters, Tom Manshreck, and Hyrum Wright (O'Reilly, 2020).
+Original operational synthesis from the software-sustainability literature.

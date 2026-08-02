@@ -34,7 +34,7 @@ close). Intensity levels: `lite` (1–3), `full` (all 8), `ultra` (+ proof pass)
 3. Add a row to the **Reference index** table in `SKILL.md`.
 4. If it changes routing, add keyword cues to `references/method-map.md` (and
    the router script).
-5. New book? Follow `curriculum/how-to-add-book.md`.
+5. New source material? Follow `curriculum/how-to-add-book.md`.
 
 ## 4. Saving coding-method cases
 Mirror the triz-innovation case flow: keep a filled template in `cases/`, fill
@@ -78,16 +78,16 @@ forwards to `triz-innovation/scripts/triz_matrix.py`. The same applies to
 
 ## 6. Curriculum
 `curriculum/README.md` is the 7-step learning path in the recommended order
-(HtDP → Algorithm Design Manual → Philosophy of SW Design → Refactoring →
-Legacy Code → SICP → final fork). DDIA is now available (distilled into
-`references/data-systems.md`, the data-heavy fork). Two books remain marked
-❌ **da aggiungere** (Algorithm Design Manual, Refactoring); each has an interim
-substitute. `how-to-add-book.md` documents the convert → distill → render → test
-flow.
+(data-first discipline → algorithm strategy → design judgment → safe refactoring
+→ legacy-change safety → reasoning engine → final fork). The data-systems card
+is now available (distilled into `references/data-systems.md`, the data-heavy
+fork). Two steps remain marked ❌ **da aggiungere**; each has an interim
+substitute. `how-to-add-book.md` documents the convert → distill → render →
+test flow.
 
 ## 7. Relationship to triz-innovation
 Both skills live in `.claude/skills/`. `triz-innovation` solves *any* problem
 (software included) with pure TRIZ; `coding-method` is the *coding-specific*
-merge of TRIZ + ponytail + the book methods. Point any agent at
+merge of TRIZ + ponytail + the method catalog. Point any agent at
 `.claude/skills/coding-method/` — no mirror exists; `triz-for-code.md` is the
 one-way bridge to the TRIZ engine.

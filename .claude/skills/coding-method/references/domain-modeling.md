@@ -1,10 +1,9 @@
 # domain-modeling
 
-Khononov's *Learning Domain-Driven Design*: let the business domain drive design
-decisions instead of technology fashion. Reach for it at the start of a system,
-feature, or modernization to decide where engineering effort goes and to split
-one ambiguous model into consistent, context-scoped models. Source book:
-*Learning Domain-Driven Design* (Vladik Khononov).
+Domain-driven modeling: let the business domain drive design decisions instead
+of technology fashion. Reach for it at the start of a system, feature, or
+modernization to decide where engineering effort goes and to split one ambiguous
+model into consistent, context-scoped models.
 
 ## When to use it
 - Starting a new system or feature — decide how much engineering each part
@@ -135,8 +134,9 @@ domain and its boundaries. Ten steps, in order:
   event-sourced only when the problem demands it.
 - Generic subdomains = the "existing dep" rung (buy); supporting subdomains =
   minimum code, corners cut on purpose.
-- Tension: DDD front-loads analysis (language, modeling, EventStorming) where
-  ponytail says code-first. Reconciliation: **the code IS the model** — value
+- Tension: domain modeling front-loads analysis (language, modeling,
+  EventStorming) where ponytail says code-first. Reconciliation: **the code IS
+  the model** — value
   objects make code self-documenting, collapsing explanation toward zero.
 - Sell a pattern with logic, not authority [Logic over authority].
 - Counter-signal to watch: money/audit domains genuinely escalate the ladder —
@@ -195,5 +195,4 @@ decisions here), `architecture-tradeoffs.md` (boundaries + ADRs),
 `branches/fields/software` (under `triz-innovation/`).
 
 ## Source
-*Learning Domain-Driven Design: Aligning Software Architecture and Business
-Strategy* — Vladik Khononov (O'Reilly).
+Original operational synthesis from the domain-modeling literature.

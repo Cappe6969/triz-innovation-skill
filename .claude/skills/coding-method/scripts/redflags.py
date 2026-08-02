@@ -2,7 +2,7 @@
 """
 Red-flag review checklist for the coding-method skill.
 
-Prints the review checklist (Ousterhout red flags + construction filters) and,
+Prints the review checklist (red-flag catalogue + construction filters) and,
 given a file, scans for the smells that are mechanically detectable. The full
 catalogue lives in references/red-flags.md; this script is the fast CLI pass.
 
@@ -20,7 +20,7 @@ from pathlib import Path
 from typing import Optional
 
 CHECKLIST = [
-    # Deep modules (Ousterhout)
+    # Deep modules
     "Shallow module — interface costs as much as the functionality it provides?",
     "Information leakage — a design decision reflected in multiple modules?",
     "Pass-through method / pass-through variable threaded across layers?",
@@ -29,12 +29,12 @@ CHECKLIST = [
     "Conjoined methods — one method is only called by one other (better together)?",
     "Vague / hard-to-pick name — does the name create an image?",
     "Nonobvious code — a quick guess is not confident? Document the why.",
-    # Construction filters (Code Complete)
+    # Construction filters
     "Loose coupling / high cohesion — small clear fan-out, internals strongly related?",
     "Secrets hidden behind a minimal stable interface (information hiding)?",
     "Leanness — could anything more be taken away without losing a function?",
     "Complexity managed — can a reader hold each part in isolation?",
-    # Pragmatics (Pragmatic Programmer / SICP)
+    # Pragmatics
     "DRY / orthogonality — is each piece of knowledge single-sourced?",
     "Abstraction barrier — callers insulated from representation changes?",
     "Broken windows — any rot left in place that will grow?",

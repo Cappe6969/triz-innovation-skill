@@ -1,12 +1,11 @@
 # design-recipe
 
-The HtDP design recipe: a fixed sequence — data definition → signature/purpose/
+The design recipe: a fixed sequence — data definition → signature/purpose/
 stub → functional examples → template from the data → body → examples as tests —
 that turns any problem statement into a correct program mechanically. Its one
 idea: **the structure of the program follows the structure of its data.** Reach
 for it whenever the structure is novel or unclear and you don't know what to
-write first. Source: Felleisen, Findler, Flatt, Krishnamurthi, *How to Design
-Programs, 2nd ed.*
+write first.
 
 ## When to use it
 - The problem statement names information you must encode before you can write a
@@ -102,12 +101,12 @@ and use it in the base case. Turns O(n²) re-traversal into one pass.
 | Natural recursion / leap of faith | Solve the sub-problem within the system: trust the recursive sub-solution and combine |
 
 ### Ponytail reconciliation [Ponytail off]
-HtDP mandates design artifacts *before* code; ponytail is code first, then ≤3
-lines of explanation. For a trivial, known pattern the full recipe is heavy
+The recipe mandates design artifacts *before* code; ponytail is code first, then
+≤3 lines of explanation. For a trivial, known pattern the full recipe is heavy
 ceremony — drop to the ladder one-liner. The two methods agree where it counts:
 no abstraction until two concrete examples exist (YAGNI), stdlib before own
 code, stub-then-fill is a minimal working skeleton, examples double as tests.
-The one real conflict: HtDP's purpose statement is a load-bearing artifact
+The one real conflict: the recipe's purpose statement is a load-bearing artifact
 written before code, while ponytail defers explanation. Resolution: **always
 write the one-line purpose; treat the rest of the ceremony as optional for
 known patterns** [Design recipe].
@@ -160,5 +159,4 @@ verification pass). TRIZ side: `software-triz.md`, `trimming.md`,
 `branches/fields/software`.
 
 ## Source
-*How to Design Programs, 2nd ed.* — Matthias Felleisen, Robert Bruce Findler,
-Matthew Flatt, Shriram Krishnamurthi (MIT Press).
+Original operational synthesis from the design-recipe literature.

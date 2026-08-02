@@ -28,7 +28,7 @@ complessità serve solo quando N è grande. Prima il baseline, poi il salto.
 
 ## Stadio 4 — Dati + strategia
 `points: List[Point]`. Strategia: **divide-and-conquer** (split per x, ricorsione
-sui due lati, strip centrale O(n)) — il caso classico del libro di Levitin.
+sui due lati, strip centrale O(n)) — il caso classico del genere.
 Complessità dichiarata prima di codificare: O(n log n).
 
 ## Stadio 5 — Contraddizione + principio

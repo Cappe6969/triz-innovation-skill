@@ -1,11 +1,10 @@
 # rewrite-ladder
 
-The method from *Learning Underscore.js* (Alex Pop): a climbable ladder that
-compresses code expression — plain imperative → a library-assisted call → a
-single idiomatic declaration of intent — with a test-first net keeping every
-rung behavior-preserving. Reach for it whenever you catch yourself writing a
-loop, hand-rolling a data transformation, or choosing between a library call and
-a native one.
+A climbable ladder that compresses code expression — plain imperative → a
+library-assisted call → a single idiomatic declaration of intent — with a
+test-first net keeping every rung behavior-preserving. Reach for it whenever you
+catch yourself writing a loop, hand-rolling a data transformation, or choosing
+between a library call and a native one.
 
 ## When to use it
 - You catch yourself writing a loop that a higher-order function expresses in one line.
@@ -42,7 +41,7 @@ intermediate variables — just the data and the transformation name.
   must allow dependency swapping, run in isolation, and avoid shared/global
   state. This forces dependency injection and decoupled design before the first
   spec is written.
-- The book's ceremony (SpecRunner page, Jasmine boilerplate) is optional. The
+- The ceremony (SpecRunner page, Jasmine boilerplate) is optional. The
   load-bearing part is the tiny spec before each rung, so every shrink is
   provably behavior-preserving. Ponytail keeps the ladder and drops the ceremony.
 
@@ -119,13 +118,11 @@ structures and extracts the modules.
 When a rung looks good enough, run the efficiency audit — the wasteful-
 iteration red flag: a nested `forEach` that re-scans the list is exactly what the
 lazy senior dev catches. The full review checklist lives in `red-flags.md`,
-which merges three sources: card 1's red-flag catalogue (Ousterhout — shallow
-module, pass-through, repetition, vague name, …), card 2's chapter-end
-checklist items (Code Complete — Key Points and construction checklists), and
-card 9's refactor triggers (Dooley — duplicate code, a method longer than ~1
-screen, weak cohesion, too many parameters, magic numbers, a middleman object,
-code that doesn't return as soon as it knows the answer). [Red flag]
-[Refactor triggers]
+which merges three catalogues: the red-flag catalogue (shallow module,
+pass-through, repetition, vague name, …), the construction checklists, and the
+refactor triggers (duplicate code, a method longer than ~1 screen, weak
+cohesion, too many parameters, magic numbers, a middleman object, code that
+doesn't return as soon as it knows the answer). [Red flag] [Refactor triggers]
 
 ## Worked example
 `bicycles` is an array of `{ bicycleType }` objects; count per type.
@@ -154,9 +151,8 @@ code that doesn't return as soon as it knows the answer). [Red flag]
   shrink provably behavior-preserving. [Test-first with Jasmine]
   [Make the SUT testable]
 - **Stage 7 (Review with red flags)** — the efficiency audit (wasteful scans,
-  non-breakable loops) plus the shared catalogue in `red-flags.md` (card 1's
-  red flags, card 2's chapter-end checklists, card 9's refactor triggers).
-  [Red flag] [Refactor triggers]
+  non-breakable loops) plus the shared catalogue in `red-flags.md` (red flags,
+  construction checklists, refactor triggers). [Red flag] [Refactor triggers]
 - **Stage 8 (Verify, record, ship)** — tests stay green at every rung; the
   rung's spec is its regression test. [Test-first with Jasmine]
 
@@ -171,4 +167,4 @@ default), `pragmatic-etiquette.md` (ETC/DRY). TRIZ files —
 `triz-innovation/branches/fields/software`.
 
 ## Source
-*Learning Underscore.js* — Alex Pop (Packt, 2015).
+Original operational synthesis from the code-expression literature.

@@ -2,10 +2,10 @@
 
 The construction-craft layer of the method: how to build and fix code so one
 human mind only ever holds one part at a time, then prove it stays correct.
-Merges *Code Complete* (McConnell) — manage complexity, ADTs, coupling/cohesion,
-hide secrets, leanness, defensive programming — with *Software Development,
-Design and Coding* (Dooley) — wicked problems, oscillating design, TDD, the
-debugging loop, code review. Reach for it while writing, debugging, or auditing
+Merges the complexity-management rules (manage complexity, ADTs,
+coupling/cohesion, hide secrets, leanness, defensive programming) with the
+engineering-workflow rules (wicked problems, oscillating design, TDD, the
+debugging loop, code review). Reach for it while writing, debugging, or auditing
 any code; the broken-code path in `method-map.md` routes here.
 
 ## When to use it
@@ -170,5 +170,4 @@ untested code), `pragmatic-etiquette.md` (debugging mindset, ETC), `design-recip
 `branches/fields/software/branch.json`.
 
 ## Source
-- *Code Complete*, 2nd ed. — Steve McConnell
-- *Software Development, Design and Coding*, 2nd ed. — John F. Dooley (2017)
+Original operational synthesis from the software-construction literature.
