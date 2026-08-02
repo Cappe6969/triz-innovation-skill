@@ -42,9 +42,10 @@ engineering vs physical contradictions · the 4 separation principles · 40
 inventive principles (with soft/business/software readings) · 6+ resource types &
 derived resources · ideality equation & IFR · trimming rules A/B/C · 9 Windows ·
 FOS/MOS · domain adaptations (business, software, rehab, mechanical,
-datascience, marketing, supplychain) — the latter four shipped as pure-data
-field branches under `branches/fields/`, each with parameter translations and
-soft principle readings; `references/use-cases.md` holds their worked examples
+datascience, marketing, supplychain, energy, education, construction,
+robotics) — shipped as pure-data field branches under `branches/fields/`, each
+with parameter translations and soft principle readings;
+`references/use-cases.md` holds their worked examples
 (original content, not book-derived).
 
 ## Limits / not yet analyzed

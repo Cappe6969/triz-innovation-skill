@@ -82,7 +82,8 @@ field or a language, no code.
 - **Field branches** (`branches/fields/<id>/branch.json`) carry domain vocabulary:
   keywords, parameter translations, soft readings of the 40 principles, and worked
   examples. Shipped: `general`, `business`, `software`, `rehab`, `mechanical`,
-  `datascience`, `marketing`, `supplychain`. `general` is the canonical core.
+  `datascience`, `marketing`, `supplychain`, `energy`, `education`,
+  `construction`, `robotics`. `general` is the canonical core.
 - **Language branches** (`branches/langs/<lang>/branch.json`) carry localized labels
   plus stopwords for auto-detection. Shipped: `en` (default), `it`.
 
