@@ -1,7 +1,7 @@
 # Usage Guide — `triz-innovation`
 
 How to use the TRIZ skill in Claude Code, invoke it manually, add references,
-save cases, run the scripts, and (later) turn it into an MCP server.
+save cases, run the scripts, and use the MCP server.
 
 ## 1. Using the skill in Claude Code
 The skill auto-triggers when you describe a real problem involving contradictions,
@@ -98,20 +98,60 @@ field branch are in `references/use-cases.md`. Adding a branch is pure data: dro
 `branch.json` in `branches/fields/<id>/` (or `branches/langs/<lang>/`) and the
 registry and router pick it up automatically — no code change.
 
-## 6. Future: turning this into an MCP server
-The skill is already structured for it. A minimal local MCP server would expose
-three tools mirroring the scripts:
-- `triz_route(problem: str)` → methods + contradictions (wrap `triz_router`).
-- `triz_new_case(title: str)` → path to created case file (wrap `triz_case_template`).
-- `triz_evaluate(solutions: list)` → scored table (wrap `triz_evaluator`).
+## 6. MCP server
+The skill ships a minimal local MCP server at
+`.claude/skills/triz-innovation/mcp/triz_mcp_server.py`. It is **pure stdlib**
+(`json`, `sys`, `io`, `argparse` only — no `mcp` SDK, no pip install, Python
+3.8+), speaking **newline-delimited JSON-RPC 2.0 over stdio** (not
+Content-Length framing): one JSON request object per stdin line, one JSON
+response object per stdout line; logs go to stderr only. On Windows the stdio
+streams are re-configured to UTF-8 so non-ASCII output never crashes.
 
-Plus optional resources exposing the `references/*.md` files so any MCP-aware
-client can pull a method on demand. Recommended path when you're ready:
-1. Add an MCP server (e.g. Python `mcp` SDK) under `mcp/` that imports the three
-   script modules (keep their logic in importable functions, not just `__main__`).
-2. Register it in your client config (Claude Desktop / Codex) as a local stdio server.
-3. Keep `SKILL.md` as the human/agent-facing method; MCP just makes the scripts
-   callable as tools. **Not built yet — out of scope for this version.**
+It exposes three tools mirroring the scripts:
+
+| Tool | Arguments | Returns |
+|---|---|---|
+| `triz_route` | `problem` (required, str), `branch` (str, default `general`) | Human-readable methods + detected contradictions (wraps `triz_router.suggest_methods`) |
+| `triz_new_case` | `title` (required, str), `lang` (`"en"`/`"it"`, default `it`) | Absolute path of the created case file (wraps `triz_case_template.create_case`) |
+| `triz_evaluate` | `solutions` (required, array of `{solution, impact, feasibility, cost, speed, risk, reversibility, complexity, ideality}` — criteria ints 1–5) | Sorted markdown table (wraps `triz_evaluator.score` + `format_table`) |
+
+### Run it standalone / self-check
+```
+python .claude/skills/triz-innovation/mcp/triz_mcp_server.py            # serve on stdio
+python .claude/skills/triz-innovation/mcp/triz_mcp_server.py --self-test # in-memory check
+```
+`--self-test` drives the handler through an in-memory conversation
+(`initialize` → notification → `ping` → `tools/list` → all three tools → an
+unknown-method request) with no client and no network, prints `SELF-TEST OK`,
+and exits 0 on success, 1 on failure.
+
+### Register it
+Because the server is pure stdlib, any Python 3.8+ on `PATH` works — no install
+step. Register it explicitly as a local stdio server.
+
+**Claude Code (project scope):**
+```
+claude mcp add triz -- python "C:\Dev\TRIZskill.md\.claude\skills\triz-innovation\mcp\triz_mcp_server.py"
+```
+Windows quoting note: the absolute path is wrapped in double quotes and `python`
+must be on `PATH`.
+
+**Claude Desktop:** add a `triz-innovation` entry to `claude_desktop_config.json`
+(equivalent to the CLI registration above):
+```json
+{
+  "mcpServers": {
+    "triz-innovation": {
+      "type": "stdio",
+      "command": "python",
+      "args": ["C:\\Dev\\TRIZskill.md\\.claude\\skills\\triz-innovation\\mcp\\triz_mcp_server.py"]
+    }
+  }
+}
+```
+
+**Do not** commit a repo-root `.mcp.json` — it would auto-spawn the server on
+every Claude Code session. Register the server explicitly (as above) instead.
 
 ## 7. Codex / other agents
 A portable mirror lives at `.agents/skills/triz-innovation/SKILL.md` — a
