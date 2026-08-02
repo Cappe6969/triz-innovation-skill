@@ -18,7 +18,7 @@ before extending it.
 ```
 .claude/skills/coding-method/
   SKILL.md            # core: triggers + operating rules + 8-stage pipeline + reference index
-  references/*.md     # 15 method notes (progressive disclosure)
+  references/*.md     # 16 method notes (progressive disclosure)
   scripts/*.py        # stdlib MVP helpers (method.py, ladder.py, redflags.py)
   curriculum/         # 7-step reading path + how-to-add-book
   cases/              # canned pipeline runs
@@ -37,12 +37,13 @@ before extending it.
    (`triz_matrix.py`, `triz_router.py`, `triz_standard_solutions.py`,
    `triz_evolution.py`, `software-triz.md`, `branches/fields/software`) lives in
    `.claude/skills/triz-innovation/` and is cross-invoked by path.
-4. **Cards → references.** The 15 reference files were rendered from 13
+4. **Cards → references.** The 16 reference files were rendered from 14
    distilled book cards (produced by a design workflow over the converted books
-   in `CodingBooks-md`). Merges: `algorithm-strategies.md` (Levitin + SICP),
-   `red-flags.md` (Ousterhout + Code Complete + Dooley),
-   `construction-checklist.md` (Code Complete + Dooley). The two cross-cutting
-   files (`method-map.md`, `triz-for-code.md`) were authored directly.
+   in `CodingBooks-md`; DDIA added 2026-08-02 via `how-to-add-book.md`). Merges:
+   `algorithm-strategies.md` (Levitin + SICP), `red-flags.md` (Ousterhout + Code
+   Complete + Dooley), `construction-checklist.md` (Code Complete + Dooley). The
+   two cross-cutting files (`method-map.md`, `triz-for-code.md`) were authored
+   directly.
 5. **Scripts are heuristic MVPs.** `method.py route` is keyword/intent-based
    (first guess, not verdict); `ladder.py` maps keywords to ladder rungs;
    `redflags.py` scans for mechanically-detectable smells. No external deps,
@@ -55,9 +56,9 @@ before extending it.
 
 ## Extension points
 - New book → `how-to-add-book.md`: convert → distill → render → update index +
-  curriculum. Planned: Algorithm Design Manual → `algorithm-strategies.md`;
-  Refactoring → `red-flags.md`/`construction-checklist.md`; DDIA →
-  `data-systems.md`.
+  curriculum. Done: DDIA → `data-systems.md` (2026-08-02). Planned: Algorithm
+  Design Manual → `algorithm-strategies.md`; Refactoring →
+  `red-flags.md`/`construction-checklist.md`.
 - New reference → `references/<topic>.md` + a row in SKILL.md's reference index.
 - New script → importable core + `__main__` guard.
 

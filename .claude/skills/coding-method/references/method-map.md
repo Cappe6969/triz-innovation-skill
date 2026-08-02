@@ -28,7 +28,7 @@ The pipeline merges three sources: **ponytail** (the lazy default), **TRIZ**
 | System-level decision (architecture) | Stages 1 → 3 → 5 → 8 + ADR | `architecture-tradeoffs.md`, `domain-modeling.md` |
 | **Broken code / debugging** | Debugging loop (below) | `construction-checklist.md`, `pragmatic-etiquette.md` |
 | Novel structure, design unclear | Full recipe, stages 1 → 7 | `design-recipe.md`, `deep-modules.md` |
-| Data-heavy system decision | Stages 1 → 3 → 5 (data fork) | `data-systems.md` (FUTURE: DDIA) |
+| Data-heavy system decision | Stages 1 → 3 → 5 (data fork) | `data-systems.md`, `computation-models.md` |
 
 ## The debugging path (broken code)
 A bug report is a *different* problem shape from a design task — route it

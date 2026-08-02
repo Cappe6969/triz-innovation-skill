@@ -37,12 +37,12 @@ workflow with the new file added.
 ## 3. Render the reference file
 Add (or merge) the card into a `references/*.md` file in the triz reference
 style (operational tables, bracket-tagged rules, worked example, how-it-feeds-
-the-pipeline). Planned merges for the missing books:
+the-pipeline). Merge targets:
+- **DDIA** → DONE (2026-08-02): new `references/data-systems.md`, unblocked the
+  curriculum's data-heavy fork (step 7 fork B).
 - **Algorithm Design Manual** → merge into `references/algorithm-strategies.md`
 - **Refactoring** → merge the catalog into `references/red-flags.md` +
   `references/construction-checklist.md`
-- **DDIA** → new `references/data-systems.md` (then unblock the curriculum's
-  data-heavy fork, step 7).
 
 Update the reference index in `SKILL.md` and the curriculum table when you do.
 

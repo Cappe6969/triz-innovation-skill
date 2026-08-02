@@ -79,10 +79,11 @@ forwards to `triz-innovation/scripts/triz_matrix.py`. The same applies to
 ## 6. Curriculum
 `curriculum/README.md` is the 7-step learning path in the recommended order
 (HtDP → Algorithm Design Manual → Philosophy of SW Design → Refactoring →
-Legacy Code → SICP → final fork). Three books are marked ❌ **da aggiungere**
-(Algorithm Design Manual, Refactoring, DDIA); each has an interim substitute
-except DDIA (blocks only the data-heavy fork). `how-to-add-book.md` documents
-the convert → distill → render → test flow.
+Legacy Code → SICP → final fork). DDIA is now available (distilled into
+`references/data-systems.md`, the data-heavy fork). Two books remain marked
+❌ **da aggiungere** (Algorithm Design Manual, Refactoring); each has an interim
+substitute. `how-to-add-book.md` documents the convert → distill → render → test
+flow.
 
 ## 7. Relationship to triz-innovation
 Both skills live in `.claude/skills/`. `triz-innovation` solves *any* problem

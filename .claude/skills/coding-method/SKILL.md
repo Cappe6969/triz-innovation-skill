@@ -63,6 +63,7 @@ trivial one-liner with a known pattern, run stages 1–3 (lite) and ship.
 | Rewrite ladder (plain → library → one line) | `references/rewrite-ladder.md` |
 | Proof-pass / type-safety verification | `references/type-safety.md` |
 | TRIZ ↔ code bridge | `references/triz-for-code.md` |
+| Data-system decisions (DDIA) | `references/data-systems.md` |
 
 ## The pipeline
 
