@@ -157,11 +157,40 @@ Persist the analysis as a reusable case file:
 `python .claude/skills/triz-innovation/scripts/triz_case_template.py "Short problem title"`
 creates a pre-filled markdown file in `cases/`. Fill it as you run the pipeline.
 
+## Branches
+The skill is a mix of branches — pure-data JSON that tunes the same TRIZ core
+to a field or a language, no code.
+
+- **Field branches** (`branches/fields/<id>/branch.json`) carry domain
+  vocabulary: keywords, parameter translations, soft readings of the 40
+  principles, and worked examples. Shipped fields: `general`, `business`,
+  `software`, `rehab`. `general` is the canonical core.
+- **Language branches** (`branches/langs/<lang>/branch.json`) carry localized
+  labels for method names and contradiction lines plus stopwords for language
+  auto-detection. English is the default overlay; Italian is the first
+  additional one.
+
+The two axes are orthogonal: **field** × **language**. Localize any tool with
+`python .../triz.py --branch <id> --lang <lang> route "..."`, and pass
+`--lang auto` to auto-detect the language of the problem text.
+
+Manage branches through the registry:
+`python .../triz.py branches list` and `python .../triz.py branches check`.
+
+To add a field branch, drop a `branch.json` in `branches/fields/<id>/` with
+that field's keywords, parameter translations, soft principle readings, and
+examples. To add a language, drop a `branch.json` in `branches/langs/<lang>/`
+with the localized labels and stopwords. Nothing else changes — the registry
+and the router pick the new branch up automatically.
+
 ## Master tool (one entrypoint)
 Instead of remembering each script, call the dispatcher:
 `python .claude/skills/triz-innovation/scripts/triz.py <command> [args]`.
 Commands: `route "<text>"` · `matrix <imp> <wor>` (or `matrix --list`) ·
 `sufield --state <state>` · `ariz "<title>"` · `evolution --signals "..."` ·
-`case "<title>"` · `evaluate <csv>` · `master` (show the `TRIZ-MASTER.md`
-knowledge base). Run with no args for the full list. Works from any directory,
-so Claude Code or Codex can invoke it whenever a TRIZ capability is needed.
+`case "<title>"` · `evaluate <csv>` · `branches list|check` · `master` (show
+the `TRIZ-MASTER.md` knowledge base). Global flags `--branch <id>` (default
+`general`) and `--lang <lang>` (default `en`, or `auto`) localize `route` and
+`case`; other commands ignore them. Run with no args for the full list. Works
+from any directory, so Claude Code or Codex can invoke it whenever a TRIZ
+capability is needed.

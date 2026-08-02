@@ -10,7 +10,7 @@ solution become almost self-evident**.
 > Rule of thumb: don't start with ARIZ. Start with framing + matrix + separation.
 > Escalate to ARIZ when those stall. ARIZ is a worksheet, not a chat — fill every
 > step in writing. Generate the worksheet with
-> `python .claude/skills/triz-innovation/scripts/triz_ariz.py "problem title"`.
+> `python .agents/skills/triz-innovation/scripts/triz_ariz.py "problem title"`.
 
 ARIZ-85C has 9 parts. This is a working subset — enough to run a real session.
 

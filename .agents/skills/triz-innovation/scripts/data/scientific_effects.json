@@ -1,0 +1,506 @@
+[
+  {
+    "function_family": "move_transport",
+    "effect_name": "Capillarity",
+    "mechanism": "Liquid rises or moves through narrow spaces (capillaries, pores, fibers) against gravity due to adhesive and cohesive forces at the liquid-solid interface.",
+    "resources_needed": ["narrow channel or porous medium", "wetting liquid", "surface tension gradient"],
+    "output": "Passive liquid transport without external energy input",
+    "domain": "physical",
+    "examples": ["wick-based lubrication", "microfluidic lab-on-chip", "ink in fountain pens", "water transport in plants"]
+  },
+  {
+    "function_family": "move_transport",
+    "effect_name": "Osmosis",
+    "mechanism": "Solvent molecules move across a semipermeable membrane from a region of lower solute concentration to higher solute concentration, driven by the chemical potential gradient.",
+    "resources_needed": ["semipermeable membrane", "concentration gradient", "solvent + solute system"],
+    "output": "Controlled solvent transport or pressure generation (osmotic pressure)",
+    "domain": "physical",
+    "examples": ["drug delivery patches", "water purification / reverse osmosis", "forward osmosis for power generation", "food preservation"]
+  },
+  {
+    "function_family": "move_transport",
+    "effect_name": "Electrophoresis",
+    "mechanism": "Charged particles or molecules migrate through a fluid under an applied electric field, moving toward the electrode of opposite charge.",
+    "resources_needed": ["electric field source", "charged particles/molecules", "conductive fluid medium"],
+    "output": "Separation or directional transport of charged species",
+    "domain": "physical",
+    "examples": ["DNA/protein gel separation", "paint/coating deposition (e-coating)", "drug delivery in tissue", "soil contaminant remediation"]
+  },
+  {
+    "function_family": "move_transport",
+    "effect_name": "Magnetophoresis",
+    "mechanism": "Magnetic particles or magnetically labeled objects migrate under a magnetic field gradient, with speed depending on particle size, magnetic susceptibility, and field strength.",
+    "resources_needed": ["magnetic field gradient", "magnetic particles or labels", "fluid carrier medium"],
+    "output": "Contactless transport and separation of magnetically susceptible objects",
+    "domain": "physical",
+    "examples": ["cell sorting in biomedical diagnostics", "magnetic drug targeting", "water treatment / heavy metal removal", "ore beneficiation"]
+  },
+  {
+    "function_family": "move_transport",
+    "effect_name": "Gravity / Siphon",
+    "mechanism": "Gravity pulls fluid from a higher elevation to a lower one; a siphon extends this by using atmospheric pressure plus gravity to lift fluid over an obstacle before descending, so long as the outlet is below the source level.",
+    "resources_needed": ["height difference", "continuous fluid column", "atmospheric pressure (for siphon)", "fluid with sufficient cohesion"],
+    "output": "Self-sustaining fluid transfer without external power",
+    "domain": "physical",
+    "examples": ["aqueducts and drainage systems", "fuel transfer in emergencies", "toilet cistern filling", "continuous-flow coffee brewer"]
+  },
+  {
+    "function_family": "move_transport",
+    "effect_name": "Thermal Convection",
+    "mechanism": "Density differences caused by temperature gradients generate buoyancy-driven flow: hotter, less-dense fluid rises while cooler, denser fluid sinks, creating a natural circulation loop.",
+    "resources_needed": ["heat source and sink", "fluid medium (liquid or gas)", "gravitational or acceleration field"],
+    "output": "Self-driven fluid circulation and mixing",
+    "domain": "physical",
+    "examples": ["passive CPU/electronics cooling", "atmospheric weather patterns", "hot-water radiators / thermosiphon", "mantle convection in Earth"]
+  },
+  {
+    "function_family": "move_transport",
+    "effect_name": "Pressure Difference",
+    "mechanism": "A pressure gradient between two regions drives bulk fluid flow from high to low pressure. Can be created by pumps, pistons, expanding gases, or vacuum.",
+    "resources_needed": ["pressure source (pump, compressor, vacuum)", "containment vessel or conduit", "pressure-tight seals"],
+    "output": "Controlled, high-rate fluid or gas transport",
+    "domain": "physical",
+    "examples": ["pneumatic tube transport", "vacuum conveyors", "syringe-based microfluidics", "pipeline oil/gas transport"]
+  },
+  {
+    "function_family": "move_transport",
+    "effect_name": "Ultrasonic Streaming",
+    "mechanism": "High-frequency acoustic waves couple into a fluid, producing steady unidirectional flow through nonlinear acoustic effects and cavitation microjets.",
+    "resources_needed": ["ultrasonic transducer / piezoelectric actuator", "fluid medium", "acoustic coupling"],
+    "output": "Non-contact fluid agitation, mixing, or directed flow",
+    "domain": "physical",
+    "examples": ["ultrasonic cleaning baths", "microfluidic pumping without moving parts", "drug mixing / nebulization", "sonochemistry reactors"]
+  },
+  {
+    "function_family": "move_transport",
+    "effect_name": "Diffusion",
+    "mechanism": "Molecules or particles spontaneously spread from areas of high concentration to low concentration via Brownian motion, driven by the entropy of mixing.",
+    "resources_needed": ["concentration gradient", "permeable medium or free space", "time"],
+    "output": "Passive, self-driven homogenization of concentration",
+    "domain": "physical",
+    "examples": ["scent dispersal", "doping of semiconductors", "gas exchange in lungs", "drug release from a polymer matrix"]
+  },
+  {
+    "function_family": "move_transport",
+    "effect_name": "Incentives (Behavioral Transport)",
+    "mechanism": "People or resources move toward a desired state when the perceived benefit of that state outweighs the cost of changing. Incentives reduce the perceived cost or increase the perceived benefit.",
+    "resources_needed": ["target population with agency", "reward/cost structure", "communication channel"],
+    "output": "Voluntary shift of behavior, attention, or resources toward a target",
+    "domain": "behavioral",
+    "examples": ["loyalty programs driving repeat purchases", "tax incentives for green energy adoption", "gamification of exercise (step goals)", "referral bonuses for hiring"]
+  },
+  {
+    "function_family": "move_transport",
+    "effect_name": "Defaults (Behavioral Transport)",
+    "mechanism": "People disproportionately stay with the pre-selected option due to status-quo bias and decision inertia, effectively 'transporting' population behavior toward the default choice.",
+    "resources_needed": ["choice architecture", "decision point with a pre-set option", "opt-out mechanism"],
+    "output": "High adoption of the default option with minimal friction",
+    "domain": "behavioral",
+    "examples": ["organ donation opt-out systems", "auto-enrollment in retirement plans", "default privacy settings shaping data sharing", "pre-checked eco shipping options"]
+  },
+  {
+    "function_family": "move_transport",
+    "effect_name": "Social Proof (Behavioral Transport)",
+    "mechanism": "Individuals adopt behaviors they observe in peers or aspirational groups because conformity and imitation reduce perceived uncertainty and risk.",
+    "resources_needed": ["visible peer behavior data", "trusted reference group", "communication channel"],
+    "output": "Behavioral diffusion through a population without direct instruction",
+    "domain": "behavioral",
+    "examples": ["hotel towel reuse messaging (most guests reuse)", "viral product adoption through social media", "restaurant queue signaling quality", "crowd-funded project momentum"]
+  },
+  {
+    "function_family": "hold_fix",
+    "effect_name": "Magnetic Holding",
+    "mechanism": "Permanent magnets or electromagnets generate an attractive force on ferromagnetic materials, providing a non-contact clamping or positioning force that can be switched on/off with electromagnets.",
+    "resources_needed": ["magnetic field source (permanent magnet or electromagnet)", "ferromagnetic workpiece", "controlled gap distance"],
+    "output": "Releasable, non-contact holding force",
+    "domain": "physical",
+    "examples": ["magnetic chucks in machining", "cabinet door latches", "robotic gripper end-effectors", "magnetic workholding for welding"]
+  },
+  {
+    "function_family": "hold_fix",
+    "effect_name": "Electrostatic Holding",
+    "mechanism": "Opposite electric charges attract, creating an adhesive-like force. An applied high voltage on electrodes induces opposite charges on the target surface, holding it without mechanical contact.",
+    "resources_needed": ["high-voltage DC supply", "electrode array", "dielectric or slightly conductive target surface"],
+    "output": "Controllable, residue-free electrostatic adhesion",
+    "domain": "physical",
+    "examples": ["wafer handling in semiconductor fabs", "electrostatic chucks for thin-film processing", "wall-climbing robots", "paper/foil handling in printing"]
+  },
+  {
+    "function_family": "hold_fix",
+    "effect_name": "Vacuum / Suction Holding",
+    "mechanism": "Atmospheric pressure presses an object against a low-pressure cavity when air is evacuated; the pressure differential across the object provides the holding force proportional to the area and vacuum level.",
+    "resources_needed": ["vacuum pump or venturi ejector", "sealing cup/gasket", "smooth, non-porous target surface"],
+    "output": "High-force, quickly releasable holding without marks or damage",
+    "domain": "physical",
+    "examples": ["pick-and-place robots in packaging", "glass pane installation tools", "suction-cup phone mounts", "CNC vacuum tables"]
+  },
+  {
+    "function_family": "hold_fix",
+    "effect_name": "Freezing / Phase-Change Holding",
+    "mechanism": "A liquid (often water) is frozen around or between parts, forming a solid bridge that mechanically locks them in place. The hold is released by melting the ice.",
+    "resources_needed": ["liquid with suitable freezing point (e.g. water)", "cooling source", "containment geometry"],
+    "output": "Temporary, residue-free, conformal mechanical lock",
+    "domain": "physical",
+    "examples": ["ice-clamping of delicate parts for machining", "temporary fixturing with low-melt alloys", "cryogenic holding of soft tissue for dissection", "ice-plug pipe freeze for maintenance"]
+  },
+  {
+    "function_family": "hold_fix",
+    "effect_name": "Surface Tension Holding",
+    "mechanism": "The cohesive force at a liquid-gas or liquid-liquid interface creates a thin film that can hold small, lightweight objects by wetting and capillary adhesion.",
+    "resources_needed": ["liquid with high surface tension (water, solder, adhesive)", "small contact area", "clean surfaces for wetting"],
+    "output": "Gentle, conformal holding force for small-scale assembly",
+    "domain": "physical",
+    "examples": ["solder reflow self-alignment of SMD components", "water droplet adhesion for micro-assembly", "dip-pen nanolithography", "capillary grippers for micro-parts"]
+  },
+  {
+    "function_family": "hold_fix",
+    "effect_name": "Friction Holding",
+    "mechanism": "Microscopic surface roughness interlocking and normal forces generate tangential resistance to sliding. Increasing normal force (clamp, wedge, press-fit) proportionally increases holding force.",
+    "resources_needed": ["contact surfaces with non-zero friction coefficient", "normal force source (weight, clamp, press)", "interlocking asperities"],
+    "output": "Passive, geometry+force-based resistance to relative motion",
+    "domain": "physical",
+    "examples": ["press-fit bearings and shafts", "wedge-lock scaffolding clamps", "non-slip mats", "screw thread self-locking (preload tension)"]
+  },
+  {
+    "function_family": "hold_fix",
+    "effect_name": "Interference / Snap-Fit Geometry",
+    "mechanism": "Elastic deformation during assembly allows a protruding feature to pass an obstruction and then return to its original shape behind it, creating a permanent or semi-permanent geometric lock.",
+    "resources_needed": ["elastic material (polymer, spring steel)", "undercut or latch geometry", "assembly insertion force"],
+    "output": "Fastener-free, one-step mechanical locking",
+    "domain": "geometric",
+    "examples": ["snap-fit plastic enclosures", "battery compartment covers", "push-to-connect pneumatic fittings", "barbed hose connectors"]
+  },
+  {
+    "function_family": "hold_fix",
+    "effect_name": "Gyroscopic Stiffening",
+    "mechanism": "A spinning rotor resists changes to its orientation axis due to conservation of angular momentum; external torques cause precession instead of tilting, giving the system effective stiffness against rotation.",
+    "resources_needed": ["high-speed spinning mass", "bearings with low friction", "sufficient angular momentum"],
+    "output": "Resistance to angular displacement without a fixed anchor",
+    "domain": "physical",
+    "examples": ["ship and spacecraft attitude stabilizers", "gyroscopic camera gimbals", "self-balancing motorcycles / bicycles", "inertial navigation systems"]
+  },
+  {
+    "function_family": "heat_cool",
+    "effect_name": "Joule Heating",
+    "mechanism": "Electric current passing through a resistive conductor dissipates power as heat (P = I^2 R), with the heating rate proportional to resistance and the square of the current.",
+    "resources_needed": ["electric current source", "resistive element (wire, film, coating)", "electrical contacts"],
+    "output": "Precisely controllable, localized or bulk heating",
+    "domain": "physical",
+    "examples": ["electric stoves and ovens", "heated car seats", "3D printer heated beds", "resistive trace for de-icing aircraft wings"]
+  },
+  {
+    "function_family": "heat_cool",
+    "effect_name": "Induction Heating",
+    "mechanism": "An alternating magnetic field induces eddy currents in a conductive material; these currents encounter resistance and dissipate heat within the material itself, without contact.",
+    "resources_needed": ["AC power source / induction coil", "electrically conductive workpiece", "high-frequency inverter"],
+    "output": "Non-contact, rapid, deeply penetrating heating of conductive materials",
+    "domain": "physical",
+    "examples": ["induction cooktops", "metal hardening and annealing", "shrink-fitting bearings", "induction welding of pipes"]
+  },
+  {
+    "function_family": "heat_cool",
+    "effect_name": "Peltier Effect",
+    "mechanism": "When current flows through a junction of two dissimilar conductors or semiconductors, heat is absorbed at one junction (cooling) and released at the other (heating), creating a solid-state heat pump.",
+    "resources_needed": ["DC power supply", "thermoelectric module (n- and p-type semiconductor pellets)", "heat sink on hot side"],
+    "output": "Solid-state, reversible heating or cooling with no moving parts",
+    "domain": "physical",
+    "examples": ["portable cooler/warmer boxes", "laser diode temperature stabilization", "car seat climate control", "CPU spot cooling"]
+  },
+  {
+    "function_family": "heat_cool",
+    "effect_name": "Evaporative Cooling",
+    "mechanism": "When a liquid evaporates, the highest-energy molecules leave the surface first, removing latent heat of vaporization from the remaining liquid and surrounding surface, lowering its temperature.",
+    "resources_needed": ["volatile liquid (water, alcohol)", "airflow or low humidity environment", "porous or wicking surface"],
+    "output": "Passive, energy-efficient cooling below ambient temperature",
+    "domain": "physical",
+    "examples": ["swamp/evaporative coolers for buildings", "sweating as biological cooling", "porous clay pot refrigeration (zeer pot)", "cooling tower for power plants"]
+  },
+  {
+    "function_family": "heat_cool",
+    "effect_name": "Exothermic Reaction Heating",
+    "mechanism": "A chemical reaction that releases net energy as heat when reactants convert to products, providing rapid, self-contained heating without external energy input.",
+    "resources_needed": ["reactive chemicals", "initiation trigger (catalyst, spark, water)", "reaction containment"],
+    "output": "Rapid, portable, or one-shot heat generation",
+    "domain": "chemical",
+    "examples": ["self-heating food packs (MREs)", "hand warmers (iron oxidation)", "thermite welding of rail tracks", "cement curing heat for cold-weather construction"]
+  },
+  {
+    "function_family": "heat_cool",
+    "effect_name": "Microwave / Dielectric Heating",
+    "mechanism": "An alternating electromagnetic field at microwave frequencies causes polar molecules (especially water) to rotate and align with the oscillating field, generating heat through molecular friction throughout the material volume.",
+    "resources_needed": ["microwave generator (magnetron)", "material with polar molecules or ionic content", "resonant cavity or waveguide"],
+    "output": "Volumetric, selective heating from the inside out",
+    "domain": "physical",
+    "examples": ["microwave ovens", "industrial drying of ceramics and wood", "rubber vulcanization", "medical diathermy"]
+  },
+  {
+    "function_family": "heat_cool",
+    "effect_name": "Radiative Cooling",
+    "mechanism": "A surface emits thermal radiation to the cold sink of outer space (~3 K) through the atmospheric infrared window (8-13 um), losing more heat by radiation than it gains from the environment, enabling sub-ambient cooling even in direct sunlight.",
+    "resources_needed": ["selective emitter surface (high emissivity in 8-13 um)", "clear sky exposure", "low solar absorption"],
+    "output": "Passive, zero-energy cooling to sub-ambient temperatures",
+    "domain": "physical",
+    "examples": ["passive building cooling films", "spacecraft thermal management", "cold storage for off-grid vaccine preservation", "radiative-cooled solar panels for efficiency gain"]
+  },
+  {
+    "function_family": "detect_measure",
+    "effect_name": "Resonance / Natural Frequency Shift",
+    "mechanism": "Every mechanical system has natural frequencies at which it vibrates most efficiently. Changes in mass, stiffness, tension, or boundary conditions shift these frequencies; measuring the shift reveals the property change.",
+    "resources_needed": ["excitation source (impact, piezo, shaker)", "vibration sensor (accelerometer, microphone)", "baseline frequency signature"],
+    "output": "Non-invasive detection of internal changes (cracks, mass, tension)",
+    "domain": "physical",
+    "examples": ["bridge and building structural health monitoring", "bell/coin tap-test for cracks", "tire pressure monitoring via wheel resonance", "bolt tension measurement by acoustic ringing"]
+  },
+  {
+    "function_family": "detect_measure",
+    "effect_name": "Thermal Imaging",
+    "mechanism": "All objects above absolute zero emit infrared radiation proportional to their temperature (Planck's law). An IR camera maps this radiation to a temperature image, revealing hotspots, insulation gaps, and thermal anomalies.",
+    "resources_needed": ["infrared camera / microbolometer array", "temperature difference from background", "line of sight to target"],
+    "output": "Non-contact, full-field temperature map",
+    "domain": "physical",
+    "examples": ["building energy audit / heat leak detection", "electrical panel hotspot inspection", "medical fever screening", "night vision surveillance"]
+  },
+  {
+    "function_family": "detect_measure",
+    "effect_name": "Luminescence / Fluorescent Markers",
+    "mechanism": "Certain materials absorb light at one wavelength and re-emit at a longer wavelength (fluorescence) or store energy and emit later (phosphorescence). This optical contrast makes trace quantities highly detectable.",
+    "resources_needed": ["fluorophore or phosphor marker", "excitation light source (UV, laser)", "optical detector/filter"],
+    "output": "Ultra-sensitive visual or instrumental detection of specific targets",
+    "domain": "physical",
+    "examples": ["biological cell labeling and microscopy", "forensic bloodstain detection (luminol)", "anti-counterfeiting security inks", "leak detection with fluorescent dye in HVAC"]
+  },
+  {
+    "function_family": "detect_measure",
+    "effect_name": "Color / Phase Change Indicators",
+    "mechanism": "A substance changes its visible color or physical phase when exposed to a specific chemical, temperature threshold, pH level, or other stimulus, providing a direct visual signal of the condition.",
+    "resources_needed": ["indicator compound/dye", "target stimulus (temperature, chemical, pH)", "visual or optical readout"],
+    "output": "Direct, instrument-free visual indication of a condition crossing a threshold",
+    "domain": "chemical",
+    "examples": ["pH litmus paper", "temperature-indicating paint / crayon for welding", "time-temperature food spoilage labels", "carbon monoxide detector spot badges"]
+  },
+  {
+    "function_family": "detect_measure",
+    "effect_name": "Capacitance Change Sensing",
+    "mechanism": "Capacitance between two conductors depends on their geometry and the dielectric constant of the material between them. Proximity, displacement, or dielectric change alters capacitance, which is measured electronically.",
+    "resources_needed": ["electrode pair or sensor pad", "capacitance measurement circuit (oscillator, bridge)", "target with different dielectric constant"],
+    "output": "Non-contact detection of proximity, level, or material composition",
+    "domain": "physical",
+    "examples": ["touchscreen and proximity sensors", "fluid level sensing in tanks", "material thickness gauging", "occupancy detection in car seats"]
+  },
+  {
+    "function_family": "detect_measure",
+    "effect_name": "Hall Effect",
+    "mechanism": "A voltage appears across a current-carrying conductor when placed in a perpendicular magnetic field; the voltage is proportional to field strength, enabling contactless magnetic field and current measurement.",
+    "resources_needed": ["current source", "semiconductor Hall element", "perpendicular magnetic field"],
+    "output": "Galvanically isolated current or position sensing",
+    "domain": "physical",
+    "examples": ["non-contact current sensors in power electronics", "BLDC motor rotor position sensing", "automotive ABS wheel speed sensors", "joystick / throttle position sensors"]
+  },
+  {
+    "function_family": "detect_measure",
+    "effect_name": "Doppler Shift",
+    "mechanism": "The frequency of a wave (sound, light, radio) shifts when the source and observer move relative to each other. Measuring the frequency difference yields relative velocity.",
+    "resources_needed": ["wave source (laser, radar, ultrasound)", "coherent detector / interferometer", "relative motion between source and target"],
+    "output": "Precise, non-contact velocity measurement",
+    "domain": "physical",
+    "examples": ["police radar speed guns", "medical blood flow ultrasound", "weather radar wind velocity", "LIDAR vehicle speed enforcement"]
+  },
+  {
+    "function_family": "detect_measure",
+    "effect_name": "Derivative Measurement",
+    "mechanism": "When the property of interest is hard to measure directly, measure its rate of change (derivative) or integral instead, and compute the target property. Acceleration is easier to measure than velocity in some regimes; velocity is easier than absolute position.",
+    "resources_needed": ["sensor for the derivative/integral quantity", "integration/differentiation circuit or algorithm", "known initial conditions"],
+    "output": "Indirect measurement of a property that resists direct sensing",
+    "domain": "physical",
+    "examples": ["inertial navigation (accelerometer -> velocity -> position)", "current measured as voltage drop across shunt", "torque from motor current (no torque sensor)", "flow rate from pressure drop across orifice"]
+  },
+  {
+    "function_family": "detect_measure",
+    "effect_name": "Difference Measurement",
+    "mechanism": "Measure the difference between two signals rather than the absolute value, cancelling common-mode noise, drift, and offsets. Sensitivity to small changes is greatly increased.",
+    "resources_needed": ["reference signal or baseline reading", "differential sensor or bridge circuit", "common-mode rejection"],
+    "output": "High-sensitivity detection of small changes in a noisy environment",
+    "domain": "physical",
+    "examples": ["Wheatstone bridge for strain gauges", "differential GPS for cm-level positioning", "balanced photodetectors in spectroscopy", "differential pressure flow meters"]
+  },
+  {
+    "function_family": "change_properties",
+    "effect_name": "Phase Transitions",
+    "mechanism": "A substance changes its physical state (solid/liquid/gas) at a critical temperature or pressure, undergoing large, reversible changes in volume, stiffness, thermal conductivity, and other properties at the transition point.",
+    "resources_needed": ["phase-change material (PCM)", "temperature or pressure control", "containment"],
+    "output": "Large, reversible, switchable property change at a defined threshold",
+    "domain": "physical",
+    "examples": ["wax thermostat actuators in car cooling systems", "PCM thermal batteries for building temperature regulation", "freeze-thaw rock weathering in nature", "steam engine phase-change work extraction"]
+  },
+  {
+    "function_family": "change_properties",
+    "effect_name": "Shape-Memory Alloys / Polymers (SMA/SMP)",
+    "mechanism": "A material deformed at low temperature recovers its original 'remembered' shape when heated above a transition temperature due to a reversible martensitic phase transformation (alloys) or glass-transition relaxation (polymers).",
+    "resources_needed": ["shape-memory alloy (NiTi/Nitinol) or shape-memory polymer", "temperature stimulus (heat, electric current)", "pre-programmed shape via training cycle"],
+    "output": "Solid-state actuation or self-deploying structure",
+    "domain": "physical",
+    "examples": ["self-expanding vascular stents", "orthodontic archwires (NiTi)", "deployable space antennas", "self-tightening surgical sutures"]
+  },
+  {
+    "function_family": "change_properties",
+    "effect_name": "Thixotropy",
+    "mechanism": "A gel or paste reversibly transitions to a liquid-like state under shear stress (stirring, shaking, squeezing) and returns to a gel/solid state at rest. Viscosity drops with shear, recovers without it.",
+    "resources_needed": ["thixotropic fluid (clay suspension, polymer gel)", "shear stress source (mixer, nozzle, vibration)", "rest/recovery time"],
+    "output": "On-demand, reversible gel-liquid-gel transition",
+    "domain": "physical",
+    "examples": ["non-drip paint (liquid under brush, gel on wall)", "drilling mud in oil wells (liquid when pumped, gel when static)", "ketchup / toothpaste dispensing", "self-leveling concrete that sets after placement"]
+  },
+  {
+    "function_family": "change_properties",
+    "effect_name": "Magneto- / Electro-Rheological Fluids",
+    "mechanism": "Smart fluids whose apparent viscosity increases dramatically (up to solid-like behavior) within milliseconds under an applied magnetic field (MR) or electric field (ER), with the change being fully reversible.",
+    "resources_needed": ["MR or ER fluid", "magnetic field source (MR) or high-voltage source (ER)", "sealed gap/valve geometry"],
+    "output": "Fast, electronically controllable variable stiffness or damping",
+    "domain": "physical",
+    "examples": ["semi-active car suspension dampers", "haptic feedback / force-feedback joysticks", "seismic dampers in buildings and bridges", "clutch and brake systems with no mechanical wear"]
+  },
+  {
+    "function_family": "change_properties",
+    "effect_name": "Photochromism / Thermochromism",
+    "mechanism": "A material changes its visible-light absorption spectrum (color) reversibly when exposed to UV/visible light (photochromism) or a temperature change (thermochromism), due to molecular restructuring, phase change, or redox state change.",
+    "resources_needed": ["photochromic or thermochromic dye/pigment", "stimulus (UV light or heat/cool cycle)", "transparent matrix/binder"],
+    "output": "Reversible, stimulus-triggered color change for visual indication",
+    "domain": "chemical",
+    "examples": ["photochromic sunglasses that darken in sunlight", "thermochromic mugs revealing a hidden image with hot liquid", "reusable UV dosimeter wristbands", "temperature-indicating baby bottle / bath toy"]
+  },
+  {
+    "function_family": "change_properties",
+    "effect_name": "Piezoelectricity (Property Change)",
+    "mechanism": "Certain crystalline materials (quartz, PZT) develop an electric polarization under mechanical stress (direct effect) and, conversely, deform under an applied electric field (converse effect), enabling reversible mechanical-electrical energy conversion.",
+    "resources_needed": ["piezoelectric crystal or ceramic", "mechanical stress or electric field", "electrodes"],
+    "output": "Bidirectional mechanical-to-electrical transduction",
+    "domain": "physical",
+    "examples": ["quartz crystal oscillators for frequency reference", "ultrasonic transducers for imaging and cleaning", "energy harvesting from footfall/vibration", "precision nanopositioning stages"]
+  },
+  {
+    "function_family": "generate_force",
+    "effect_name": "Thermal Expansion Actuation",
+    "mechanism": "Most materials expand when heated. Confining a material so that its expansion is constrained converts thermal expansion into a large force with small travel, or differential expansion of two bonded strips produces bending.",
+    "resources_needed": ["material with high thermal expansion coefficient", "heat source", "constrained or differential geometry"],
+    "output": "Simple, high-force, self-resetting linear or bending actuation",
+    "domain": "physical",
+    "examples": ["bimetallic strip in thermostats and circuit breakers", "shrink-fit assembly (heat shaft, cool after insertion)", "thermal expansion valves", "fire sprinkler bulb thermal actuation"]
+  },
+  {
+    "function_family": "generate_force",
+    "effect_name": "Piezo Actuation",
+    "mechanism": "Applying a voltage to a piezoelectric material causes it to change dimensions (inverse piezoelectric effect). Stacking many thin layers produces useful displacement with nanoscale resolution and sub-millisecond response.",
+    "resources_needed": ["piezoelectric stack or bending element", "high-voltage amplifier", "mechanical preload"],
+    "output": "Nanoscale-precision, high-bandwidth linear positioning",
+    "domain": "physical",
+    "examples": ["atomic force microscope (AFM) scanning stages", "fuel injectors for diesel engines", "inkjet printer nozzle actuators", "active vibration cancellation mounts"]
+  },
+  {
+    "function_family": "generate_force",
+    "effect_name": "Magnetostriction",
+    "mechanism": "Ferromagnetic materials change their physical dimensions when magnetized (Joule effect) due to the realignment of magnetic domains. The strain is small (~10-100 ppm) but the force density is high.",
+    "resources_needed": ["magnetostrictive material (Terfenol-D, Galfenol)", "magnetic field coil", "mechanical coupling / preload"],
+    "output": "High-force, moderate-frequency solid-state actuation",
+    "domain": "physical",
+    "examples": ["sonar transducers for underwater acoustics", "active engine mounts for noise cancellation", "ultrasonic welding horn drivers", "micro-positioning in optics"]
+  },
+  {
+    "function_family": "generate_force",
+    "effect_name": "Shape-Memory Actuation",
+    "mechanism": "A shape-memory alloy (e.g., Nitinol) wire or spring that was deformed at low temperature contracts back to its trained shape upon heating, generating significant recovery stress (up to 500 MPa) in a compact volume.",
+    "resources_needed": ["SMA wire/spring (Nitinol)", "heating source (electric current, hot fluid)", "biasing spring for return stroke"],
+    "output": "Compact, silent, high work-density linear actuation",
+    "domain": "physical",
+    "examples": ["automotive HVAC vent flap actuators", "thermostatic radiator valves", "active catheter steering", "deployable satellite release mechanisms"]
+  },
+  {
+    "function_family": "generate_force",
+    "effect_name": "Electrostatic / Magnetic Attraction Force",
+    "mechanism": "Coulomb force between opposite charges or magnetic force between opposite poles attracts two bodies across a gap. Force follows an inverse-square law, providing high force at close range without mechanical contact.",
+    "resources_needed": ["voltage source / permanent magnet / electromagnet", "conductive or ferromagnetic target", "small or controlled air gap"],
+    "output": "Non-contact attractive force for positioning, clamping, or levitation",
+    "domain": "physical",
+    "examples": ["magnetic door catches and cabinet latches", "electrostatic speakers / headphones", "maglev train suspension", "electrostatic film adhesion for wall displays"]
+  },
+  {
+    "function_family": "generate_force",
+    "effect_name": "Pressure / Phase-Change Expansion",
+    "mechanism": "A confined liquid vaporizes (or a gas is heated), expanding in volume by orders of magnitude and generating high pressure that can drive a piston, turbine, or burst membrane.",
+    "resources_needed": ["working fluid (water, refrigerant, CO2)", "heat source", "pressure vessel / expander geometry"],
+    "output": "High-power, scalable mechanical work from heat",
+    "domain": "physical",
+    "examples": ["steam engines and turbines for power generation", "internal combustion engine piston force", "explosive fasteners / separation bolts for rockets", "aerosol can propellant expansion"]
+  },
+  {
+    "function_family": "generate_force",
+    "effect_name": "Bimetallic Bending",
+    "mechanism": "Two metals with different thermal expansion coefficients are bonded together; temperature change causes one side to expand more than the other, producing a predictable, repeatable bending curvature proportional to the temperature change.",
+    "resources_needed": ["bimetallic strip (e.g., steel + brass/copper)", "temperature change source", "cantilever or coil geometry"],
+    "output": "Simple, reliable temperature-to-displacement transduction",
+    "domain": "physical",
+    "examples": ["dial thermometers", "thermostat switching elements", "circuit breaker thermal trip", "automatic choke in carburetors"]
+  },
+  {
+    "function_family": "separate_mix",
+    "effect_name": "Centrifugation",
+    "mechanism": "Rapid rotation creates a centrifugal acceleration field many times gravity, causing denser particles or immiscible phases to migrate radially outward faster than lighter ones, achieving separation by density difference.",
+    "resources_needed": ["rotor/spinner capable of high RPM", "sample vessel/tube", "density difference between components"],
+    "output": "Rapid, density-based separation of particulates, phases, or biological components",
+    "domain": "physical",
+    "examples": ["blood plasma separation in clinical labs", "cream separation from milk", "uranium enrichment gas centrifuges", "washing machine spin-dry cycle"]
+  },
+  {
+    "function_family": "separate_mix",
+    "effect_name": "Electrophoretic Separation",
+    "mechanism": "Charged molecules migrate at different speeds through a separation medium (gel, capillary, fluid) under an applied electric field, with mobility depending on charge-to-size ratio, enabling high-resolution molecular separation.",
+    "resources_needed": ["high-voltage power supply", "separation medium (gel, capillary, buffer)", "charged analyte mixture"],
+    "output": "High-resolution molecular separation by charge and size",
+    "domain": "physical",
+    "examples": ["DNA sequencing gel electrophoresis", "protein purity analysis (SDS-PAGE)", "capillary electrophoresis for forensic DNA", "paint particle analysis in art conservation"]
+  },
+  {
+    "function_family": "separate_mix",
+    "effect_name": "Magnetic Separation",
+    "mechanism": "Magnetic field gradients attract and capture magnetically susceptible particles from a flowing mixture while non-magnetic material passes through, enabling selective removal or enrichment.",
+    "resources_needed": ["magnetic field source (permanent or electromagnet)", "magnetic or magnetically-labeled target particles", "flow channel or conveyor"],
+    "output": "Selective extraction of magnetic species from a bulk mixture",
+    "domain": "physical",
+    "examples": ["iron ore beneficiation in mining", "recycling sorting (ferrous from non-ferrous)", "immunomagnetic cell separation (MACS) in biotech", "magnetic bead-based water purification"]
+  },
+  {
+    "function_family": "separate_mix",
+    "effect_name": "Distillation / Phase-Change Separation",
+    "mechanism": "Components of a liquid mixture vaporize at different temperatures; selective heating vaporizes the more volatile component, which is then condensed and collected separately, exploiting boiling point differences.",
+    "resources_needed": ["heat source and condenser/cold sink", "boiling point difference between components", "fractionating column (for multi-component separation)"],
+    "output": "High-purity separation of liquid mixtures by volatility",
+    "domain": "physical",
+    "examples": ["crude oil refining into gasoline, diesel, etc.", "alcohol distillation for spirits and fuel ethanol", "desalination via multi-stage flash distillation", "solvent recovery and recycling"]
+  },
+  {
+    "function_family": "separate_mix",
+    "effect_name": "Filtration (Porous / Capillary Media)",
+    "mechanism": "A porous barrier (membrane, bed of granules, fibrous mat) allows fluid to pass while retaining particles larger than its pore size. Additional mechanisms (adsorption, electrostatic charge) enhance capture of smaller particles.",
+    "resources_needed": ["porous filter medium (membrane, sand, fabric, paper)", "pressure differential to drive flow", "pore size appropriate to target particle size"],
+    "output": "Size-exclusion or depth-based separation of solids from fluids",
+    "domain": "physical",
+    "examples": ["HEPA air purifiers and cleanroom filtration", "coffee / tea brewing", "kidney dialysis membranes", "swimming pool sand filters"]
+  },
+  {
+    "function_family": "separate_mix",
+    "effect_name": "Flotation",
+    "mechanism": "Hydrophobic particles attach to rising air bubbles in a slurry and float to the surface as froth, while hydrophilic particles sink. Surfactants and collectors selectively modify the surface chemistry of target minerals.",
+    "resources_needed": ["air bubble source / sparger", "surfactant/collector chemicals", "slurry tank with froth overflow"],
+    "output": "Selective separation of hydrophobic from hydrophilic particles",
+    "domain": "physical",
+    "examples": ["copper and gold ore concentration", "paper de-inking for recycling", "wastewater fat/oil/grease removal (DAF)", "plastics separation by surface chemistry"]
+  },
+  {
+    "function_family": "separate_mix",
+    "effect_name": "Adsorption",
+    "mechanism": "Atoms, ions, or molecules from a fluid phase adhere to a solid surface via van der Waals forces (physisorption) or chemical bonds (chemisorption), removing the adsorbate from the bulk fluid and concentrating it on the solid.",
+    "resources_needed": ["high-surface-area adsorbent (activated carbon, zeolite, silica gel)", "fluid-adsorbent contact", "regeneration capability (heat, pressure swing, solvent)"],
+    "output": "Selective removal of dissolved or gaseous contaminants down to trace levels",
+    "domain": "chemical",
+    "examples": ["activated carbon water filters for taste/odor/chlorine", "gas masks and respirator cartridges", "moisture removal in compressed air (desiccant dryers)", "catalytic converter pollutant capture"]
+  }
+]

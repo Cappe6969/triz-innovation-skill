@@ -15,11 +15,15 @@ import json
 import unittest
 import tempfile
 import re
+import csv
+import shutil
+import subprocess
 from pathlib import Path
 
 # ---- path setup: add the scripts directory so imports work ----
+_REPO_ROOT = Path(__file__).resolve().parent.parent
 _SCRIPTS_DIR = (
-    Path(__file__).resolve().parent.parent
+    _REPO_ROOT
     / ".claude" / "skills" / "triz-innovation" / "scripts"
 )
 sys.path.insert(0, str(_SCRIPTS_DIR))
@@ -31,6 +35,7 @@ import triz_standard_solutions
 import triz_evolution
 import triz_ariz
 import triz_case_template
+import triz_branches
 
 
 class TestTRIZ(unittest.TestCase):
@@ -946,6 +951,291 @@ class TestTRIZ(unittest.TestCase):
                     f"## Part {i}", content,
                     f"Part {i} heading not found in ARIZ worksheet"
                 )
+
+
+    # ═══════════════════════════════════════════════════════════════════════
+    #  R14 NEW TESTS — branches + language axis + mirror (SPEC build 2)
+    # ═══════════════════════════════════════════════════════════════════════
+
+
+class TestBranchesAndLanguageAxis(unittest.TestCase):
+    """Branch registry, language detection, router --lang/--branch,
+    case-template --lang, dispatcher flags, mirror, and master structure."""
+
+    # ── Branch registry ────────────────────────────────────────────────────
+
+    def test_branches_list_exact(self):
+        inv = triz_branches.list_branches()
+        self.assertEqual(inv["fields"], ["general", "business", "software", "rehab"])
+        self.assertEqual(inv["langs"], ["en", "it"])
+
+    def test_branches_validate_clean(self):
+        self.assertEqual(triz_branches.validate(), [])
+
+    def test_branches_field_branch(self):
+        sw = triz_branches.get_field_branch("software")
+        self.assertEqual(sw["id"], "software")
+        self.assertIsInstance(sw["parameter_map"], dict)
+        self.assertGreater(len(sw["parameter_map"]), 0)
+        for fid in ("business", "rehab"):
+            data = triz_branches.get_field_branch(fid)
+            self.assertIn("parameter_map", data)
+            self.assertGreater(len(data["parameter_map"]), 0)
+        gen = triz_branches.get_field_branch("general")
+        self.assertNotIn("parameter_map", gen)
+        self.assertEqual(gen["keywords"], [])
+
+    def test_branches_unknown_raises(self):
+        with self.assertRaises(KeyError):
+            triz_branches.get_field_branch("nope")
+        with self.assertRaises(KeyError):
+            triz_branches.get_lang_branch("de")
+        with self.assertRaises(KeyError):
+            triz_branches.resolve_labels("fr")
+
+    # ── Language detection ─────────────────────────────────────────────────
+
+    def test_detect_language_italian(self):
+        self.assertEqual(
+            triz_branches.detect_language("il problema è quindi molto complesso"),
+            "it",
+        )
+
+    def test_detect_language_english(self):
+        self.assertEqual(
+            triz_branches.detect_language("the system is fast and reliable"),
+            "en",
+        )
+
+    def test_detect_language_mixed_italian_hit(self):
+        self.assertEqual(
+            triz_branches.detect_language("the app è quindi molto lento"),
+            "it",
+        )
+
+    def test_detect_language_equal_hits_prefers_italian(self):
+        # Spec: "it" when Italian hits >= 1 AND Italian hits >= English hits —
+        # equal counts resolve to "it", not "en".
+        self.assertEqual(
+            triz_branches.detect_language("quindi the system"),
+            "it",
+        )
+
+    # ── Router --lang / --branch ───────────────────────────────────────────
+
+    def test_router_suggest_methods_keys_english(self):
+        result = triz_router.suggest_methods("problema ma migliora")
+        methods = [m["method"] for m in result["methods"]]
+        self.assertTrue(
+            any("Engineering Contradiction" in m for m in methods),
+            f"Expected English method key, got {methods}",
+        )
+        self.assertNotIn("Contraddizione tecnica + 40 principi inventivi", methods)
+
+    def test_router_cli_lang_it(self):
+        proc = subprocess.run(
+            [sys.executable, str(_SCRIPTS_DIR / "triz_router.py"),
+             "--lang", "it", "problema ma migliora"],
+            capture_output=True, text=True, encoding="utf-8",
+        )
+        self.assertEqual(proc.returncode, 0, proc.stderr)
+        self.assertIn("Contraddizione", proc.stdout)
+        self.assertNotIn("Engineering Contradiction", proc.stdout)
+
+    def test_router_branch_software_excludes_business(self):
+        text = "il prezzo di mercato cala ma la vendita cresce"
+        default = triz_router.suggest_methods(text)
+        default_methods = [m["method"] for m in default["methods"]]
+        self.assertIn("Business TRIZ", default_methods)
+        filtered = triz_router.suggest_methods(text, branch="software")
+        filtered_methods = [m["method"] for m in filtered["methods"]]
+        self.assertNotIn("Business TRIZ", filtered_methods)
+        self.assertNotIn("Rehabilitation TRIZ", filtered_methods)
+
+    def test_router_branch_unknown_raises(self):
+        with self.assertRaises(ValueError):
+            triz_router.suggest_methods("x", branch="nope")
+
+    # ── Case template --lang ───────────────────────────────────────────────
+
+    def test_case_template_lang_en(self):
+        with tempfile.TemporaryDirectory() as tmpdir:
+            path = triz_case_template.create_case("X", cases_dir=tmpdir, lang="en")
+            content = path.read_text(encoding="utf-8")
+            self.assertIn("Restated problem", content)
+            self.assertIn("Technical contradiction", content)
+
+    def test_case_template_lang_it_matches_default(self):
+        with tempfile.TemporaryDirectory() as tmpdir:
+            it_path = triz_case_template.create_case(
+                "X", cases_dir=tmpdir, lang="it"
+            )
+            default_path = triz_case_template.create_case(
+                "X", cases_dir=tmpdir, lang=None
+            )
+            it_content = it_path.read_text(encoding="utf-8")
+            default_content = default_path.read_text(encoding="utf-8")
+            self.assertIn("Problema riformulato", it_content)
+            self.assertIn("Problema riformulato", default_content)
+
+    def test_case_template_lang_unknown(self):
+        with tempfile.TemporaryDirectory() as tmpdir:
+            with self.assertRaises(ValueError):
+                triz_case_template.create_case("X", cases_dir=tmpdir, lang="de")
+
+    # ── Dispatcher ─────────────────────────────────────────────────────────
+
+    def test_dispatcher_lang_it_route(self):
+        proc = subprocess.run(
+            [sys.executable, str(_SCRIPTS_DIR / "triz.py"),
+             "--lang", "it", "route", "problema ma migliora"],
+            capture_output=True, text=True, encoding="utf-8",
+        )
+        self.assertEqual(proc.returncode, 0, proc.stderr)
+        self.assertIn("Contraddizione", proc.stdout)
+
+    def test_dispatcher_branches_list(self):
+        proc = subprocess.run(
+            [sys.executable, str(_SCRIPTS_DIR / "triz.py"), "branches", "list"],
+            capture_output=True, text=True, encoding="utf-8",
+        )
+        self.assertEqual(proc.returncode, 0, proc.stderr)
+        self.assertIn("software", proc.stdout)
+
+    def test_dispatcher_branches_check(self):
+        proc = subprocess.run(
+            [sys.executable, str(_SCRIPTS_DIR / "triz.py"), "branches", "check"],
+            capture_output=True, text=True, encoding="utf-8",
+        )
+        self.assertEqual(proc.returncode, 0, proc.stderr)
+
+    def test_dispatcher_flags_position_independent(self):
+        proc1 = subprocess.run(
+            [sys.executable, str(_SCRIPTS_DIR / "triz.py"),
+             "--lang", "it", "route", "problema ma migliora"],
+            capture_output=True, text=True, encoding="utf-8",
+        )
+        proc2 = subprocess.run(
+            [sys.executable, str(_SCRIPTS_DIR / "triz.py"),
+             "route", "problema ma migliora", "--lang", "it"],
+            capture_output=True, text=True, encoding="utf-8",
+        )
+        self.assertEqual(proc1.returncode, 0, proc1.stderr)
+        self.assertEqual(proc2.returncode, 0, proc2.stderr)
+        self.assertEqual(proc1.stdout, proc2.stdout)
+
+    def test_dispatcher_unknown_lang_rejected(self):
+        proc = subprocess.run(
+            [sys.executable, str(_SCRIPTS_DIR / "triz.py"),
+             "--lang", "de", "route", "x"],
+            capture_output=True, text=True, encoding="utf-8",
+        )
+        self.assertNotEqual(proc.returncode, 0)
+        self.assertIn("unknown --lang", proc.stderr.lower())
+
+    # ── Mirror ─────────────────────────────────────────────────────────────
+
+    def _make_temp_skill_tree(self, root: Path) -> Path:
+        """Lay down a minimal source skill tree + a copy of build_mirror.py."""
+        scripts_dir = root / "scripts"
+        scripts_dir.mkdir(parents=True)
+        shutil.copy2(
+            _REPO_ROOT / "scripts" / "build_mirror.py",
+            scripts_dir / "build_mirror.py",
+        )
+        skill = root / ".claude" / "skills" / "triz-innovation"
+        (skill / "scripts" / "data").mkdir(parents=True)
+        (skill / "references").mkdir()
+        (skill / "branches" / "fields" / "general").mkdir(parents=True)
+        (skill / "SKILL.md").write_text(
+            "# Skill\n\nRun `python .claude/skills/triz-innovation/scripts/triz.py`\n",
+            encoding="utf-8",
+        )
+        (skill / "scripts" / "triz.py").write_text(
+            "# resolves .claude/skills/triz-innovation/scripts/data\n",
+            encoding="utf-8",
+        )
+        (skill / "references" / "ref.md").write_text(
+            "ref content\n", encoding="utf-8"
+        )
+        (skill / "branches" / "fields" / "general" / "branch.json").write_text(
+            '{"id": "general"}\n', encoding="utf-8"
+        )
+        return scripts_dir / "build_mirror.py"
+
+    def test_mirror_build_and_check(self):
+        with tempfile.TemporaryDirectory() as tmpdir:
+            root = Path(tmpdir)
+            builder = self._make_temp_skill_tree(root)
+            proc = subprocess.run(
+                [sys.executable, str(builder)],
+                capture_output=True, text=True, encoding="utf-8",
+            )
+            self.assertEqual(proc.returncode, 0, proc.stderr)
+            mirror = root / ".agents" / "skills" / "triz-innovation"
+            self.assertTrue((mirror / "SKILL.md").is_file())
+            self.assertTrue((mirror / "scripts" / "triz.py").is_file())
+            self.assertTrue((mirror / "references" / "ref.md").is_file())
+            self.assertTrue(
+                (mirror / "branches" / "fields" / "general" / "branch.json").is_file()
+            )
+            skill_text = (mirror / "SKILL.md").read_text(encoding="utf-8")
+            self.assertIn("GENERATED by scripts/build_mirror.py", skill_text)
+            script_text = (mirror / "scripts" / "triz.py").read_text(encoding="utf-8")
+            self.assertIn(".agents/skills/triz-innovation/scripts/data", script_text)
+            self.assertNotIn(".claude/skills/triz-innovation", script_text)
+            # --check is in sync after a build
+            sync = subprocess.run(
+                [sys.executable, str(builder), "--check"],
+                capture_output=True, text=True, encoding="utf-8",
+            )
+            self.assertEqual(sync.returncode, 0, sync.stdout + sync.stderr)
+            # Drift: add a source file that is not in the mirror
+            (root / ".claude" / "skills" / "triz-innovation"
+             / "scripts" / "data" / "new.csv").write_text("a,b\n", encoding="utf-8")
+            drift = subprocess.run(
+                [sys.executable, str(builder), "--check"],
+                capture_output=True, text=True, encoding="utf-8",
+            )
+            self.assertNotEqual(drift.returncode, 0)
+
+    # ── Master structure regression (guards the R8 content fixes) ──────────
+
+    def test_master_exactly_24_h2(self):
+        master = _REPO_ROOT / "TRIZ-MASTER.md"
+        content = master.read_text(encoding="utf-8")
+        h2 = [line for line in content.splitlines() if line.startswith("## ")]
+        self.assertEqual(len(h2), 24, f"Expected 24 H2 sections, got {len(h2)}")
+
+    def test_master_method_sections_have_procedure(self):
+        master = _REPO_ROOT / "TRIZ-MASTER.md"
+        lines = master.read_text(encoding="utf-8").splitlines()
+        section_headers = [
+            i for i, line in enumerate(lines) if re.match(r"^## \d+\.", line)
+        ]
+        for i, idx in enumerate(section_headers):
+            num = int(re.match(r"^## (\d+)\.", lines[idx]).group(1))
+            if not 3 <= num <= 20:
+                continue
+            end = section_headers[i + 1] if i + 1 < len(section_headers) else len(lines)
+            body = "\n".join(lines[idx:end])
+            self.assertIn(
+                "**Procedure:**", body,
+                f"Section {num} (line {idx + 1}) is missing **Procedure:**",
+            )
+
+    def test_master_inventive_principles_row2(self):
+        csv_path = _SCRIPTS_DIR / "data" / "inventive_principles.csv"
+        with open(csv_path, "r", encoding="utf-8") as fh:
+            rows = list(csv.reader(fh))
+        # rows[0] is the header; rows[2] is the second data row (id 2).
+        self.assertEqual(rows[2][0], "2")
+        self.assertEqual(rows[2][1], "Taking Out")
+
+    def test_master_matrix_27_25(self):
+        result = triz_matrix.lookup(27, 25)
+        pids = [p["id"] for p in result["principles"]]
+        self.assertEqual(pids, [10, 30, 4])
 
 
 if __name__ == "__main__":

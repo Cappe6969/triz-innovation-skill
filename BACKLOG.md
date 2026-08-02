@@ -23,3 +23,5 @@ Deferred Medium/Low findings.
 - [Medium] tests/test_triz.py:760 — Matrix and catalog tests do not verify exact (18,35) principles, can silently skip the empty-cell case, and omit list-all output, variant-count, complete-entry, and missing-template checks. (round 1) → Assert exact expected values, fail when fixtures are absent, and add the missing catalog and template tests.
 
 - [Low] commit-and-push.cmd:1 — Deleting this file is outside the specified scope and violates Acceptance Criterion 1, which requires no other files to be modified. (round 2) → Restore the file or explicitly amend the specification to authorize its removal.
+
+- [Fixed] .agents/skills/triz-innovation/scripts/triz.py:37 — Help advertises `branches resolve` but the dispatcher stripped `--lang` and did not forward it, so the documented path exited with a usage error. (round 3) → RESOLVED in ship build 2: `_FLAG_CONSUMERS` now forwards `--lang` to the `branches` command and `triz_branches.py` accepts the flag at any position. Verified via `python triz.py branches resolve --lang it`.

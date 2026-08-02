@@ -20,7 +20,7 @@ Every system follows an S-shaped performance-vs-effort curve through 4 stages:
 **Diagnostic:** if you're spending more and more to gain less and less, and recent
 "innovations" are cosmetic, you're in late maturity — the leverage is in switching
 curves, not tuning this one. The classifier hints at the stage:
-`python .claude/skills/triz-innovation/scripts/triz_evolution.py --signals "gains shrinking, cost rising, minor tweaks"`.
+`python .agents/skills/triz-innovation/scripts/triz_evolution.py --signals "gains shrinking, cost rising, minor tweaks"`.
 
 ## The 8 trends (laws) of evolution
 

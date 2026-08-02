@@ -27,10 +27,10 @@ from pathlib import Path
 def _repo_root(script_file: str) -> Path:
     """Resolve the repository root from this script's location.
 
-    Script lives at: .claude/skills/triz-innovation/scripts/
+    Script lives at: .agents/skills/triz-innovation/scripts/
     Repo root is 5 parent directories up.
     """
-    # Script is .claude/skills/triz-innovation/scripts/<file>.py — 5 levels to root
+    # Script is .agents/skills/triz-innovation/scripts/<file>.py — 5 levels to root
     return Path(script_file).resolve().parent.parent.parent.parent.parent
 
 
