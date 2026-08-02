@@ -43,3 +43,8 @@ toward fewer moving parts; every new service is denominator weight.
 Software changes are cheap to make reversible: feature flags, canary, shadow
 traffic, A/B. The stage-10 experiment should almost always be a flagged, metric-
 gated rollout with an explicit success threshold and rollback trigger.
+
+## Cross-link
+For the coding-method skill's code-side bridge (8-stage pipeline, ponytail
+ladder, red flags), see
+`../coding-method/references/triz-for-code.md`.
