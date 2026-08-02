@@ -26,7 +26,7 @@ from unittest import mock
 _REPO_ROOT = Path(__file__).resolve().parent.parent
 _SCRIPTS_DIR = (
     _REPO_ROOT
-    / ".claude" / "skills" / "triz-innovation" / "scripts"
+    / "skills" / "triz-coding-method" / "engine" / "scripts"
 )
 sys.path.insert(0, str(_SCRIPTS_DIR))
 
@@ -1716,7 +1716,7 @@ class TestFieldBranchesDataDriven(unittest.TestCase):
     def test_use_cases_file_structure(self):
         path = (
             _REPO_ROOT
-            / ".claude" / "skills" / "triz-innovation" / "references" / "use-cases.md"
+            / "skills" / "triz-coding-method" / "engine" / "references" / "use-cases.md"
         )
         self.assertTrue(path.is_file(), "references/use-cases.md missing")
         text = path.read_text(encoding="utf-8")
@@ -1736,7 +1736,7 @@ class TestFieldBranchesDataDriven(unittest.TestCase):
             "use-cases.md must contain exactly the required ## sections, in order",
         )
         sections: dict[str, list[str]] = {}
-        current: str | None = None
+        current = None
         for line in text.splitlines():
             if line.startswith("## "):
                 current = line

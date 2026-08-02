@@ -1,0 +1,17 @@
+{
+  "id": "closest-pair",
+  "visibility": "public",
+  "expected": {"initial_tests": "fail", "target_tests": "pass"},
+  "prompt": "Implement closest_pair(points) for up to 100000 two-dimensional points. Keep the API in solution.py and make all tests pass. Do not add dependencies.",
+  "test_command": [
+    "python",
+    "-m",
+    "unittest",
+    "-q",
+    "test_solution.py"
+  ],
+  "files": {
+    "solution.py": "def closest_pair(points):\n    \"\"\"Return (distance, point_a, point_b).\"\"\"\n    raise NotImplementedError\n",
+    "test_solution.py": "import math\nimport random\nimport unittest\nfrom solution import closest_pair\n\n\ndef brute(points):\n    best = None\n    pair = None\n    for i, a in enumerate(points):\n        for b in points[i + 1:]:\n            d = math.hypot(a[0] - b[0], a[1] - b[1])\n            if best is None or d < best:\n                best, pair = d, (a, b)\n    return best, pair\n\n\nclass TestClosestPair(unittest.TestCase):\n    def test_duplicates(self):\n        distance, a, b = closest_pair([(0, 0), (4, 5), (0, 0)])\n        self.assertEqual(distance, 0)\n        self.assertEqual(a, b)\n\n    def test_random_matches_oracle(self):\n        rng = random.Random(7)\n        for size in range(2, 35):\n            points = [(rng.randrange(-50, 51), rng.randrange(-50, 51)) for _ in range(size)]\n            expected, _ = brute(points)\n            actual, a, b = closest_pair(points)\n            self.assertTrue(math.isclose(actual, expected))\n            self.assertIn(a, points)\n            self.assertIn(b, points)\n\n\nif __name__ == '__main__':\n    unittest.main()\n"
+  }
+}

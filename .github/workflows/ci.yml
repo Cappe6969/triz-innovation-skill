@@ -7,10 +7,14 @@ on:
   push:
   pull_request:
 
+permissions:
+  contents: read
+
 jobs:
   test:
     name: unittest (${{ matrix.os }} / py${{ matrix.python-version }})
     runs-on: ${{ matrix.os }}
+    timeout-minutes: 15
     strategy:
       fail-fast: false
       matrix:
@@ -24,6 +28,16 @@ jobs:
       - name: Full test suite
         run: python -m unittest discover -s tests -p "test_*.py"
       - name: Branch registry validation
-        run: python .claude/skills/triz-innovation/scripts/triz.py branches check
+        run: python skills/triz-coding-method/engine/scripts/triz.py branches check
       - name: MCP server self-test
-        run: python .claude/skills/triz-innovation/mcp/triz_mcp_server.py --self-test
+        run: python skills/triz-coding-method/scripts/triz_mcp_server.py --self-test
+      - name: Skill quick validation
+        run: python scripts/quick_validate_skill.py
+      - name: Plugin manifest validation
+        run: python scripts/validate_plugin.py
+      - name: Repository and version validation
+        run: python scripts/validate_repo.py
+      - name: Benchmark fixture dry validation
+        run: python benchmarks/runner.py --dry-run
+      - name: Build and inspect all release packages
+        run: python scripts/package_release.py --target all --output-dir dist-ci

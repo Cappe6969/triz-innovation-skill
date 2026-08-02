@@ -1,344 +1,202 @@
 #!/usr/bin/env python3
-"""Tests for the stdlib MCP server (mcp/triz_mcp_server.py).
-
-Pytest-compatible; also runnable with plain Python (unittest).
-
-Usage:
-    pytest tests/test_triz_mcp.py
-    python tests/test_triz_mcp.py
-"""
+"""Contract and wire tests for the read-only MCP server."""
 
 from __future__ import annotations
 
+import io
 import json
-import re
 import subprocess
 import sys
-import tempfile
 import unittest
 from pathlib import Path
 from unittest import mock
 
-_REPO_ROOT = Path(__file__).resolve().parent.parent
-_MCP_DIR = (
-    _REPO_ROOT / ".claude" / "skills" / "triz-innovation" / "mcp"
-)
-_MCP_SERVER = _MCP_DIR / "triz_mcp_server.py"
-
-# Importing the server bootstraps the scripts dir onto sys.path and pulls in
-# triz_router / triz_evaluator / triz_case_template as module attributes.
-sys.path.insert(0, str(_MCP_DIR))
+ROOT = Path(__file__).resolve().parent.parent
+SERVER_DIR = ROOT / "skills" / "triz-coding-method" / "scripts"
+SERVER = SERVER_DIR / "triz_mcp_server.py"
+sys.path.insert(0, str(SERVER_DIR))
 import triz_mcp_server as mcp  # noqa: E402
 
 
-def _req(method: str, params=None, req_id: int = 1) -> dict:
-    msg: dict = {"jsonrpc": "2.0", "id": req_id, "method": method}
+def request(method, params=None, request_id=1):
+    value = {"jsonrpc": "2.0", "id": request_id, "method": method}
     if params is not None:
-        msg["params"] = params
-    return msg
+        value["params"] = params
+    return value
 
 
-def _solutions() -> list[dict]:
-    return [
-        {"solution": "Gamified reminders", "impact": 4, "feasibility": 3,
-         "cost": 2, "speed": 4, "risk": 3, "reversibility": 5,
-         "complexity": 2, "ideality": 3},
-        {"solution": "Therapist calls", "impact": 5, "feasibility": 3,
-         "cost": 1, "speed": 2, "risk": 4, "reversibility": 4,
-         "complexity": 4, "ideality": 2},
-    ]
+def call(name, arguments):
+    return mcp.handle_message(request("tools/call", {"name": name, "arguments": arguments}))
 
 
-class TestMCPHandleMessage(unittest.TestCase):
-    """Unit tests on the pure handle_message core."""
+def sample_solution(name="small"):
+    return {
+        "solution": name,
+        "impact": 3,
+        "feasibility": 4,
+        "cost": 5,
+        "speed": 4,
+        "risk": 5,
+        "reversibility": 5,
+        "complexity": 5,
+        "ideality": 4,
+    }
 
-    # ── initialize ──────────────────────────────────────────────────────────
 
-    def test_initialize_shape_and_protocol_echo(self):
-        """initialize returns capabilities + serverInfo, echoing a valid version."""
-        r = mcp.handle_message(_req(
-            "initialize",
-            {"protocolVersion": "2025-03-26", "capabilities": {}, "clientInfo": {}},
-        ))
-        self.assertEqual(r["id"], 1)
-        self.assertEqual(r["jsonrpc"], "2.0")
-        self.assertEqual(r["result"]["protocolVersion"], "2025-03-26")
-        self.assertEqual(r["result"]["capabilities"], {"tools": {}})
-        self.assertEqual(r["result"]["serverInfo"],
-                         {"name": "triz-innovation", "version": "0.1.0"})
+class TestProtocol(unittest.TestCase):
+    def test_initialize_supported_version(self):
+        result = mcp.handle_message(request("initialize", {"protocolVersion": "2025-06-18"}))
+        self.assertEqual(result["result"]["protocolVersion"], "2025-06-18")
+        self.assertEqual(result["result"]["serverInfo"], {"name": "triz-coding-method", "version": "0.1.0"})
 
-    def test_initialize_fallback_protocol_version(self):
-        """Non-version protocolVersion falls back to the server default."""
-        for bad in ("garbage", "1.0", "", None, 123, True):
-            r = mcp.handle_message(_req("initialize", {"protocolVersion": bad}))
-            self.assertEqual(r["result"]["protocolVersion"], "2025-06-18",
-                             f"for {bad!r}")
+    def test_initialize_rejects_unsupported_version(self):
+        result = mcp.handle_message(request("initialize", {"protocolVersion": "2099-01-01"}))
+        self.assertEqual(result["error"]["code"], -32602)
 
-    # ── tools/list ──────────────────────────────────────────────────────────
+    def test_requires_jsonrpc_2(self):
+        result = mcp.handle_message({"id": 1, "method": "ping"})
+        self.assertEqual(result["error"]["code"], -32600)
 
-    def test_tools_list_exact_tools_with_schemas(self):
-        """tools/list has exactly triz_route / triz_new_case / triz_evaluate,
-        each with a valid object inputSchema."""
-        r = mcp.handle_message(_req("tools/list"))
-        tools = r["result"]["tools"]
-        self.assertEqual([t["name"] for t in tools],
-                         ["triz_route", "triz_new_case", "triz_evaluate"])
-        for t in tools:
-            self.assertIn("inputSchema", t)
-            schema = t["inputSchema"]
-            self.assertEqual(schema["type"], "object")
-            self.assertIn("properties", schema)
-            self.assertIn("required", schema)
-            self.assertIsInstance(schema["properties"], dict)
+    def test_rejects_extra_request_fields(self):
+        message = request("ping")
+        message["extra"] = True
+        self.assertEqual(mcp.handle_message(message)["error"]["code"], -32600)
 
-    # ── tools/call triz_route ───────────────────────────────────────────────
-
-    def test_tools_call_triz_route_returns_method_text(self):
-        """triz_route returns a text block containing a recommended method."""
-        r = mcp.handle_message(_req(
-            "tools/call",
-            {"name": "triz_route",
-             "arguments": {"problem": "more speed but less reliability"}},
-        ))
-        self.assertNotIn("error", r)
-        self.assertNotIn("isError", r.get("result", {}))
-        text = r["result"]["content"][0]["text"]
-        self.assertIn("40 Inventive Principles", text)
-        self.assertIn("Engineering Contradiction", text)
-
-    def test_tools_call_triz_route_missing_problem_invalid_params(self):
-        """Missing required 'problem' -> -32602."""
-        r = mcp.handle_message(_req(
-            "tools/call",
-            {"name": "triz_route", "arguments": {}},
-        ))
-        self.assertEqual(r["error"]["code"], -32602)
-
-    def test_tools_call_triz_route_unknown_branch_is_error(self):
-        """An unknown branch surfaces as a friendly isError result, not a crash."""
-        r = mcp.handle_message(_req(
-            "tools/call",
-            {"name": "triz_route",
-             "arguments": {"problem": "x", "branch": "bogus"}},
-        ))
-        self.assertEqual(r["result"]["isError"], True)
-        self.assertIn("triz_route failed", r["result"]["content"][0]["text"])
-
-    # ── tools/call triz_evaluate ────────────────────────────────────────────
-
-    def test_tools_call_triz_evaluate_returns_table(self):
-        """Valid rows produce the sorted markdown table."""
-        r = mcp.handle_message(_req(
-            "tools/call",
-            {"name": "triz_evaluate", "arguments": {"solutions": _solutions()}},
-        ))
-        self.assertNotIn("error", r)
-        text = r["result"]["content"][0]["text"]
-        self.assertIn("Solution", text)
-        self.assertIn("Impact", text)
-        self.assertIn("Total", text)
-        self.assertIn("Gamified reminders", text)
-        self.assertIn("Therapist calls", text)
-
-    def test_tools_call_triz_evaluate_bad_criterion_is_error(self):
-        """A criterion out of 1..5 -> isError naming the problem."""
-        bad = _solutions()
-        bad[0]["impact"] = 9
-        r = mcp.handle_message(_req(
-            "tools/call",
-            {"name": "triz_evaluate", "arguments": {"solutions": bad}},
-        ))
-        self.assertEqual(r["result"]["isError"], True)
-        self.assertIn("impact", r["result"]["content"][0]["text"].lower())
-
-    def test_tools_call_triz_evaluate_non_int_criterion_is_error(self):
-        """A non-integer criterion (bool/str) -> isError."""
-        bad = _solutions()
-        bad[0]["cost"] = "cheap"
-        r = mcp.handle_message(_req(
-            "tools/call",
-            {"name": "triz_evaluate", "arguments": {"solutions": bad}},
-        ))
-        self.assertEqual(r["result"]["isError"], True)
-        self.assertIn("cost", r["result"]["content"][0]["text"].lower())
-
-    # ── tools/call triz_new_case ────────────────────────────────────────────
-
-    def test_tools_call_triz_new_case_missing_template_is_error(self):
-        """Absent template path -> friendly isError (patched like test_triz.py)."""
-        with tempfile.TemporaryDirectory() as tmpdir:
-            missing = Path(tmpdir) / "missing-template.md"
-            with mock.patch.object(mcp.triz_case_template, "_template_path",
-                                   return_value=missing):
-                r = mcp.handle_message(_req(
-                    "tools/call",
-                    {"name": "triz_new_case", "arguments": {"title": "X"}},
-                ))
-        self.assertEqual(r["result"]["isError"], True)
-        self.assertIn("triz_new_case", r["result"]["content"][0]["text"])
-
-    def test_tools_call_triz_new_case_missing_title_invalid_params(self):
-        """Missing required 'title' -> -32602."""
-        r = mcp.handle_message(_req(
-            "tools/call",
-            {"name": "triz_new_case", "arguments": {}},
-        ))
-        self.assertEqual(r["error"]["code"], -32602)
-
-    def test_tools_call_triz_new_case_writes_to_cases_dir(self):
-        """With a patched _repo_root, create_case writes into the temp cases dir."""
-        with tempfile.TemporaryDirectory() as tmpdir:
-            tmp = Path(tmpdir)
-            (tmp / "cases").mkdir()
-            (tmp / "cases" / "template-triz-case.md").write_text(
-                "# Title\n\nBody\n", encoding="utf-8"
-            )
-            with mock.patch.object(mcp.triz_case_template, "_repo_root",
-                                   return_value=tmp):
-                r = mcp.handle_message(_req(
-                    "tools/call",
-                    {"name": "triz_new_case", "arguments": {"title": "MCP Unit Test"}},
-                ))
-        self.assertNotIn("error", r)
-        self.assertIn("cases", r["result"]["content"][0]["text"])
-
-    # ── error mapping / protocol ────────────────────────────────────────────
+    def test_notification_has_no_response(self):
+        self.assertIsNone(mcp.handle_message({"jsonrpc": "2.0", "method": "notifications/initialized"}))
 
     def test_unknown_method(self):
-        """Unknown method -> -32601 Method not found."""
-        r = mcp.handle_message(_req("no/such/method"))
-        self.assertEqual(r["error"]["code"], -32601)
-
-    def test_invalid_params_missing_tool_name(self):
-        """tools/call without a tool name -> -32602 Invalid params."""
-        r = mcp.handle_message(_req("tools/call", {}))
-        self.assertEqual(r["error"]["code"], -32602)
-
-    def test_invalid_params_unknown_tool(self):
-        """tools/call for an unknown tool -> -32602 Invalid params."""
-        r = mcp.handle_message(_req(
-            "tools/call", {"name": "nope", "arguments": {}},
-        ))
-        self.assertEqual(r["error"]["code"], -32602)
-
-    def test_notification_returns_none(self):
-        """A JSON-RPC notification (no id) must produce no response."""
-        self.assertIsNone(mcp.handle_message(
-            {"jsonrpc": "2.0", "method": "notifications/initialized"}
-        ))
-
-    def test_ping_returns_empty_result(self):
-        r = mcp.handle_message(_req("ping"))
-        self.assertEqual(r["result"], {})
-
-    def test_bad_json_parse_error(self):
-        """Non-JSON line -> -32700 Parse error with id null."""
-        r = mcp._handle_line("{not json")
-        self.assertEqual(r["error"]["code"], -32700)
-        self.assertIsNone(r["id"])
-
-    def test_non_object_request_invalid_request(self):
-        """A valid-JSON non-object request -> -32600 Invalid Request."""
-        r = mcp._handle_line("[1, 2, 3]")
-        self.assertEqual(r["error"]["code"], -32600)
+        self.assertEqual(mcp.handle_message(request("unknown"))["error"]["code"], -32601)
 
 
-class TestMCPSubprocess(unittest.TestCase):
-    """One subprocess test exercising the real --self-test CLI mode."""
+class TestSchemas(unittest.TestCase):
+    def setUp(self):
+        self.tools = mcp.handle_message(request("tools/list"))["result"]["tools"]
 
-    def test_self_test_subprocess(self):
-        """`python triz_mcp_server.py --self-test` exits 0 and prints OK."""
-        proc = subprocess.run(
-            [sys.executable, str(_MCP_SERVER), "--self-test"],
-            capture_output=True, text=True, encoding="utf-8",
-        )
-        self.assertEqual(proc.returncode, 0, proc.stderr)
-        self.assertIn("SELF-TEST OK", proc.stdout)
-        self.assertEqual(proc.stdout.count("\n"), 1,
-                         "self-test should print exactly one line")
+    def test_exact_read_only_tools(self):
+        self.assertEqual([tool["name"] for tool in self.tools], [
+            "triz_coding_route", "triz_matrix_lookup", "triz_coding_evaluate"
+        ])
+        self.assertNotIn("triz_new_case", json.dumps(self.tools))
 
+    def test_all_object_schemas_are_closed(self):
+        def visit(node):
+            if isinstance(node, dict):
+                if node.get("type") == "object":
+                    self.assertIs(node.get("additionalProperties"), False)
+                for value in node.values():
+                    visit(value)
+            elif isinstance(node, list):
+                for value in node:
+                    visit(value)
+        for tool in self.tools:
+            visit(tool["inputSchema"])
 
-class TestMCPWireProtocol(unittest.TestCase):
-    """End-to-end tests over the real stdio transport — proves the server speaks
-    BOTH the standard MCP Content-Length framing (official SDK / Claude Code /
-    opencode) and the legacy newline-delimited framing. One persistent
-    subprocess serves all three exchanges sequentially."""
-
-    @classmethod
-    def setUpClass(cls):
-        cls._proc = subprocess.Popen(
-            [sys.executable, str(_MCP_SERVER)],
-            stdin=subprocess.PIPE,
-            stdout=subprocess.PIPE,
-            stderr=subprocess.PIPE,
-        )
-
-    @classmethod
-    def tearDownClass(cls):
-        try:
-            cls._proc.stdin.close()
-            cls._proc.terminate()
-            cls._proc.wait(timeout=5)
-        except Exception:
-            pass
-
-    def _send(self, data: bytes) -> None:
-        self._proc.stdin.write(data)
-        self._proc.stdin.flush()
-
-    def test_content_length_initialize(self):
-        """A standard Content-Length framed initialize gets a framed reply."""
-        self._send(_cl_frame(_req(
-            "initialize", {"protocolVersion": "2025-06-18"}
-        )))
-        resp = _read_cl_frame(self._proc.stdout)
-        self.assertEqual(resp["id"], 1)
-        self.assertEqual(resp["result"]["protocolVersion"], "2025-06-18")
-        self.assertEqual(resp["result"]["serverInfo"]["name"], "triz-innovation")
-
-    def test_content_length_tools_call_route(self):
-        """A Content-Length framed tools/call returns the routed text."""
-        self._send(_cl_frame(_req(
-            "tools/call",
-            {"name": "triz_route",
-             "arguments": {"problem": "more speed but less reliability"}},
-            req_id=2,
-        )))
-        resp = _read_cl_frame(self._proc.stdout)
-        self.assertEqual(resp["id"], 2)
-        text = resp["result"]["content"][0]["text"]
-        self.assertIn("40 Inventive Principles", text)
-
-    def test_newline_initialize(self):
-        """Legacy newline-delimited framing still works line-by-line."""
-        self._send(json.dumps(_req(
-            "initialize", {"protocolVersion": "2025-06-18"}, req_id=3
-        )).encode("utf-8") + b"\n")
-        line = self._proc.stdout.readline()
-        resp = json.loads(line.decode("utf-8"))
-        self.assertEqual(resp["id"], 3)
-        self.assertEqual(resp["result"]["serverInfo"]["name"], "triz-innovation")
+    def test_schema_limits(self):
+        schemas = {tool["name"]: tool["inputSchema"] for tool in self.tools}
+        self.assertEqual(schemas["triz_coding_route"]["properties"]["problem"]["maxLength"], 20000)
+        solutions = schemas["triz_coding_evaluate"]["properties"]["solutions"]
+        self.assertEqual(solutions["maxItems"], 50)
+        self.assertEqual(solutions["items"]["properties"]["solution"]["maxLength"], 2000)
 
 
-def _cl_frame(msg: dict) -> bytes:
-    """Encode a request as a standard MCP Content-Length framed message."""
-    body = json.dumps(msg, ensure_ascii=False).encode("utf-8")
-    return (b"Content-Length: " + str(len(body)).encode("ascii")
-            + b"\r\n\r\n" + body)
+class TestTools(unittest.TestCase):
+    def test_route_structured_content(self):
+        result = call("triz_coding_route", {"problem": "more speed but less reliability"})["result"]
+        self.assertFalse(result["isError"])
+        structured = result["structuredContent"]
+        self.assertEqual(structured["mode"], "focused")
+        self.assertIn(5, structured["stages"])
+        self.assertIsNotNone(structured["contradiction"])
+        self.assertTrue(all(not ref.startswith(("/", "C:")) for ref in structured["references"]))
+
+    def test_route_explicit_modes(self):
+        for mode in ("lite", "focused", "ultra"):
+            with self.subTest(mode=mode):
+                result = call("triz_coding_route", {"problem": "choose an API", "mode": mode})
+                self.assertEqual(result["result"]["structuredContent"]["mode"], mode)
+
+    def test_route_rejects_size_and_extra(self):
+        self.assertTrue(call("triz_coding_route", {"problem": "x" * 20001})["result"]["isError"])
+        self.assertTrue(call("triz_coding_route", {"problem": "x", "branch": "general"})["result"]["isError"])
+
+    def test_matrix_exact_lookup(self):
+        result = call("triz_matrix_lookup", {"improving": 18, "worsening": 35})["result"]
+        self.assertFalse(result["isError"])
+        self.assertEqual([item["id"] for item in result["structuredContent"]["principles"]], [15, 1, 19])
+
+    def test_matrix_rejects_bool_and_range(self):
+        self.assertTrue(call("triz_matrix_lookup", {"improving": True, "worsening": 2})["result"]["isError"])
+        self.assertTrue(call("triz_matrix_lookup", {"improving": 40, "worsening": 2})["result"]["isError"])
+
+    def test_evaluate_orders_scores(self):
+        low = sample_solution("low")
+        low.update({criterion: 1 for criterion in mcp.triz_evaluator.CRITERIA})
+        result = call("triz_coding_evaluate", {"solutions": [low, sample_solution("high")]})["result"]
+        self.assertFalse(result["isError"])
+        self.assertEqual(result["structuredContent"]["solutions"][0]["solution"], "high")
+
+    def test_evaluate_rejects_limits(self):
+        self.assertTrue(call("triz_coding_evaluate", {"solutions": []})["result"]["isError"])
+        self.assertTrue(call("triz_coding_evaluate", {"solutions": [sample_solution()] * 51})["result"]["isError"])
+        too_long = sample_solution("x" * 2001)
+        self.assertTrue(call("triz_coding_evaluate", {"solutions": [too_long]})["result"]["isError"])
+
+    def test_evaluate_rejects_bad_and_extra_fields(self):
+        bad = sample_solution()
+        bad["risk"] = True
+        self.assertTrue(call("triz_coding_evaluate", {"solutions": [bad]})["result"]["isError"])
+        extra = sample_solution()
+        extra["notes"] = "no"
+        self.assertTrue(call("triz_coding_evaluate", {"solutions": [extra]})["result"]["isError"])
+
+    def test_internal_error_is_sanitized(self):
+        payload = json.dumps(request("tools/call", {"name": "triz_coding_route", "arguments": {"problem": "x"}})).encode()
+        with mock.patch.object(mcp.coding_method, "route", side_effect=RuntimeError("C:\\private\\secret.py")):
+            result = mcp._handle_payload(payload)
+        rendered = json.dumps(result)
+        self.assertIn("Internal error", rendered)
+        self.assertNotIn("private", rendered)
+        self.assertNotIn("Traceback", rendered)
 
 
-def _read_cl_frame(stdout) -> dict:
-    """Read one Content-Length framed response from a binary stdout pipe."""
-    headers = b""
-    while True:
-        line = stdout.readline()
-        if line in (b"", b"\r\n", b"\n"):
-            break
-        headers += line
-    m = re.search(br"Content-Length:\s*(\d+)", headers, re.IGNORECASE)
-    assert m is not None, f"no Content-Length header, got {headers!r}"
-    body = stdout.read(int(m.group(1)))
-    return json.loads(body.decode("utf-8"))
+class TestWire(unittest.TestCase):
+    def _serve(self, payload):
+        output = io.BytesIO()
+        mcp.serve_streams(io.BytesIO(payload), output)
+        return output.getvalue()
+
+    def test_newline_framing(self):
+        wire = json.dumps(request("ping")).encode() + b"\n"
+        response = json.loads(self._serve(wire))
+        self.assertEqual(response["result"], {})
+
+    def test_content_length_framing(self):
+        body = json.dumps(request("ping")).encode()
+        wire = b"Content-Length: " + str(len(body)).encode() + b"\r\n\r\n" + body
+        response_wire = self._serve(wire)
+        _, response_body = response_wire.split(b"\r\n\r\n", 1)
+        self.assertEqual(json.loads(response_body)["result"], {})
+
+    def test_malformed_json(self):
+        response = json.loads(self._serve(b"{bad}\n"))
+        self.assertEqual(response["error"]["code"], -32700)
+
+    def test_oversized_newline_request(self):
+        response = json.loads(self._serve(b"{" + b"x" * (mcp.MAX_REQUEST_BYTES + 10) + b"}\n"))
+        self.assertEqual(response["error"]["message"], "Request too large")
+
+    def test_oversized_framed_request(self):
+        size = mcp.MAX_REQUEST_BYTES + 1
+        wire = b"Content-Length: " + str(size).encode() + b"\r\n\r\n" + b"x" * size
+        response_wire = self._serve(wire)
+        _, body = response_wire.split(b"\r\n\r\n", 1)
+        self.assertEqual(json.loads(body)["error"]["message"], "Request too large")
+
+    def test_self_test_cli(self):
+        completed = subprocess.run([sys.executable, str(SERVER), "--self-test"], capture_output=True, text=True, check=False)
+        self.assertEqual(completed.returncode, 0, completed.stderr)
+        self.assertIn("SELF-TEST OK", completed.stdout)
 
 
 if __name__ == "__main__":

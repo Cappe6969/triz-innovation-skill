@@ -1,0 +1,17 @@
+{
+  "id": "declarative-pipeline",
+  "visibility": "public",
+  "expected": {"initial_tests": "fail", "target_tests": "pass"},
+  "prompt": "Implement completed_paid_totals without mutating orders. Return totals by customer for completed and paid orders only. Prefer the smallest clear standard-library solution.",
+  "test_command": [
+    "python",
+    "-m",
+    "unittest",
+    "-q",
+    "test_solution.py"
+  ],
+  "files": {
+    "solution.py": "def completed_paid_totals(orders):\n    raise NotImplementedError\n",
+    "test_solution.py": "import copy\nimport unittest\nfrom solution import completed_paid_totals\n\n\nclass TestPipeline(unittest.TestCase):\n    def test_filters_and_accumulates(self):\n        orders = [\n            {'customer': 'a', 'status': 'completed', 'paid': True, 'total': 4},\n            {'customer': 'a', 'status': 'completed', 'paid': True, 'total': 3},\n            {'customer': 'b', 'status': 'pending', 'paid': True, 'total': 9},\n            {'customer': 'b', 'status': 'completed', 'paid': False, 'total': 8},\n        ]\n        original = copy.deepcopy(orders)\n        self.assertEqual(completed_paid_totals(orders), {'a': 7})\n        self.assertEqual(orders, original)\n\n    def test_empty(self):\n        self.assertEqual(completed_paid_totals([]), {})\n\n\nif __name__ == '__main__':\n    unittest.main()\n"
+  }
+}

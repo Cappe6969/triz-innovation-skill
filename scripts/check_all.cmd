@@ -7,10 +7,25 @@ set FAIL=0
 python -m unittest discover -s tests -p "test_*.py"
 if errorlevel 1 set FAIL=1
 
-python .claude\skills\triz-innovation\scripts\triz.py branches check
+python skills\triz-coding-method\engine\scripts\triz.py branches check
 if errorlevel 1 set FAIL=1
 
-python .claude\skills\triz-innovation\mcp\triz_mcp_server.py --self-test
+python skills\triz-coding-method\scripts\triz_mcp_server.py --self-test
+if errorlevel 1 set FAIL=1
+
+python scripts\quick_validate_skill.py
+if errorlevel 1 set FAIL=1
+
+python scripts\validate_plugin.py
+if errorlevel 1 set FAIL=1
+
+python scripts\validate_repo.py
+if errorlevel 1 set FAIL=1
+
+python benchmarks\runner.py --dry-run
+if errorlevel 1 set FAIL=1
+
+python scripts\package_release.py --target all
 if errorlevel 1 set FAIL=1
 
 if %FAIL%==1 (

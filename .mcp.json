@@ -1,0 +1,10 @@
+{
+  "mcpServers": {
+    "triz-coding-method": {
+      "command": "python",
+      "args": [
+        "${CLAUDE_PLUGIN_ROOT}/skills/triz-coding-method/scripts/triz_mcp_server.py"
+      ]
+    }
+  }
+}

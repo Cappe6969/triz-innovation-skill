@@ -1,0 +1,17 @@
+{
+  "id": "cache-freshness",
+  "visibility": "public",
+  "expected": {"initial_tests": "fail", "target_tests": "pass"},
+  "prompt": "Implement TtlCache in solution.py. Cached values may be stale only until ttl expires; after expiry the next read must call the loader. Use the injected clock. Do not add dependencies.",
+  "test_command": [
+    "python",
+    "-m",
+    "unittest",
+    "-q",
+    "test_solution.py"
+  ],
+  "files": {
+    "solution.py": "class TtlCache:\n    def __init__(self, ttl, clock):\n        self.ttl = ttl\n        self.clock = clock\n\n    def get(self, key, loader):\n        raise NotImplementedError\n\n    def invalidate(self, key):\n        raise NotImplementedError\n",
+    "test_solution.py": "import unittest\nfrom solution import TtlCache\n\n\nclass Clock:\n    now = 0\n    def __call__(self):\n        return self.now\n\n\nclass TestTtlCache(unittest.TestCase):\n    def test_hit_then_refresh_at_expiry(self):\n        clock = Clock()\n        cache = TtlCache(30, clock)\n        values = iter(['v1', 'v2'])\n        calls = []\n        def load():\n            calls.append(1)\n            return next(values)\n        self.assertEqual(cache.get('x', load), 'v1')\n        clock.now = 29\n        self.assertEqual(cache.get('x', load), 'v1')\n        clock.now = 30\n        self.assertEqual(cache.get('x', load), 'v2')\n        self.assertEqual(len(calls), 2)\n\n    def test_invalidate_forces_refresh(self):\n        clock = Clock()\n        cache = TtlCache(30, clock)\n        values = iter([1, 2])\n        self.assertEqual(cache.get('x', lambda: next(values)), 1)\n        cache.invalidate('x')\n        self.assertEqual(cache.get('x', lambda: next(values)), 2)\n\n\nif __name__ == '__main__':\n    unittest.main()\n"
+  }
+}

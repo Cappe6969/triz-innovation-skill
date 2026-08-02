@@ -1,0 +1,18 @@
+{
+  "id": "sqlite-desktop-mount",
+  "visibility": "anonymized-real",
+  "expected": {"initial_tests": "fail", "target_tests": "pass"},
+  "derived_from": "13853135",
+  "prompt": "Implement database_path for a desktop app. Use an explicitly selected .db file or app_dir/app.db, return an absolute resolved Path, create only the parent directory, and reject non-.db selections.",
+  "test_command": [
+    "python",
+    "-m",
+    "unittest",
+    "-q",
+    "test_solution.py"
+  ],
+  "files": {
+    "solution.py": "from pathlib import Path\n\n\ndef database_path(app_dir, selected=None):\n    return Path(selected or 'app.db')\n",
+    "test_solution.py": "import tempfile\nimport unittest\nfrom pathlib import Path\nfrom solution import database_path\n\n\nclass TestDatabasePath(unittest.TestCase):\n    def test_default_below_app_dir(self):\n        with tempfile.TemporaryDirectory() as tmp:\n            result = database_path(tmp)\n            self.assertEqual(result, (Path(tmp) / 'app.db').resolve())\n            self.assertTrue(result.parent.is_dir())\n            self.assertFalse(result.exists())\n\n    def test_selected_database(self):\n        with tempfile.TemporaryDirectory() as tmp:\n            selected = Path(tmp) / 'mounted' / 'data.db'\n            self.assertEqual(database_path(tmp, selected), selected.resolve())\n            self.assertTrue(selected.parent.is_dir())\n\n    def test_rejects_other_extension(self):\n        with tempfile.TemporaryDirectory() as tmp:\n            with self.assertRaises(ValueError): database_path(tmp, Path(tmp) / 'data.txt')\n\n\nif __name__ == '__main__':\n    unittest.main()\n"
+  }
+}
