@@ -126,8 +126,8 @@ _SIGNALS = [
      "Define the data first (named data definition + interpretation), template follows the data, pick the strategy."),
     ("data-heavy",
      r"\bdatabase\b|\bpipeline\b|\banalytics\b|\bdata model\b|\btable\b|\bquery\b",
-     "Stages 4 + 5", ["computation-models.md"],
-     "Data-heavy system: consider the data fork (future references/data-systems.md from DDIA)."),
+     "Stages 4 + 5", ["data-systems.md", "computation-models.md"],
+     "Data-heavy system: consult references/data-systems.md (DDIA) — frame as a composite data system, derive caches/indexes from the source-of-truth log, pick the isolation level you actually need."),
 ]
 
 _REF_INDEX = [
@@ -146,6 +146,7 @@ _REF_INDEX = [
     ("Rewrite ladder", "rewrite-ladder.md"),
     ("Proof-pass verification", "type-safety.md"),
     ("TRIZ <-> code bridge", "triz-for-code.md"),
+    ("Data-system decisions", "data-systems.md"),
 ]
 
 

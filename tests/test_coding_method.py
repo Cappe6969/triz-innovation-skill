@@ -4,7 +4,7 @@ Coding-method (Lazy Ideality) test suite — runnable with plain Python (unittes
 or pytest.
 
 Covers the three scripts (method dispatcher, ponytail ladder, red-flag scan),
-the reference index (all 15 files present), the 8-stage pipeline shape, the
+the reference index (all 16 files present), the 8-stage pipeline shape, the
 cross-invocation to triz-innovation, and the curriculum structure.
 
 Usage:
@@ -46,6 +46,7 @@ _REF_FILES = [
     "rewrite-ladder.md",
     "type-safety.md",
     "triz-for-code.md",
+    "data-systems.md",
 ]
 
 
@@ -288,11 +289,11 @@ class TestRedFlags(unittest.TestCase):
 
 
 class TestReferenceIndex(unittest.TestCase):
-    """All 15 reference files exist and the index lists exactly them."""
+    """All 16 reference files exist and the index lists exactly them."""
 
-    def test_index_15_entries(self):
+    def test_index_16_entries(self):
         files = [entry[1] for entry in method._REF_INDEX]
-        self.assertEqual(len(files), 15)
+        self.assertEqual(len(files), 16)
 
     def test_index_matches_disk(self):
         files = [entry[1] for entry in method._REF_INDEX]

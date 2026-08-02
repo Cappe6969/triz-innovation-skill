@@ -25,11 +25,10 @@ Google / Pragmatic / Underscore / Dooley / TAPL are references, not steps.
 | 4 | **Refactoring** | safe mechanical improvement → stages 6–7 | ❌ **da aggiungere** |
 | 5 | **Working Effectively with Legacy Code** | change-any-code safety → stage 6 | ✅ |
 | 6 | **SICP** | the reasoning engine → stages 3–5 | ✅ |
-| 7 | **Fork finale** (FSWA / DDD / DDIA) | system-level judgment → stages 5, 8 | FSWA+DDD ✅, DDIA ❌ |
+| 7 | **Fork finale** (FSWA / DDD / DDIA) | system-level judgment → stages 5, 8 | ✅ tutti e tre |
 
 Missing books don't block you: steps 2 and 4 have interim substitutes from the
-already-distilled cards, and step 7 works with FSWA or DDD today (DDIA is only
-needed for the data-heavy fork).
+already-distilled cards.
 
 ---
 
@@ -113,16 +112,25 @@ cheap default.
 - **Fork A — Learning Domain-Driven Design** (✅ available): you build
   domain-heavy business software. Read: ch 1, 2, 3, 4 (integration), 6
   (tactical building blocks), 10 (decision tree — twice), 12 (EventStorming).
-- **Fork B — Designing Data-Intensive Applications** (❌ **da aggiungere**): you
-  build data-heavy systems (databases, pipelines, analytics). Add it first, then
-  read the data-model, storage, replication, and consistency chapters.
+- **Fork B — Designing Data-Intensive Applications** (✅ available): you build
+  data-heavy systems (databases, pipelines, analytics). Distilled into
+  `references/data-systems.md` — the reference is the operational core; read the
+  book for depth. Start with Part I (ch 1: the RSM frame + percentiles; ch 2:
+  data-model choice; ch 3: storage engines; ch 4: encoding/evolution — skim),
+  then Part II's load-bearing chapters (ch 5: replication + the three lag
+  guarantees; ch 7: transactions and the isolation ladder; ch 9: linearizability
+  vs causality + consensus-reducible problems), then Part III (ch 10: batch;
+  ch 11: stream + CDC/event sourcing; skim ch 12). Read ch 6 (partitioning) and
+  ch 8 (partial failure) when a specific system needs them — they're the "why",
+  the reference gives the "what to do".
 
 The fork is not permanent — the other two become reference files in the skill
-regardless (`architecture-tradeoffs.md`, `domain-modeling.md`).
+regardless (`architecture-tradeoffs.md`, `domain-modeling.md`; DDIA →
+`data-systems.md`).
 
 ## Health check
 A small script-level check lists which of the 7 books are still missing and
 what unblocks each:
 `python .claude/skills/coding-method/scripts/method.py route "curriculum check"`
-— but the authoritative list lives here. Missing books have an interim
-substitute except DDIA (blocks only the data-heavy fork).
+— but the authoritative list lives here. Remaining missing: Algorithm Design
+Manual (step 2) and Refactoring (step 4), both with interim substitutes.
