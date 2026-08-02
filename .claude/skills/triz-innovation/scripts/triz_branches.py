@@ -195,8 +195,7 @@ def _load_json(path: Path, errors: list[str]) -> dict[str, Any] | None:
 def _canonical_parameter_names() -> set[str]:
     """Lower-cased canonical 39-parameter names from scripts/data/parameters_39.csv.
 
-    The CSV lives beside this script (the mirror copies it too), so the check
-    works from both .claude and .agents. Returns an empty set if the CSV is
+    The CSV lives beside this script. Returns an empty set if the CSV is
     missing, which skips the canonical-key check rather than failing loudly.
     """
     csv_path = _SCRIPT_DIR / "data" / "parameters_39.csv"

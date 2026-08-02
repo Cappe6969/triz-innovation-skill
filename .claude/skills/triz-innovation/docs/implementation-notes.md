@@ -12,23 +12,24 @@ before extending it.
 
 ## Architecture
 ```
-.claude/skills/triz-innovation/
+.claude/skills/triz-innovation/    # the single methodology folder
   SKILL.md            # core: operating rules + 10-stage pipeline + reference index
+  TRIZ-MASTER.md      # the master knowledge base (24 sections)
   references/*.md     # 13 on-demand method notes (progressive disclosure)
   examples/*.md       # 4 fully-worked pipeline runs
-  scripts/*.py        # 3 stdlib MVP helpers
-.agents/skills/triz-innovation/SKILL.md   # portable mirror (Codex/agent)
-cases/                # saved analyses (template + README + generated cases)
-docs/                 # this file + usage-guide + source-map
+  scripts/*.py        # stdlib MVP helpers
+  mcp/                # stdlib MCP server
+  docs/               # this file + usage-guide + source-map
+cases/                # saved analyses (template + README + generated cases) — repo root
 ```
 
 ## Key decisions
 1. **Progressive disclosure.** `SKILL.md` stays short and always loaded; deep
    method content lives in `references/` and is read only when a stage needs it.
    Keeps context cost low and routing fast.
-2. **Two skill copies, one source of truth.** `.claude` is canonical (has
-   references + scripts). `.agents` is a self-contained mirror for Codex. Keep
-   `name` + `description` identical so both hosts route the same way.
+2. **Single methodology folder, one source of truth.** The whole TRIZ
+   methodology (skill + TRIZ-MASTER + docs + mcp) lives under
+   `.claude/skills/triz-innovation/`. No mirror: any agent points at that folder.
 3. **Contradiction matrix not embedded.** The full Altshuller matrix is large and
    already in the repo as CSVs; `contradiction-analysis.md` points to it on
    demand instead of bloating the skill.

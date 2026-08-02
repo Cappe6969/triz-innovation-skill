@@ -19,9 +19,9 @@ You are the **Architect**. When the user asks for a feature, change, or fix:
 - Deferred Medium/Low findings go to `BACKLOG.md` — review with the user periodically.
 <!-- end ship-workflow -->
 
-## Mirror & checks
+## Methodology location
 
-- `.agents/skills/triz-innovation/` is GENERATED — never edit it directly.
-- Edit the canonical source under `.claude/skills/triz-innovation/*`, then run `python scripts/build_mirror.py` to regenerate the mirror.
-- Run `scripts/install-hooks.cmd` once to install the commit-time drift gate (a pre-commit hook runs `python scripts/build_mirror.py --check`).
-- Run `scripts/check_all.cmd` for the full gate: the test suite plus the mirror `--check`.
+The whole TRIZ methodology lives in one folder: `.claude/skills/triz-innovation/`
+(SKILL.md, branches, references, scripts, mcp, docs, TRIZ-MASTER.md). No mirror.
+Run `scripts/check_all.cmd` (or `python -m unittest discover -s tests -p "test_*.py"`)
+for the full gate.

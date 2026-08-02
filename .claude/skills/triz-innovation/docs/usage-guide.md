@@ -155,12 +155,7 @@ must be on `PATH`.
 every Claude Code session. Register the server explicitly (as above) instead.
 
 ## 7. Codex / other agents
-A portable mirror lives at `.agents/skills/triz-innovation/SKILL.md` — a
-self-contained copy of the pipeline, references, scripts, and branches, with
-`.claude/` paths rewritten to `.agents/` (same `name`/`description`). Point
-Codex Agent Skills at that folder. The mirror is generated from the canonical
-`.claude` sources — after any change to the skill, regenerate it:
-```
-python scripts/build_mirror.py
-python scripts/build_mirror.py --check    # verify it's in sync (exit 1 on drift)
-```
+There is no mirror — the methodology lives in a single folder:
+`.claude/skills/triz-innovation/` (SKILL.md, branches, references, scripts,
+mcp, examples, docs, TRIZ-MASTER.md). Point Codex Agent Skills (or any other
+agent) directly at that folder; no regeneration step exists.
