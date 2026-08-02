@@ -1,25 +1,27 @@
 # BACKLOG
 
 Deferred Medium/Low findings from the ship builds. Reviewed with the user during
-Phase 4 (2026-08-02).
+Phase 4 (2026-08-02). All seven remaining open items were closed in Phase 5
+(2026-08-02) — this build is tests + BACKLOG/docs updates only.
 
 ## Open
 
-- [Low] `.claude/skills/triz-innovation/scripts/triz_router.py:187` — Engineering contradiction label via `_short_label(text, 40)` truncates to the first 40 characters before the contradiction connector, producing near-meaningless partial fragments (e.g. "Ho un'app di fisioterapia che deve…" instead of a meaningful subject like "app notifications"). (round 1) → Improve the label-extraction heuristic: walk backward from the connector to the nearest noun phrase, or use the last N words before the connector instead of the raw prefix.
+No open items remain — all seven items carried over from Phases 1–4 are resolved
+in Phase 5 (see Resolved → Phase 5 below).
 
-- [Low] `.claude/skills/triz-innovation/scripts/triz_router.py:25` — The keyword `"but "` (with trailing space) won't match "but," or "but." — only "but " followed by another word. Contradiction detection is unaffected (it uses bare "but"). (round 1) → Add bare "but" / "ma" to the RULES keywords, or use a regex word-boundary match for connector keywords.
+## Resolved
 
-- [Medium] `cases/2026-06-14-ariz-test-problem.md`, `cases/2026-06-14-smoke-test-case.md`, `reddit-post.md` — untracked working-tree files. The round-1 finding flagged them as out of scope for a build; they were never added to any merged build. (round 1) → Decide their fate: commit deliberately, move to `docs/`, or delete. User has not yet chosen.
+### Phase 5 — all 7 open items closed (commits `9056842` tests + `abc4b04` BACKLOG/SPEC)
 
-- [Medium] `tests/test_triz.py:345` — Dispatcher tests check return codes only; they omit required output assertions, non-empty effects/network output checks, and the missing-subtool failure path. (round 1) → Capture output and add marker, non-empty-output, and empty-script-directory assertions.
+- [Low] `.claude/skills/triz-innovation/scripts/triz_router.py:187` — engineering-contradiction label via `_short_label(text, 40)` truncated to the first 40 chars before the connector, producing partial fragments (e.g. "Ho un'app di fisioterapia che deve…"). → Resolved in Phase 5: the label heuristic already walks the last whole words before the connector (`_subject_words(before_raw, 3, from_end=True)`), so the label is now whole-word (e.g. `improve [per gli esercizi]`); locked in with whole-word regression tests (`test_router_physio_ec_label_whole_words`, `test_router_long_word_english_ec_label_whole_words`).
+- [Low] `.claude/skills/triz-innovation/scripts/triz_router.py:25` — the keyword `"but "` (trailing space) would miss `"but,"`/`"but."`. → Resolved in Phase 5: connector keywords are bare whole words matched with `\b` word boundaries, so punctuation-adjacent connectors already match; covered by `test_router_punctuation_adjacent_connectors`.
+- [Medium] `cases/2026-06-14-ariz-test-problem.md`, `cases/2026-06-14-smoke-test-case.md`, `reddit-post.md` — untracked working-tree files. → Resolved in Phase 5: the files no longer exist on disk and `git status` is clean.
+- [Medium] `tests/test_triz.py:345` — dispatcher tests checked return codes only. → Resolved in Phase 5: subprocess output assertions added for `route` (markers `Engineering Contradiction` / `40 Inventive Principles`), `effects --keyword magnetic` and `network --demo` (non-empty stdout), plus the missing-subtool failure path (rc 1 + `Sub-tool not found` on stderr).
+- [Medium] `tests/test_triz.py:572` — router label tests checked format/length but not whole words. → Resolved in Phase 5: whole-word / no-mid-word-split assertions added for the Italian physio label and a long-word English input, keeping the ASCII-ellipsis (`…`) constraint.
+- [Medium] `tests/test_triz.py:693` — evaluator coverage omitted BOM handling, short-row validation, and clean-stderr assertions. → Resolved in Phase 5: UTF-8-BOM parse-and-score, short-row `missing value` (SystemExit 1), and `Error:`-with-no-Traceback + empty-stdout tests added.
+- [Medium] `tests/test_triz.py:760` — matrix/catalog tests omitted exact values and coverage. → Resolved in Phase 5: exact (18,35) `[15, 1, 19]` ids/names, fixture-presence (fail loud), `matrix --list` output (39 lines + rows 18/35), `--list-all` totals, 11-variant count, complete 87-entry shape, and case-template `FileNotFoundError` tests added.
 
-- [Medium] `tests/test_triz.py:572` — Router label tests check format and length but not that label halves contain whole words, leaving the key mid-word-split regression uncovered. (round 1) → Assert whole-word tokens for both Italian label halves and the ASCII-ellipsis constraint.
-
-- [Medium] `tests/test_triz.py:693` — Evaluator coverage omits BOM handling, short-row validation, and clean stderr assertions for invalid/missing files. (round 1) → Add UTF-8-BOM, missing-field, and captured-stderr regression tests.
-
-- [Medium] `tests/test_triz.py:760` — Matrix and catalog tests don't verify exact (18,35) principles, can silently skip the empty-cell case, and omit list-all output, variant-count, complete-entry, and missing-template checks. (round 1) → Assert exact expected values, fail when fixtures are absent, and add the missing catalog/template tests.
-
-## Resolved (closed in later builds)
+### Earlier phases (kept for provenance)
 
 - [Medium] `Books/` copyrighted full-text books in the repo — resolved: removed from git (commit `f87685a`) and gitignored; on-disk copies are untracked.
 - [Medium] `.agents/skills/triz-innovation/SKILL.md` references missing — resolved in Phase 2: mirror rebuilt self-contained via `scripts/build_mirror.py` (copies `references/`, `scripts/`, `branches/`, rewrites `.claude/` → `.agents/`).
