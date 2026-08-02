@@ -1,0 +1,38 @@
+{
+  "id": "education",
+  "name": "Education & Learning TRIZ",
+  "name_it": "TRIZ educazione e apprendimento",
+  "description": "Same TRIZ machinery with education / learning vocabulary — students, curricula, assessment, engagement, retention and attention.",
+  "keywords": [
+    "student", "teacher", "school", "university", "curriculum",
+    "assessment", "lesson", "homework", "grading", "pedagogy", "tutoring",
+    "exam", "syllabus", "distraction", "motivation", "attention span",
+    "e-learning", "dropout", "knowledge retention", "learning outcomes",
+    "classroom", "study habits", "vocational training", "didactic"
+  ],
+  "parameter_map": {
+    "Loss of information": "knowledge decay / what students forget / missed explanations",
+    "Measurement accuracy": "assessment validity / grading consistency",
+    "Speed": "pace of instruction / time to mastery",
+    "Loss of time": "idle class time / administrative overhead",
+    "Quantity of substance": "class size / content volume / seat hours",
+    "Adaptability or versatility": "differentiation / personalization of learning paths",
+    "Extent of automation": "automated grading / auto-generated practice",
+    "Reliability": "consistency of learning outcomes across cohorts"
+  },
+  "principle_soft": {
+    "1": "segment the curriculum into small modules / micro-lessons",
+    "2": "take the explanation out of the live lecture — flipped classroom, video on demand",
+    "3": "local quality — per-student pacing and adaptive difficulty per topic",
+    "5": "combine modalities — lecture + practice + peer discussion",
+    "10": "pre-load prerequisites and pre-teach vocabulary before the lesson",
+    "15": "dynamic assessment — adaptive tests that shift difficulty in real time",
+    "19": "spaced repetition at regular intervals to beat the forgetting curve",
+    "25": "self-service learning — self-graded drills with automatic feedback"
+  },
+  "examples": [
+    "Students must retain more of the lesson, but adding review time leaves no room for new content.",
+    "The course must scale to more students, but personalized feedback requires more teacher time.",
+    "The assessment must measure real understanding, but longer exams exhaust the students."
+  ]
+}

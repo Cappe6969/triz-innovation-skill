@@ -1245,6 +1245,7 @@ class TestBranchesAndLanguageAxis(unittest.TestCase):
         self.assertEqual(inv["fields"], [
             "general", "business", "software", "rehab",
             "mechanical", "datascience", "marketing", "supplychain",
+            "energy", "education", "construction", "robotics",
         ])
         self.assertEqual(inv["langs"], ["en", "it"])
 
@@ -1524,15 +1525,27 @@ class TestBranchesAndLanguageAxis(unittest.TestCase):
 
 
 class TestFieldBranchesDataDriven(unittest.TestCase):
-    """Phase-3 regression: 8 field branches in canonical order, data-driven
-    dispatcher/router branch validation, four new domain rules, the
+    """Phase-3/6 regression: 12 field branches in canonical order, data-driven
+    dispatcher/router branch validation, eight domain rules, the
     use-cases reference file, and mirror sync."""
 
     _EXPECTED_FIELDS = [
         "general", "business", "software", "rehab",
         "mechanical", "datascience", "marketing", "supplychain",
+        "energy", "education", "construction", "robotics",
     ]
-    _NEW_BRANCHES = ["mechanical", "datascience", "marketing", "supplychain"]
+    _NEW_BRANCHES = ["mechanical", "datascience", "marketing", "supplychain",
+                     "energy", "education", "construction", "robotics"]
+    _BRANCH_METHODS = {
+        "mechanical": "Mechanical TRIZ",
+        "datascience": "Data Science TRIZ",
+        "marketing": "Marketing TRIZ",
+        "supplychain": "Supply Chain TRIZ",
+        "energy": "Energy TRIZ",
+        "education": "Education TRIZ",
+        "construction": "Construction TRIZ",
+        "robotics": "Robotics TRIZ",
+    }
     _USE_CASES_LABELS = [
         "**Problem:**",
         "**Branch detection:**",
@@ -1542,9 +1555,9 @@ class TestFieldBranchesDataDriven(unittest.TestCase):
         "**Result:**",
     ]
 
-    # ── Registry (8 fields, canonical order) ──────────────────────────────
+    # ── Registry (12 fields, canonical order) ─────────────────────────────
 
-    def test_registry_eight_fields_canonical_order(self):
+    def test_registry_twelve_fields_canonical_order(self):
         inv = triz_branches.list_branches()
         self.assertEqual(inv["fields"], self._EXPECTED_FIELDS)
 
@@ -1596,6 +1609,34 @@ class TestFieldBranchesDataDriven(unittest.TestCase):
         methods = [m["method"] for m in result["methods"]]
         self.assertIn("Supply Chain TRIZ", methods)
 
+    def test_route_energy_keywords(self):
+        result = triz_router.suggest_methods(
+            "the battery and inverter on the solar grid keep losing energy efficiency"
+        )
+        methods = [m["method"] for m in result["methods"]]
+        self.assertIn("Energy TRIZ", methods)
+
+    def test_route_education_keywords(self):
+        result = triz_router.suggest_methods(
+            "students lose motivation and attention span during the lesson"
+        )
+        methods = [m["method"] for m in result["methods"]]
+        self.assertIn("Education TRIZ", methods)
+
+    def test_route_construction_keywords(self):
+        result = triz_router.suggest_methods(
+            "the concrete foundation needs curing on the construction site"
+        )
+        methods = [m["method"] for m in result["methods"]]
+        self.assertIn("Construction TRIZ", methods)
+
+    def test_route_robotics_keywords(self):
+        result = triz_router.suggest_methods(
+            "the robot arm has oscillation at the end effector during path planning"
+        )
+        methods = [m["method"] for m in result["methods"]]
+        self.assertIn("Robotics TRIZ", methods)
+
     # ── --branch filter isolates a single domain's rules ──────────────────
 
     def test_branch_filter_excludes_other_domains(self):
@@ -1614,6 +1655,22 @@ class TestFieldBranchesDataDriven(unittest.TestCase):
         methods = [m["method"] for m in result["methods"]]
         self.assertIn("Data Science TRIZ", methods)
 
+    def test_suggest_methods_accepts_new_branch_ids(self):
+        """Each new field branch id is accepted by suggest_methods and routes
+        a field-relevant problem to its own domain method."""
+        problems = {
+            "energy": "the battery and inverter keep losing energy efficiency",
+            "education": "students lose motivation during the lesson",
+            "construction": "the concrete foundation needs curing",
+            "robotics": "the robot arm has oscillation at the end effector",
+        }
+        for fid, text in problems.items():
+            with self.subTest(branch=fid):
+                result = triz_router.suggest_methods(text, branch=fid)
+                methods = [m["method"] for m in result["methods"]]
+                self.assertGreater(len(methods), 0)
+                self.assertIn(self._BRANCH_METHODS[fid], methods)
+
     def test_branch_bogus_raises(self):
         with self.assertRaises(ValueError):
             triz_router.suggest_methods("the model overfits", branch="bogus")
@@ -1626,6 +1683,46 @@ class TestFieldBranchesDataDriven(unittest.TestCase):
             capture_output=True, text=True, encoding="utf-8",
         )
         self.assertEqual(proc.returncode, 0, proc.stderr)
+
+    def test_dispatcher_route_energy(self):
+        proc = subprocess.run(
+            [sys.executable, str(_SCRIPTS_DIR / "triz.py"),
+             "--branch", "energy", "route",
+             "the battery and inverter on the solar grid keep losing energy efficiency"],
+            capture_output=True, text=True, encoding="utf-8",
+        )
+        self.assertEqual(proc.returncode, 0, proc.stderr)
+        self.assertIn("Energy TRIZ", proc.stdout)
+
+    def test_dispatcher_route_education(self):
+        proc = subprocess.run(
+            [sys.executable, str(_SCRIPTS_DIR / "triz.py"),
+             "--branch", "education", "route",
+             "students lose motivation and attention span during the lesson"],
+            capture_output=True, text=True, encoding="utf-8",
+        )
+        self.assertEqual(proc.returncode, 0, proc.stderr)
+        self.assertIn("Education TRIZ", proc.stdout)
+
+    def test_dispatcher_route_construction(self):
+        proc = subprocess.run(
+            [sys.executable, str(_SCRIPTS_DIR / "triz.py"),
+             "--branch", "construction", "route",
+             "the concrete foundation needs curing on the construction site"],
+            capture_output=True, text=True, encoding="utf-8",
+        )
+        self.assertEqual(proc.returncode, 0, proc.stderr)
+        self.assertIn("Construction TRIZ", proc.stdout)
+
+    def test_dispatcher_route_robotics(self):
+        proc = subprocess.run(
+            [sys.executable, str(_SCRIPTS_DIR / "triz.py"),
+             "--branch", "robotics", "route",
+             "the robot arm has oscillation at the end effector during path planning"],
+            capture_output=True, text=True, encoding="utf-8",
+        )
+        self.assertEqual(proc.returncode, 0, proc.stderr)
+        self.assertIn("Robotics TRIZ", proc.stdout)
 
     def test_dispatcher_bogus_branch_exit1(self):
         proc = subprocess.run(
@@ -1650,11 +1747,15 @@ class TestFieldBranchesDataDriven(unittest.TestCase):
             "## Data science / ML / AI",
             "## Marketing / growth",
             "## Supply chain / logistics",
+            "## Energy / power",
+            "## Education / learning",
+            "## Construction / civil",
+            "## Robotics / IoT / embedded",
         ]
         h2 = [line for line in text.splitlines() if line.startswith("## ")]
         self.assertEqual(
             h2, headings,
-            "use-cases.md must contain exactly the four required ## sections, in order",
+            "use-cases.md must contain exactly the required ## sections, in order",
         )
         sections: dict[str, list[str]] = {}
         current: str | None = None

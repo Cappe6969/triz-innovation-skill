@@ -1,0 +1,39 @@
+{
+  "id": "robotics",
+  "name": "Robotics TRIZ",
+  "name_it": "TRIZ robotica e IoT",
+  "description": "Same TRIZ machinery with robotics / IoT / embedded vocabulary — actuators, sensors, autonomy, motion control, calibration and edge compute.",
+  "keywords": [
+    "actuator", "sensor", "autonomy", "autonomous", "firmware", "gripper",
+    "calibration", "telemetry", "motion control", "embedded", "ros",
+    "edge device", "servo", "kinematics", "path planning", "obstacle",
+    "lidar", "imu", "end effector", "robot arm", "odometry", "closed loop",
+    "sensor fusion", "localization", "microcontroller", "robot", "drone",
+    "oscillation"
+  ],
+  "parameter_map": {
+    "Speed": "cycle time / joint velocity / control-loop rate",
+    "Measurement accuracy": "sensor accuracy / localization error / encoder resolution",
+    "Stability of the object's composition": "control stability / oscillation / drift",
+    "Loss of information": "sensor noise / dropout / telemetry data loss",
+    "Duration of action of moving object": "battery life / runtime / actuator duty cycle",
+    "Extent of automation": "autonomy level / human-in-the-loop ratio",
+    "Adaptability or versatility": "grasp generality / task reconfigurability",
+    "Device complexity": "sensor-suite size / onboard compute budget"
+  },
+  "principle_soft": {
+    "1": "segment the task — modular skills; split a grasp into sub-primitives",
+    "2": "take the heavy compute off the robot — offload perception to the edge or server",
+    "3": "local quality — per-joint control gains, zone-specific sensor tuning",
+    "10": "pre-compute motion plans and pre-calibrate before the task starts",
+    "13": "invert — treat the error as the signal; close the loop on the residual",
+    "15": "dynamic control — adaptive gains, impedance control that stiffens on contact",
+    "24": "intermediary — tool changer, sensor-fusion layer, shared memory buffer",
+    "35": "change the state — switch control mode or firmware operating mode on demand"
+  },
+  "examples": [
+    "The robot arm must move faster, but higher speed causes oscillation at the end effector.",
+    "The drone must fly longer, but adding battery capacity makes it heavier and drains more power.",
+    "The autonomous vehicle must react faster to obstacles, but the perception model is too slow on the edge hardware."
+  ]
+}

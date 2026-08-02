@@ -129,3 +129,130 @@ worsening = 26 Quantity of substance.
 
 **Result:** cross-dock the fast movers `[IP-24 Intermediary]` and pre-stage on
 forecast `[IP-10 Preliminary Action]` — lead time down, inventory flat.
+
+## Energy / power
+
+**Problem:** The inverter must deliver more peak power, but the bigger cooling
+system no longer fits in the cabinet.
+
+**Branch detection:** The router matched `inverter` from the `Energy TRIZ`
+rule; the `--branch energy` filter isolates that rule and skips the other
+domains.
+
+**Route:** `python .claude/skills/triz-innovation/scripts/triz.py --branch energy route "The inverter must deliver more peak power, but the bigger cooling system no longer fits in the cabinet."`
+Live output — top methods: Engineering Contradiction + 40 Inventive Principles
+(7), then Energy TRIZ (2). The "must ... but" trade-off is detected as a
+contradiction (score 7); the `inverter` keyword hit adds the domain rule (1
+keyword hit × 2).
+
+**Parameter translation:** `Power` → *rated / peak power output*; `Loss of
+energy` → *conversion losses, heat, line losses*; `Temperature` → *junction
+temperature of the power devices*. Improving = 21 Power, worsening = 17
+Temperature.
+
+**Solution via soft principles:**
+- `IP-15` (Dynamization) — run the converter in a derated mode when the cabinet
+  heat budget is exceeded, so full peak power returns as soon as the thermal
+  mass cools.
+- `IP-1` (Segmentation) — split the single large inverter into paralleled
+  modules that share the peak and cool in turns.
+- `IP-35` (Parameter Changes) — swap the cooling medium for a phase-change
+  thermal buffer that absorbs the peak-heat burst without a bigger fan.
+
+**Result:** parallel modular converters `[IP-1 Segmentation]` with a
+phase-change thermal buffer `[IP-35 Parameter Changes]` — peak power up,
+cabinet unchanged.
+
+## Education / learning
+
+**Problem:** Students must retain more of the lesson, but adding review time
+leaves no room for new content.
+
+**Branch detection:** The router matched `students`, `lesson` from the
+`Education TRIZ` rule; the `--branch education` filter isolates it.
+
+**Route:** `python .claude/skills/triz-innovation/scripts/triz.py --branch education route "Students must retain more of the lesson, but adding review time leaves no room for new content."`
+Live output — top methods: Engineering Contradiction + 40 Inventive Principles
+(7), then Education TRIZ (4). The "must ... but" trade-off is detected as a
+contradiction (score 7); the two education keyword hits add the domain rule (2
+hits × 2).
+
+**Parameter translation:** `Loss of information` → *knowledge decay / what
+students forget*; `Loss of time` → *idle class time / review overhead*;
+`Quantity of substance` → *content volume / seat hours*. Improving = 24 Loss of
+information, worsening = 25 Loss of time.
+
+**Solution via soft principles:**
+- `IP-19` (Periodic Action) — spaced repetition: schedule short review bursts
+  at growing intervals so retention climbs without a dedicated review block.
+- `IP-2` (Taking out) — move the explanation out of the live lecture to a
+  video; class time is then freed for retrieval practice.
+- `IP-10` (Preliminary Action) — pre-teach the key vocabulary before the
+  lesson so new content lands on prepared ground.
+
+**Result:** spaced-repetition review bursts `[IP-19 Periodic Action]` and
+pre-taught vocabulary `[IP-10 Preliminary Action]` — retention up, new content
+still fits.
+
+## Construction / civil
+
+**Problem:** The concrete must finish curing faster, but accelerating the cure
+makes the slab brittle and prone to cracking.
+
+**Branch detection:** The router matched `concrete`, `curing` from the
+`Construction TRIZ` rule; the `--branch construction` filter isolates it.
+
+**Route:** `python .claude/skills/triz-innovation/scripts/triz.py --branch construction route "The concrete must finish curing faster, but accelerating the cure makes the slab brittle and prone to cracking."`
+Live output — top methods: Engineering Contradiction + 40 Inventive Principles
+(4), Construction TRIZ (4). The "must ... but" trade-off is detected as a
+contradiction; the `concrete` + `curing` keyword hits add the domain rule (2
+hits × 2).
+
+**Parameter translation:** `Loss of time` → *construction schedule / curing
+wait*; `Strength` → *concrete grade / early compressive strength*;
+`Object-affected harmful factors` → *shrinkage / thermal cracking / freeze-thaw*.
+Improving = 25 Loss of time, worsening = 14 Strength.
+
+**Solution via soft principles:**
+- `IP-24` (Intermediary) — a curing compound or sacrificial membrane holds the
+  moisture so the hydration front advances evenly and fast.
+- `IP-3` (Local Quality) — use accelerating admixtures only in the zone that
+  must reach early strength; leave the rest on the normal mix.
+- `IP-35` (Parameter Changes) — raise the curing temperature locally with
+  heated formwork, but cool the surface gradually to stop thermal shock.
+
+**Result:** curing compound + heated formwork `[IP-24 Intermediary]`
+`[IP-35 Parameter Changes]` — the slab reaches stripping strength sooner,
+without the brittle, crack-prone fast cure.
+
+## Robotics / IoT / embedded
+
+**Problem:** The robot arm must move faster, but higher speed causes oscillation
+at the end effector.
+
+**Branch detection:** The router matched `robot arm`, `oscillation`,
+`end effector` from the `Robotics TRIZ` rule; the `--branch robotics` filter
+isolates it.
+
+**Route:** `python .claude/skills/triz-innovation/scripts/triz.py --branch robotics route "The robot arm must move faster, but higher speed causes oscillation at the end effector."`
+Live output — top methods: Robotics TRIZ (8), then Engineering Contradiction +
+40 Inventive Principles (4). The `robot arm`, `oscillation` and `end effector`
+keyword hits add the domain rule (score 8); the "must ... but" wording is also
+read as a contradiction.
+
+**Parameter translation:** `Speed` → *cycle time / joint velocity*; `Stability
+of the object's composition` → *control stability / oscillation / drift*;
+`Measurement accuracy` → *end-effector pose error / encoder resolution*.
+Improving = 9 Speed, worsening = 13 Stability of the object's composition.
+
+**Solution via soft principles:**
+- `IP-15` (Dynamization) — adaptive gains / impedance control that stiffens on
+  contact and softens during fast moves, damping the oscillation.
+- `IP-10` (Preliminary Action) — pre-compute and smooth the trajectory before
+  the move, so the controller never excites the resonance mode.
+- `IP-13` (The Other Way Around) — invert the loop: close the servo on the
+  residual error and cancel the oscillation with an opposing signal.
+
+**Result:** adaptive impedance control `[IP-15 Dynamization]` plus pre-smoothed
+trajectories `[IP-10 Preliminary Action]` — cycle time down, end-effector
+settles without oscillation.

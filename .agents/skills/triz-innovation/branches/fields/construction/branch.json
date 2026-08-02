@@ -1,0 +1,39 @@
+{
+  "id": "construction",
+  "name": "Construction TRIZ",
+  "name_it": "TRIZ edilizia e civile",
+  "description": "Same TRIZ machinery with construction / civil vocabulary — structures, materials, foundations, scheduling, site and execution.",
+  "keywords": [
+    "concrete", "cement", "steel", "beam", "foundation", "crane",
+    "scaffolding", "excavation", "structural", "load-bearing", "rebar",
+    "prefabrication", "construction site", "contractor", "waterproofing",
+    "insulation", "facade", "settlement", "curing", "formwork", "erection",
+    "demolition", "seismic", "shoring", "construction", "building",
+    "bridge", "tunnel"
+  ],
+  "parameter_map": {
+    "Stress or pressure": "structural stress / soil bearing pressure / wind load",
+    "Strength": "material strength / concrete grade / steel yield",
+    "Loss of substance": "material waste / rebar offcuts / concrete spillage",
+    "Loss of time": "construction schedule / idle crew time / curing wait",
+    "Reliability": "structural integrity / defect rate / rework",
+    "Quantity of substance": "material quantities / concrete volume / steel tonnage",
+    "Object-affected harmful factors": "corrosion / weathering / seismic / freeze-thaw",
+    "Ease of repair": "maintainability / retrofit access"
+  },
+  "principle_soft": {
+    "1": "segment the build — prefabricated panels, phased construction",
+    "2": "take the wet trade off the critical path — precast instead of cast-in-place",
+    "3": "local quality — grade concrete by zone, thicken exactly where load peaks",
+    "10": "pre-assemble and pre-cure before erection; stage materials early",
+    "15": "dynamic shoring; adaptive formwork that adjusts to the pour",
+    "24": "intermediary — sacrificial screed, bearing pad, waterproofing membrane",
+    "26": "copying — repeat a proven bay module across floors and wings",
+    "35": "change the material state — self-healing concrete, admixtures, curing compounds"
+  },
+  "examples": [
+    "The concrete must finish curing faster, but accelerating the cure makes the slab brittle and prone to cracking.",
+    "The building must go up faster, but overlapping trades on the same floor creates congestion and rework.",
+    "The foundation must carry more load, but expanding it means excavating under the existing structure."
+  ]
+}
