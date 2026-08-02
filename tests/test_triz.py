@@ -1013,6 +1013,14 @@ class TestBranchesAndLanguageAxis(unittest.TestCase):
             "it",
         )
 
+    def test_detect_language_equal_hits_prefers_italian(self):
+        # Spec: "it" when Italian hits >= 1 AND Italian hits >= English hits —
+        # equal counts resolve to "it", not "en".
+        self.assertEqual(
+            triz_branches.detect_language("quindi the system"),
+            "it",
+        )
+
     # ── Router --lang / --branch ───────────────────────────────────────────
 
     def test_router_suggest_methods_keys_english(self):

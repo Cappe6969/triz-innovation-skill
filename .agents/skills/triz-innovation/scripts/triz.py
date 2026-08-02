@@ -34,7 +34,7 @@ Commands:
     effects --keyword <query>            -> search scientific effects by keyword
     network --demo                       -> contradiction network demo
     network --analyze                    -> analyze network from stdin JSON
-    branches list|check                  -> manage field + language branches
+    branches list|check|info|resolve|detect -> manage field + language branches
     master                               -> show the TRIZ-MASTER.md knowledge base
 
 Aliases: router->route, standard-solutions/standard_solutions/su-field->sufield,
