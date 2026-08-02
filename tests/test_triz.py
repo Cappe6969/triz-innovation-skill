@@ -18,7 +18,10 @@ import re
 import csv
 import shutil
 import subprocess
+import contextlib
+import io
 from pathlib import Path
+from unittest import mock
 
 # ---- path setup: add the scripts directory so imports work ----
 _REPO_ROOT = Path(__file__).resolve().parent.parent
@@ -951,6 +954,279 @@ class TestTRIZ(unittest.TestCase):
                     f"## Part {i}", content,
                     f"Part {i} heading not found in ARIZ worksheet"
                 )
+
+
+    # ═══════════════════════════════════════════════════════════════════════
+    #  R16 NEW TESTS — Phase 5: close all 7 OPEN BACKLOG items
+    #  (router whole-word labels, dispatcher output, evaluator BOM/short-row/
+    #   clean-stderr, matrix + catalog exact values; SPEC build 4)
+    # ═══════════════════════════════════════════════════════════════════════
+
+    # ── R1: Router whole-word EC-label regression tests ──────────────────
+
+    def _assert_label_whole_words(self, before: str, after: str, source: str) -> None:
+        """R1: every whitespace token in each EC-label half is a complete word
+        reconstructable from the source sentence (a truncated fragment is never
+        a whole word), and no token carries a stray character like '…'."""
+        source_words = source.split()
+        cleaned = {w.strip(".,;:!?()[]{}<>\"'«»").lower() for w in source_words}
+        for half_name, half in (("improve", before), ("worsens", after)):
+            for token in half.split():
+                self.assertTrue(
+                    any(token in w for w in source_words),
+                    f"{half_name} label token {token!r} is not a substring of "
+                    f"any source word (mid-word slice or stray '…')",
+                )
+                self.assertIn(
+                    token.strip(".,;:!?()[]{}<>\"'«»").lower(),
+                    cleaned,
+                    f"{half_name} label token {token!r} is not a complete word "
+                    f"of the source sentence",
+                )
+
+    def test_router_physio_ec_label_whole_words(self):
+        """R1: Italian physio EC label uses the last whole words before the
+        connector — not the raw 40-char prefix — with no mid-word split."""
+        source = (
+            "Ho un'app di fisioterapia che deve inviare notifiche per gli esercizi, "
+            "ma le notifiche li infastidiscono e disattivano l'app"
+        )
+        result = triz_router.suggest_methods(source)
+        ec = result["engineering_contradiction"]
+        self.assertIsNotNone(ec)
+        self.assertRegex(ec, r'^improve \[.*\] / worsens \[.*\]$')
+        halves_str = ec[len("improve ["):]
+        parts = halves_str.split("] / worsens [")
+        self.assertEqual(len(parts), 2)
+        before = parts[0]
+        after = parts[1].rstrip("]")
+        self.assertLessEqual(len(before), 40)
+        self.assertLessEqual(len(after), 40)
+        # Label must use the last words before the connector, not the raw prefix.
+        self.assertIn("per gli esercizi", before)
+        self.assertNotIn("…", ec)
+        self._assert_label_whole_words(before, after, source)
+
+    def test_router_long_word_english_ec_label_whole_words(self):
+        """R1: long-word English input → no EC-label half contains a mid-word
+        slice of any source word (subject words exceed 40 chars combined)."""
+        source = (
+            "the supercalifragilisticexpialidocious gearbox must transmit more "
+            "torque but the housing cannot grow heavier"
+        )
+        result = triz_router.suggest_methods(source)
+        ec = result["engineering_contradiction"]
+        self.assertIsNotNone(ec)
+        self.assertRegex(ec, r'^improve \[.*\] / worsens \[.*\]$')
+        halves_str = ec[len("improve ["):]
+        parts = halves_str.split("] / worsens [")
+        self.assertEqual(len(parts), 2)
+        before = parts[0]
+        after = parts[1].rstrip("]")
+        self.assertLessEqual(len(before), 40)
+        self.assertLessEqual(len(after), 40)
+        self.assertNotIn("…", ec)
+        self._assert_label_whole_words(before, after, source)
+
+    # ── R2: Dispatcher output assertions + missing-subtool path ───────────
+
+    def test_dispatcher_route_output(self):
+        """R2: 'triz.py route' prints marker-bearing output (rc 0)."""
+        proc = subprocess.run(
+            [sys.executable, str(_SCRIPTS_DIR / "triz.py"),
+             "route", "more speed but less reliability"],
+            capture_output=True, text=True, encoding="utf-8",
+        )
+        self.assertEqual(proc.returncode, 0, proc.stderr)
+        self.assertIn("Engineering Contradiction", proc.stdout)
+        self.assertIn("40 Inventive Principles", proc.stdout)
+
+    def test_dispatcher_effects_output(self):
+        """R2: 'triz.py effects --keyword magnetic' prints non-empty output."""
+        proc = subprocess.run(
+            [sys.executable, str(_SCRIPTS_DIR / "triz.py"),
+             "effects", "--keyword", "magnetic"],
+            capture_output=True,
+        )
+        self.assertEqual(proc.returncode, 0)
+        self.assertGreater(len(proc.stdout), 0,
+                           "effects --keyword magnetic printed nothing")
+
+    def test_dispatcher_network_output(self):
+        """R2: 'triz.py network --demo' prints non-empty output."""
+        proc = subprocess.run(
+            [sys.executable, str(_SCRIPTS_DIR / "triz.py"),
+             "network", "--demo"],
+            capture_output=True,
+        )
+        self.assertEqual(proc.returncode, 0)
+        self.assertGreater(len(proc.stdout), 0,
+                           "network --demo printed nothing")
+
+    def test_dispatcher_missing_subtool(self):
+        """R2: empty script dir → rc 1 + 'Sub-tool not found' on stderr."""
+        import triz
+        with tempfile.TemporaryDirectory() as tmpdir:
+            with mock.patch("triz._SCRIPT_DIR", Path(tmpdir)):
+                err = io.StringIO()
+                with contextlib.redirect_stderr(err):
+                    rc = triz.dispatch(["matrix", "1", "2"])
+        self.assertEqual(rc, 1)
+        self.assertIn("Sub-tool not found", err.getvalue())
+
+    # ── R3: Evaluator BOM / short-row / clean-stderr tests ───────────────
+
+    def test_evaluator_utf8_bom(self):
+        """R3: CSV with a UTF-8 BOM parses and scores correctly."""
+        csv_content = (
+            "﻿solution,impact,feasibility,cost,speed,risk,reversibility,"
+            "complexity,ideality\n"
+            "TestA,4,3,2,1,5,4,3,2\n"
+        )
+        with tempfile.TemporaryDirectory() as tmpdir:
+            csv_path = Path(tmpdir) / "bom.csv"
+            csv_path.write_text(csv_content, encoding="utf-8")
+            rows = triz_evaluator._parse_csv(str(csv_path))
+            self.assertEqual(len(rows), 1)
+            scored = triz_evaluator.score(rows)
+            self.assertEqual(scored[0]["solution"], "TestA")
+            self.assertEqual(scored[0]["total"], 24)
+
+    def test_evaluator_short_row_clean_error(self):
+        """R3: short data row → SystemExit(1), stderr has 'missing value',
+        no Traceback."""
+        csv_content = (
+            "solution,impact,feasibility,cost,speed,risk,reversibility,complexity,ideality\n"
+            "TestA,4,3,2,1,5,4,3,2\n"
+            "Short,4,3\n"
+        )
+        with tempfile.TemporaryDirectory() as tmpdir:
+            csv_path = Path(tmpdir) / "short.csv"
+            csv_path.write_text(csv_content, encoding="utf-8")
+            err = io.StringIO()
+            with contextlib.redirect_stderr(err):
+                with self.assertRaises(SystemExit) as cm:
+                    triz_evaluator._parse_csv(str(csv_path))
+            self.assertEqual(cm.exception.code, 1)
+            self.assertIn("missing value", err.getvalue())
+            self.assertNotIn("Traceback", err.getvalue())
+
+    def test_evaluator_clean_stderr_missing_file(self):
+        """R3: missing file → SystemExit(1), stderr 'Error:' only, no stdout."""
+        err = io.StringIO()
+        out = io.StringIO()
+        with contextlib.redirect_stderr(err), contextlib.redirect_stdout(out):
+            with self.assertRaises(SystemExit) as cm:
+                triz_evaluator._parse_csv("/nonexistent/path/file.csv")
+        self.assertEqual(cm.exception.code, 1)
+        self.assertIn("Error:", err.getvalue())
+        self.assertNotIn("Traceback", err.getvalue())
+        self.assertEqual(out.getvalue(), "")
+
+    def test_evaluator_clean_stderr_wrong_header(self):
+        """R3: wrong header → SystemExit(1), stderr 'Error:' only, no stdout."""
+        csv_content = (
+            "solution,bogus,fake,wrong,headers,here\n"
+            "X,1,2,3,4,5\n"
+        )
+        with tempfile.TemporaryDirectory() as tmpdir:
+            csv_path = Path(tmpdir) / "bad.csv"
+            csv_path.write_text(csv_content, encoding="utf-8")
+            err = io.StringIO()
+            out = io.StringIO()
+            with contextlib.redirect_stderr(err), contextlib.redirect_stdout(out):
+                with self.assertRaises(SystemExit) as cm:
+                    triz_evaluator._parse_csv(str(csv_path))
+            self.assertEqual(cm.exception.code, 1)
+            self.assertIn("Error:", err.getvalue())
+            self.assertNotIn("Traceback", err.getvalue())
+            self.assertEqual(out.getvalue(), "")
+
+    # ── R4: Matrix + catalog exact-value and coverage tests ──────────────
+
+    def test_matrix_lookup_18_35_exact(self):
+        """R4: lookup(18, 35) returns exactly [15, 1, 19] with names."""
+        result = triz_matrix.lookup(18, 35)
+        pids = [p["id"] for p in result["principles"]]
+        names = [p["name"] for p in result["principles"]]
+        self.assertEqual(pids, [15, 1, 19])
+        self.assertEqual(names, ["Dynamization", "Segmentation", "Periodic Action"])
+
+    def test_matrix_fixtures_present(self):
+        """R4: the three matrix data CSVs must exist — fail loudly if absent."""
+        data_dir = _SCRIPTS_DIR / "data"
+        for filename in ("contradiction_matrix.csv", "parameters_39.csv",
+                         "inventive_principles.csv"):
+            path = data_dir / filename
+            self.assertTrue(path.is_file(), f"Missing data fixture: {path}")
+
+    def test_matrix_list_output(self):
+        """R4: 'triz.py matrix --list' prints 39 parameters incl. 18 & 35."""
+        proc = subprocess.run(
+            [sys.executable, str(_SCRIPTS_DIR / "triz.py"), "matrix", "--list"],
+            capture_output=True, text=True, encoding="utf-8",
+        )
+        self.assertEqual(proc.returncode, 0, proc.stderr)
+        lines = [line for line in proc.stdout.splitlines()
+                 if re.match(r"^\s*\d+\s+\S", line)]
+        self.assertEqual(len(lines), 39,
+                         f"Expected 39 parameter lines, got {len(lines)}")
+        self.assertIn("18  Illumination intensity", proc.stdout)
+        self.assertIn("35  Adaptability or versatility", proc.stdout)
+
+    def test_standard_solutions_list_all_output(self):
+        """R4: '--list-all' prints the 76 + 11 totals."""
+        proc = subprocess.run(
+            [sys.executable, str(_SCRIPTS_DIR / "triz_standard_solutions.py"),
+             "--list-all"],
+            capture_output=True, text=True, encoding="utf-8",
+        )
+        self.assertEqual(proc.returncode, 0, proc.stderr)
+        self.assertIn("Total: 76 standard solutions", proc.stdout)
+        self.assertIn("+ 11 variant(s)", proc.stdout)
+
+    def test_standard_solutions_variant_count(self):
+        """R4: exactly 11 variants, 76 bases, 87 total."""
+        all_sols = triz_standard_solutions._iter_solutions(
+            triz_standard_solutions.load_solutions_db()
+        )
+        variants = [s for s in all_sols if "parent_id" in s]
+        bases = [s for s in all_sols if "parent_id" not in s]
+        self.assertEqual(len(variants), 11)
+        self.assertEqual(len(bases), 76)
+        self.assertEqual(len(all_sols), 87)
+
+    def test_standard_solutions_complete_entry(self):
+        """R4: all 87 entries have non-empty required fields; each variant's
+        parent_id resolves to an existing base id."""
+        required = ["id", "name", "description", "mechanism",
+                    "subfield_state", "class_id", "group_id"]
+        all_sols = triz_standard_solutions._iter_solutions(
+            triz_standard_solutions.load_solutions_db()
+        )
+        base_ids = {s["id"] for s in all_sols if "parent_id" not in s}
+        for sol in all_sols:
+            for field in required:
+                value = sol.get(field)
+                self.assertTrue(
+                    value is not None and
+                    (not isinstance(value, str) or value.strip()),
+                    f"Solution {sol.get('id')} has empty '{field}': {value!r}",
+                )
+            if "parent_id" in sol:
+                self.assertIn(
+                    sol["parent_id"], base_ids,
+                    f"Variant {sol['id']} parent {sol['parent_id']} is not a base id",
+                )
+
+    def test_case_template_missing_template(self):
+        """R4: absent template path → create_case raises FileNotFoundError."""
+        with tempfile.TemporaryDirectory() as tmpdir:
+            missing = Path(tmpdir) / "missing-template.md"
+            with mock.patch("triz_case_template._template_path",
+                            return_value=missing):
+                with self.assertRaises(FileNotFoundError):
+                    triz_case_template.create_case("X", cases_dir=tmpdir)
 
 
     # ═══════════════════════════════════════════════════════════════════════
