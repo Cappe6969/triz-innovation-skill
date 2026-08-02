@@ -14,11 +14,12 @@ Usage:
     python triz.py help                  # list commands
 
 Global flags (position-independent; stripped before forwarding):
-    --branch <id>    field branch: general|business|software|rehab (default general)
+    --branch <id>    field branch: any registered field branch (default general)
     --lang <lang>    language overlay: en|it|auto (default en)
     These are forwarded to `route` (both) and to `case`/`branches` (--lang
-    only); every other command ignores them. Unknown --branch/--lang values are
-    rejected here with a clear error (exit 1) rather than forwarded.
+    only); every other command ignores them. Unknown --branch values (ids not
+    registered as a field branch) and unknown --lang values are rejected here
+    with a clear error (exit 1) rather than forwarded.
 
 Commands:
     route "<problem text>"               -> suggest TRIZ methods + contradictions
@@ -50,6 +51,8 @@ import sys
 from pathlib import Path
 from typing import Optional
 
+from triz_branches import list_branches
+
 # command -> sub-script filename (lives beside this file)
 _COMMANDS = {
     "route": "triz_router.py",
@@ -77,8 +80,12 @@ _ALIASES = {
 
 _SCRIPT_DIR = Path(__file__).resolve().parent
 
-_VALID_BRANCHES = ("general", "business", "software", "rehab")
 _VALID_LANGS = ("en", "it", "auto")
+
+
+def _valid_branches() -> tuple[str, ...]:
+    """Registered field branch ids, derived from the branch registry."""
+    return tuple(list_branches()["fields"])
 
 # Sub-tools that accept the global flags. route takes --branch + --lang;
 # case and branches take --lang only (branches resolve requires it).
@@ -141,10 +148,10 @@ def _parse_global_flags(argv: list) -> tuple[dict, list, int]:
                     return flags, rest, 1
                 value = argv[i + 1]
                 i += 1
-            if value not in _VALID_BRANCHES:
+            if value not in _valid_branches():
                 print(
                     f"Error: unknown --branch value {value!r} "
-                    f"(expected {', '.join(_VALID_BRANCHES)}).",
+                    f"(expected {', '.join(_valid_branches())}).",
                     file=sys.stderr,
                 )
                 return flags, rest, 1

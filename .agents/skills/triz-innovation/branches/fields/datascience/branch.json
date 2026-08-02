@@ -1,0 +1,37 @@
+{
+  "id": "datascience",
+  "name": "Data Science TRIZ",
+  "name_it": "TRIZ data science e AI",
+  "description": "Same TRIZ machinery with data-science / ML / AI vocabulary — models, data, training, inference, accuracy trade-offs.",
+  "keywords": [
+    "model", "training", "dataset", "feature", "accuracy", "precision",
+    "recall", "overfitting", "underfitting", "bias", "gradient", "inference",
+    "prediction", "machine learning", "deep learning", "neural", "embedding",
+    "hyperparameter", "loss", "metric", "cluster", "classification",
+    "regression", "anomaly", "outlier", "drift", "validation", "batch",
+    "epoch", "weights", "tuning", "prompt", "llm", "transformer", "token"
+  ],
+  "parameter_map": {
+    "Speed": "training time / inference latency / throughput",
+    "Measurement accuracy": "model accuracy / F1 / precision-recall",
+    "Loss of information": "information lost in dimensionality reduction / quantization",
+    "Stability of the object's composition": "training stability / convergence / reproducibility",
+    "Device complexity": "model complexity / parameter count",
+    "Adaptability or versatility": "generalization / transfer learning / robustness",
+    "Quantity of substance": "dataset size / feature count / memory footprint"
+  },
+  "principle_soft": {
+    "1": "split one model into specialized sub-models (ensembles, mixture of experts)",
+    "2": "take the bottleneck stage out of the main path (cache features, distill)",
+    "3": "per-segment models; localized features instead of one global model",
+    "10": "pre-compute features; pre-train embeddings before the hot path",
+    "13": "invert the objective — predict the residual, treat anomaly as signal",
+    "15": "adaptive / online learning; dynamic decision thresholds",
+    "24": "embedding layer as intermediary; feature store as a buffer",
+    "35": "change the model state — quantization, pruning, distillation"
+  },
+  "examples": [
+    "The model must be more accurate, but adding features makes training too slow.",
+    "Inference must run on-device at 10 ms, but the full model needs a GPU."
+  ]
+}
