@@ -1,0 +1,37 @@
+{
+  "id": "marketing",
+  "name": "Marketing TRIZ",
+  "name_it": "TRIZ marketing e crescita",
+  "description": "Same TRIZ machinery with marketing / growth vocabulary — funnels, campaigns, conversion, audience, positioning.",
+  "keywords": [
+    "conversion", "funnel", "campaign", "churn", "retention", "acquisition",
+    "engagement", "brand", "click", "cta", "lead", "landing page", "bounce",
+    "audience", "segment", "positioning", "pricing", "a/b test", "persona",
+    "market", "growth", "virality", "reach", "impression", "ctr", "roi",
+    "content", "social", "influencer", "marketing", "advertising", "onboarding",
+    "activation", "upsell", "cross-sell"
+  ],
+  "parameter_map": {
+    "Speed": "campaign launch time / time-to-market / growth velocity",
+    "Reliability": "campaign predictability / conversion consistency",
+    "Loss of time": "time wasted on low-intent leads",
+    "Amount of substance": "reach / impressions / audience size",
+    "Harmful side effects": "brand dilution / ad fatigue / spam complaints",
+    "Difficulty of detecting and measuring": "attribution accuracy / measurability",
+    "Cost of wasting something": "wasted ad spend / burn rate on unproven channels"
+  },
+  "principle_soft": {
+    "1": "segment the audience; modular campaigns you can A/B independently",
+    "2": "remove the annoying step from the funnel (the required sign-up)",
+    "5": "combine channels — bundle offers, cross-promote across touchpoints",
+    "6": "one campaign that serves many segments (evergreen content repurposed)",
+    "10": "pre-launch teasers; nurture the audience before the offer drops",
+    "15": "dynamic pricing; adaptive creative rotation by audience response",
+    "25": "self-serve onboarding; user-generated content loops (self-service)",
+    "32": "change the visual frame — reframe perception, not just the message"
+  },
+  "examples": [
+    "The landing page must convert more visitors, but adding friction to capture data hurts sign-ups.",
+    "Growth must accelerate, but ad spend on new channels is burning cash without proven ROI."
+  ]
+}

@@ -166,7 +166,9 @@ to a field or a language, no code.
 - **Field branches** (`branches/fields/<id>/branch.json`) carry domain
   vocabulary: keywords, parameter translations, soft readings of the 40
   principles, and worked examples. Shipped fields: `general`, `business`,
-  `software`, `rehab`. `general` is the canonical core.
+  `software`, `rehab`, `mechanical`, `datascience`, `marketing`,
+  `supplychain`. `general` is the canonical core. Worked examples for each
+  field branch are in `references/use-cases.md`.
 - **Language branches** (`branches/langs/<lang>/branch.json`) carry localized
   labels for method names and contradiction lines plus stopwords for language
   auto-detection. English is the default overlay; Italian is the first

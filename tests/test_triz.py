@@ -966,7 +966,10 @@ class TestBranchesAndLanguageAxis(unittest.TestCase):
 
     def test_branches_list_exact(self):
         inv = triz_branches.list_branches()
-        self.assertEqual(inv["fields"], ["general", "business", "software", "rehab"])
+        self.assertEqual(inv["fields"], [
+            "general", "business", "software", "rehab",
+            "mechanical", "datascience", "marketing", "supplychain",
+        ])
         self.assertEqual(inv["langs"], ["en", "it"])
 
     def test_branches_validate_clean(self):
@@ -1236,6 +1239,172 @@ class TestBranchesAndLanguageAxis(unittest.TestCase):
         result = triz_matrix.lookup(27, 25)
         pids = [p["id"] for p in result["principles"]]
         self.assertEqual(pids, [10, 30, 4])
+
+
+    # ═══════════════════════════════════════════════════════════════════════
+    #  R15 NEW TESTS — 8 field branches, data-driven validation, four new
+    #  domain rules, use-cases reference, mirror sync (SPEC build 3)
+    # ═══════════════════════════════════════════════════════════════════════
+
+
+class TestFieldBranchesDataDriven(unittest.TestCase):
+    """Phase-3 regression: 8 field branches in canonical order, data-driven
+    dispatcher/router branch validation, four new domain rules, the
+    use-cases reference file, and mirror sync."""
+
+    _EXPECTED_FIELDS = [
+        "general", "business", "software", "rehab",
+        "mechanical", "datascience", "marketing", "supplychain",
+    ]
+    _NEW_BRANCHES = ["mechanical", "datascience", "marketing", "supplychain"]
+    _USE_CASES_LABELS = [
+        "**Problem:**",
+        "**Branch detection:**",
+        "**Route:**",
+        "**Parameter translation:**",
+        "**Solution via soft principles:**",
+        "**Result:**",
+    ]
+
+    # ── Registry (8 fields, canonical order) ──────────────────────────────
+
+    def test_registry_eight_fields_canonical_order(self):
+        inv = triz_branches.list_branches()
+        self.assertEqual(inv["fields"], self._EXPECTED_FIELDS)
+
+    def test_registry_validate_clean(self):
+        self.assertEqual(triz_branches.validate(), [])
+
+    # ── New branches data ─────────────────────────────────────────────────
+
+    def test_new_branch_data_complete(self):
+        for fid in self._NEW_BRANCHES:
+            with self.subTest(branch=fid):
+                data = triz_branches.get_field_branch(fid)
+                self.assertEqual(data["id"], fid)
+                self.assertIn("name_it", data)
+                self.assertIsInstance(data["parameter_map"], dict)
+                self.assertGreaterEqual(len(data["parameter_map"]), 5)
+                self.assertIsInstance(data["principle_soft"], dict)
+                self.assertGreaterEqual(len(data["principle_soft"]), 5)
+                self.assertGreaterEqual(len(data["keywords"]), 10)
+                self.assertGreaterEqual(len(data["examples"]), 2)
+
+    # ── Routing: each new domain routes to its own rule ───────────────────
+
+    def test_route_mechanical_keywords(self):
+        result = triz_router.suggest_methods(
+            "the gear wears out under vibration and high torque"
+        )
+        methods = [m["method"] for m in result["methods"]]
+        self.assertIn("Mechanical TRIZ", methods)
+
+    def test_route_datascience_keywords(self):
+        result = triz_router.suggest_methods(
+            "the model overfits on the training dataset"
+        )
+        methods = [m["method"] for m in result["methods"]]
+        self.assertIn("Data Science TRIZ", methods)
+
+    def test_route_marketing_keywords(self):
+        result = triz_router.suggest_methods(
+            "the landing page conversion is dropping"
+        )
+        methods = [m["method"] for m in result["methods"]]
+        self.assertIn("Marketing TRIZ", methods)
+
+    def test_route_supplychain_keywords(self):
+        result = triz_router.suggest_methods(
+            "the warehouse keeps running out of safety stock"
+        )
+        methods = [m["method"] for m in result["methods"]]
+        self.assertIn("Supply Chain TRIZ", methods)
+
+    # ── --branch filter isolates a single domain's rules ──────────────────
+
+    def test_branch_filter_excludes_other_domains(self):
+        text = "the landing page conversion is dropping"
+        filtered = triz_router.suggest_methods(text, branch="mechanical")
+        filtered_methods = [m["method"] for m in filtered["methods"]]
+        self.assertNotIn("Marketing TRIZ", filtered_methods)
+        all_methods = triz_router.suggest_methods(text, branch="general")
+        all_names = [m["method"] for m in all_methods["methods"]]
+        self.assertIn("Marketing TRIZ", all_names)
+
+    # ── Data-driven validation ────────────────────────────────────────────
+
+    def test_branch_datascience_accepted(self):
+        result = triz_router.suggest_methods("the model overfits", branch="datascience")
+        methods = [m["method"] for m in result["methods"]]
+        self.assertIn("Data Science TRIZ", methods)
+
+    def test_branch_bogus_raises(self):
+        with self.assertRaises(ValueError):
+            triz_router.suggest_methods("the model overfits", branch="bogus")
+
+    def test_dispatcher_new_branch_route_exit0(self):
+        proc = subprocess.run(
+            [sys.executable, str(_SCRIPTS_DIR / "triz.py"),
+             "--branch", "supplychain", "route",
+             "lead time must drop but safety stock raises cost"],
+            capture_output=True, text=True, encoding="utf-8",
+        )
+        self.assertEqual(proc.returncode, 0, proc.stderr)
+
+    def test_dispatcher_bogus_branch_exit1(self):
+        proc = subprocess.run(
+            [sys.executable, str(_SCRIPTS_DIR / "triz.py"),
+             "--branch", "bogus", "route", "x"],
+            capture_output=True, text=True, encoding="utf-8",
+        )
+        self.assertNotEqual(proc.returncode, 0)
+        self.assertIn("unknown --branch", proc.stderr.lower())
+
+    # ── Use-cases reference ───────────────────────────────────────────────
+
+    def test_use_cases_file_structure(self):
+        path = (
+            _REPO_ROOT
+            / ".claude" / "skills" / "triz-innovation" / "references" / "use-cases.md"
+        )
+        self.assertTrue(path.is_file(), "references/use-cases.md missing")
+        text = path.read_text(encoding="utf-8")
+        headings = [
+            "## Mechanical / hardware",
+            "## Data science / ML / AI",
+            "## Marketing / growth",
+            "## Supply chain / logistics",
+        ]
+        h2 = [line for line in text.splitlines() if line.startswith("## ")]
+        self.assertEqual(
+            h2, headings,
+            "use-cases.md must contain exactly the four required ## sections, in order",
+        )
+        sections: dict[str, list[str]] = {}
+        current: str | None = None
+        for line in text.splitlines():
+            if line.startswith("## "):
+                current = line
+                sections.setdefault(current, [])
+            elif current is not None:
+                for label in self._USE_CASES_LABELS:
+                    if line.startswith(label):
+                        sections[current].append(label)
+                        break
+        for heading in headings:
+            self.assertEqual(
+                sections.get(heading, []), self._USE_CASES_LABELS,
+                f"Section {heading!r} must contain the six labels in order",
+            )
+
+    # ── Mirror sync ───────────────────────────────────────────────────────
+
+    def test_mirror_check_in_sync(self):
+        proc = subprocess.run(
+            [sys.executable, str(_REPO_ROOT / "scripts" / "build_mirror.py"), "--check"],
+            capture_output=True, text=True, encoding="utf-8",
+        )
+        self.assertEqual(proc.returncode, 0, proc.stdout + proc.stderr)
 
 
 if __name__ == "__main__":

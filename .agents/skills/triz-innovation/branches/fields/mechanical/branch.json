@@ -1,0 +1,37 @@
+{
+  "id": "mechanical",
+  "name": "Mechanical TRIZ",
+  "name_it": "TRIZ meccanico / hardware",
+  "description": "Same TRIZ machinery with mechanical / hardware vocabulary — moving parts, loads, wear, thermal and structural constraints.",
+  "keywords": [
+    "torque", "vibration", "fatigue", "tolerance", "wear", "friction",
+    "gear", "bearing", "stiffness", "deflection", "crack", "corrosion",
+    "shaft", "weld", "thermal", "heat", "machining", "spindle", "clearance",
+    "seal", "spring", "piston", "hydraulic", "pneumatic", "clutch", "brake",
+    "motor", "gearbox", "bolt", "fastener"
+  ],
+  "parameter_map": {
+    "Weight of moving object": "mass / moment of inertia of the moving part",
+    "Speed": "rotational speed (RPM) / linear velocity of the mechanism",
+    "Force": "torque / load / clamping force",
+    "Stress or pressure": "contact stress / preload / operating pressure",
+    "Durability of moving object": "fatigue life / cycles to failure",
+    "Temperature": "operating temperature / thermal load on the joint",
+    "Vibration": "vibration amplitude / resonance frequency",
+    "Amount of substance": "material volume / lubricant quantity"
+  },
+  "principle_soft": {
+    "1": "modular / segmented tooling; split a large casting into bolted parts",
+    "2": "take the failure-prone part out of the critical path (move a seal outside the wear zone)",
+    "3": "local hardening — reinforce exactly where stress concentrates",
+    "5": "combine fixtures; multi-material parts (steel core, plastic sleeve)",
+    "10": "pre-load, pre-stress, pre-treat surfaces before service",
+    "15": "dynamic stiffness; adaptive damping that stiffens under load",
+    "24": "intermediary bushing / bearing / wear sleeve that absorbs the wear",
+    "35": "change material state — surface treatment, heat treatment, coating"
+  },
+  "examples": [
+    "A gearbox must transmit more torque but the housing cannot grow heavier or larger.",
+    "The spindle vibrates at high RPM; damping it rigidly would add too much mass."
+  ]
+}
