@@ -37,8 +37,9 @@ Short-lived → write and ship. Long-lived → review, tests, ownership, depreca
 plan. Same decision, different input.
 
 ### Hyrum's Law — budget for observable behavior
-> Any observable behavior of an interface will eventually be depended on by
-> someone, no matter what the contract says.
+Any behavior an interface exposes — documented or not — becomes part of its
+implicit contract as soon as callers rely on it. Plan for that drift instead of
+assuming the written API is the whole deal.
 - Treat the documented contract as the floor, not the ceiling, of what you owe
   users [Hyrum's Law].
 - Before changing a shared interface, inventory which behaviors are *actually*

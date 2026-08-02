@@ -28,9 +28,11 @@ leaving a small island of tested code behind — the net effect is safe change n
 more test coverage later.
 
 ### The seam model [Seam]
-A seam is a place where you can alter behavior **without editing in that place**.
-Before editing the risky line, look for a seam already in the code and swap the
-dependency instead — you never touch the code under test.
+A seam is an existing **substitution point**: a place in the code where you can
+swap one implementation for another (a virtual method, an injected dependency, a
+build-time binding) so a test sees different behavior without the edited code
+changing at all. Before editing the risky line, look for a seam already in the
+code and swap the dependency instead — you never touch the code under test.
 
 | Software concept | TRIZ concept |
 |---|---|

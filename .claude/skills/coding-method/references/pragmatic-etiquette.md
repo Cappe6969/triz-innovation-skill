@@ -28,8 +28,11 @@ easier or harder to change?** Decoupling, single-responsibility, naming, config
 - When several minimal options are equal in size, pick the one that keeps the system easiest to change (a rule ponytail lacks).
 
 ### DRY — one source of truth [DRY]
-Every piece of knowledge must have a **single, unambiguous, authoritative
-representation** in the system. Duplication is of *knowledge*, not just code.
+Each piece of knowledge gets exactly **one canonical home** in the system —
+when it must change, it changes once. The duplication to hunt is of
+*knowledge* (meaning), not just code: identical-looking code can encode two
+different concepts (that's fine), and two copies of the same rule in different
+forms (schema + API shape) are still one duplication.
 Four duplication sources to hunt:
 | Source | Pattern | Fix |
 |---|---|---|
