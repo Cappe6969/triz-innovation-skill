@@ -41,7 +41,11 @@ Function modeling (T/A/O, U/H, N/I/E) · cause-effect chains & leverage points �
 engineering vs physical contradictions · the 4 separation principles · 40
 inventive principles (with soft/business/software readings) · 6+ resource types &
 derived resources · ideality equation & IFR · trimming rules A/B/C · 9 Windows ·
-FOS/MOS · domain adaptations (business, software, rehab).
+FOS/MOS · domain adaptations (business, software, rehab, mechanical,
+datascience, marketing, supplychain) — the latter four shipped as pure-data
+field branches under `branches/fields/`, each with parameter translations and
+soft principle readings; `references/use-cases.md` holds their worked examples
+(original content, not book-derived).
 
 ## Limits / not yet analyzed
 - The full **contradiction matrix** is not embedded in the skill; `contradiction-analysis.md` points to the repo CSVs to load on demand (keeps the skill light).

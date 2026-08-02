@@ -48,12 +48,21 @@ and **Follow-up**. See `cases/README.md`.
 ## 5. Using the Python scripts
 All scripts are plain-stdlib MVPs (no install needed; Python 3.8+).
 
+**Master dispatcher — one entrypoint:**
+```
+python .claude/skills/triz-innovation/scripts/triz.py route "Ho un'app di fisioterapia che deve aiutare i pazienti ad aderire agli esercizi, ma se aggiungo troppe notifiche diventa fastidiosa."
+```
+`triz.py` forwards to the right sub-tool (`matrix`, `ariz`, `effects`,
+`branches`, …). Run with no args for the full command list.
+
 **Router — which methods to use:**
 ```
-python .claude/skills/triz-innovation/scripts/triz_router.py "Ho un'app di fisioterapia che deve aiutare i pazienti ad aderire agli esercizi, ma se aggiungo troppe notifiche diventa fastidiosa."
+python .claude/skills/triz-innovation/scripts/triz_router.py "…"
 ```
 Prints likely engineering/physical contradictions and a ranked list of suggested
-TRIZ methods.
+TRIZ methods. The router (and dispatcher) accept two global flags:
+`--branch <id>` and `--lang <lang>` (or `--lang auto` to detect the language of
+the problem text). See *Field and language branches* below.
 
 **Case template generator:** see section 4.
 
@@ -65,6 +74,29 @@ CSV columns: `solution,impact,feasibility,cost,speed,risk,reversibility,complexi
 (scores 1–5; for cost/risk/complexity, 5 = cheap/safe/simple). Prints a table
 sorted by total. Run with `--help` for the exact format, or with no args to see a
 demo on built-in sample data.
+
+### Field and language branches
+The skill is a mix of branches — pure-data JSON that tunes the same TRIZ core to a
+field or a language, no code.
+
+- **Field branches** (`branches/fields/<id>/branch.json`) carry domain vocabulary:
+  keywords, parameter translations, soft readings of the 40 principles, and worked
+  examples. Shipped: `general`, `business`, `software`, `rehab`, `mechanical`,
+  `datascience`, `marketing`, `supplychain`. `general` is the canonical core.
+- **Language branches** (`branches/langs/<lang>/branch.json`) carry localized labels
+  plus stopwords for auto-detection. Shipped: `en` (default), `it`.
+
+Use them through the dispatcher — the flags are position-independent:
+```
+python .../triz.py --branch mechanical --lang en route "The gearbox must transmit more torque, but the housing cannot grow heavier"
+python .../triz.py --lang auto route "…"          # detect the language from the text
+python .../triz.py branches list|check|resolve --lang it
+```
+`--branch <domain>` restricts the router to that field's domain rule; `--lang it`
+prints Italian labels; `--lang auto` detects the language. Worked examples for each
+field branch are in `references/use-cases.md`. Adding a branch is pure data: drop a
+`branch.json` in `branches/fields/<id>/` (or `branches/langs/<lang>/`) and the
+registry and router pick it up automatically — no code change.
 
 ## 6. Future: turning this into an MCP server
 The skill is already structured for it. A minimal local MCP server would expose
@@ -82,6 +114,12 @@ client can pull a method on demand. Recommended path when you're ready:
    callable as tools. **Not built yet — out of scope for this version.**
 
 ## 7. Codex / other agents
-A portable mirror lives at `.agents/skills/triz-innovation/SKILL.md` (self-
-contained pipeline, same `name`/`description`). Point Codex Agent Skills at that
-folder.
+A portable mirror lives at `.agents/skills/triz-innovation/SKILL.md` — a
+self-contained copy of the pipeline, references, scripts, and branches, with
+`.claude/` paths rewritten to `.agents/` (same `name`/`description`). Point
+Codex Agent Skills at that folder. The mirror is generated from the canonical
+`.claude` sources — after any change to the skill, regenerate it:
+```
+python scripts/build_mirror.py
+python scripts/build_mirror.py --check    # verify it's in sync (exit 1 on drift)
+```

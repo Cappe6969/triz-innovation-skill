@@ -118,7 +118,7 @@ The TRIZ innovation skill runs a fixed 10-stage pipeline. Each stage feeds the n
 6. **Ideal Final Result** — State the IFR: the function happens by itself, on time, with no added cost/harm/component; ask "how do we get this without adding a new element?"
 7. **Method selection** — Pick 2–5 TRIZ methods that fit the problem signature; justify each in one line. Use the decision table (section 16) or the router script for a fast first guess.
 8. **Solution generation** — Produce 3 conservative, 3 creative-but-realistic, 3 non-obvious TRIZ, 2 high-risk/high-upside, and 1 minimal testable-this-week solution. Tag every solution with its method.
-9. **Evaluation** — Score every solution 1–5 on impact, feasibility, cost, speed, risk, reversibility, complexity, ideality. Present as a sortable table.
+9. **Evaluation** — Score every solution 1–5 on impact, feasibility, cost, speed, risk, reversibility, complexity, ideality. (Cost/risk/complexity: 5 = cheap/safe/simple.) Present as a table sorted by total.
 10. **Experiment plan** — Name the best candidate, the first practical experiment, the data to collect, the success/failure criterion (a number, not a vibe), and next steps for both outcomes.
 
 ### Advanced escalation track

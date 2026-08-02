@@ -1,27 +1,33 @@
 # BACKLOG
 
-Deferred Medium/Low findings.
+Deferred Medium/Low findings from the ship builds. Reviewed with the user during
+Phase 4 (2026-08-02).
 
-- [Medium] Books/:null — Six full-text copyrighted books (~38K lines) committed to the repository. These are not referenced by SPEC.md, not part of any acceptance criterion, and carry copyright/license risk. The GUID-prefixed filenames plus '(z-library)' tags in several filenames confirm these are unlicensed copies from Z-Library. (round 1) → Remove the entire Books/ directory from the branch before merging. If reference material is needed, link to external sources or use short fair-use excerpts in references/.
-- [Low] .claude/skills/triz-innovation/scripts/triz_router.py:187 — Engineering contradiction label via `_short_label(text, 40)` truncates to the first 40 characters before the contradiction connector, producing near-meaningless partial fragments (e.g. 'Ho un'app di fisioterapia che deve…' instead of a meaningful subject like 'app notifications'). Technically meets the spec requirement of returning a string, but the output is not useful as an 'improve X / worsens Y' guess. (round 1) → Improve label extraction heuristic: walk backward from the connector position to find the nearest noun phrase or subject word, rather than taking the raw prefix. Alternatively, increase max_len to 80 and use the last N words before the connector.
-- [Low] .claude/skills/triz-innovation/scripts/triz_router.py:25 — The keyword `"but "` (with trailing space) in the RULES table won't match 'but,' or 'but.' — only 'but ' followed by another word. This means contradiction cues joined by punctuation (e.g. '…exercises, but, if we add…') miss the method-scoring boost. Contradiction detection (separate function) is unaffected since it uses bare 'but' in `_CONTRADICTION_CONNECTORS`. (round 1) → Add bare `"but"` and `"ma"` (without trailing space) to the RULES keywords to catch punctuation-adjacent connectors. Or use a regex word-boundary match instead of substring containment for connector keywords.
+## Open
 
-- [Medium] .agents/skills/triz-innovation/SKILL.md:27 — Relative `references/` paths resolve inside the `.agents` skill, but that directory contains only SKILL.md; every indexed reference is therefore missing. (round 1) → Restore the canonical-location guidance and point reference loading to `../../../.claude/skills/triz-innovation/references/`, or bundle the references under `.agents`.
+- [Low] `.claude/skills/triz-innovation/scripts/triz_router.py:187` — Engineering contradiction label via `_short_label(text, 40)` truncates to the first 40 characters before the contradiction connector, producing near-meaningless partial fragments (e.g. "Ho un'app di fisioterapia che deve…" instead of a meaningful subject like "app notifications"). (round 1) → Improve the label-extraction heuristic: walk backward from the connector to the nearest noun phrase, or use the last N words before the connector instead of the raw prefix.
 
-- [Medium] TRIZ-MASTER.md:232 — Section 6 lacks the required bold inline `Procedure` label, violating the mandatory per-method template. (round 1) → Add `**Procedure:**` after `Core idea` and before `Example`, with actionable steps for applying the inventive principles.
-- [Low] TRIZ-MASTER.md:5 — `Table of Contents` is an additional H2 outside the exact 24-section H2 structure and is not linked from the TOC itself. (round 1) → Render the TOC label without an H2, such as bold text, so only the specified 24 H2 headings remain.
+- [Low] `.claude/skills/triz-innovation/scripts/triz_router.py:25` — The keyword `"but "` (with trailing space) won't match "but," or "but." — only "but " followed by another word. Contradiction detection is unaffected (it uses bare "but"). (round 1) → Add bare "but" / "ma" to the RULES keywords, or use a regex word-boundary match for connector keywords.
 
-- [Medium] TRIZ-MASTER.md:121 — Evaluation omits the source rule that cost, risk, and complexity score 5 when cheap, safe, and simple, and that results must be sorted by total. (round 2) → Restore the scoring direction and total-score sorting requirements from SKILL.md.
-- [Medium] TRIZ-MASTER.md:159 — The consolidation omits source-defined output contracts for Function Analysis, Trimming, and System Operator, so it is not lossless. (round 2) → Add the required three-bullet function summary, per-trim result fields, and filled 9-window grid with 2–3 intervention points.
-- [Medium] TRIZ-MASTER.md:558 — ARIZ Part 1 omits selecting the technical contradiction that best preserves the main useful function before intensifying it. (round 2) → Restore the TC-selection step from references/ariz.md.
-- [Low] TRIZ-MASTER.md:760 — The Smart Little People section incorrectly labels FOS/MOS phrases as its router keywords, contradicting the source and router implementation. (round 2) → Replace this line with the Smart Little People cues: stuck, no idea, and creative block, or remove the duplicated FOS/MOS text.
+- [Medium] `cases/2026-06-14-ariz-test-problem.md`, `cases/2026-06-14-smoke-test-case.md`, `reddit-post.md` — untracked working-tree files. The round-1 finding flagged them as out of scope for a build; they were never added to any merged build. (round 1) → Decide their fate: commit deliberately, move to `docs/`, or delete. User has not yet chosen.
 
-- [Medium] cases/2026-06-14-ariz-test-problem.md:1 — The commit adds case files and reddit-post.md despite the spec limiting changes to the required scripts, data, and tests and explicitly excluding case content. (round 1) → Remove both case files and reddit-post.md from this build.
-- [Medium] tests/test_triz.py:345 — Dispatcher tests check return codes only; they omit required output assertions, non-empty effects/network output checks, and the missing-subtool failure path. (round 1) → Capture output and add the specified marker, non-empty-output, and empty-script-directory assertions.
-- [Medium] tests/test_triz.py:572 — Router label tests check format and length but not that label halves contain whole words, leaving the key mid-word-split regression uncovered. (round 1) → Assert whole-word tokens for both Italian label halves and the ASCII-ellipsis constraint.
-- [Medium] tests/test_triz.py:693 — Evaluator coverage omits BOM handling, short-row validation, and clean stderr assertions for invalid or missing files. (round 1) → Add UTF-8-BOM, missing-field, and captured-stderr regression tests.
-- [Medium] tests/test_triz.py:760 — Matrix and catalog tests do not verify exact (18,35) principles, can silently skip the empty-cell case, and omit list-all output, variant-count, complete-entry, and missing-template checks. (round 1) → Assert exact expected values, fail when fixtures are absent, and add the missing catalog and template tests.
+- [Medium] `tests/test_triz.py:345` — Dispatcher tests check return codes only; they omit required output assertions, non-empty effects/network output checks, and the missing-subtool failure path. (round 1) → Capture output and add marker, non-empty-output, and empty-script-directory assertions.
 
-- [Low] commit-and-push.cmd:1 — Deleting this file is outside the specified scope and violates Acceptance Criterion 1, which requires no other files to be modified. (round 2) → Restore the file or explicitly amend the specification to authorize its removal.
+- [Medium] `tests/test_triz.py:572` — Router label tests check format and length but not that label halves contain whole words, leaving the key mid-word-split regression uncovered. (round 1) → Assert whole-word tokens for both Italian label halves and the ASCII-ellipsis constraint.
 
-- [Fixed] .agents/skills/triz-innovation/scripts/triz.py:37 — Help advertises `branches resolve` but the dispatcher stripped `--lang` and did not forward it, so the documented path exited with a usage error. (round 3) → RESOLVED in ship build 2: `_FLAG_CONSUMERS` now forwards `--lang` to the `branches` command and `triz_branches.py` accepts the flag at any position. Verified via `python triz.py branches resolve --lang it`.
+- [Medium] `tests/test_triz.py:693` — Evaluator coverage omits BOM handling, short-row validation, and clean stderr assertions for invalid/missing files. (round 1) → Add UTF-8-BOM, missing-field, and captured-stderr regression tests.
+
+- [Medium] `tests/test_triz.py:760` — Matrix and catalog tests don't verify exact (18,35) principles, can silently skip the empty-cell case, and omit list-all output, variant-count, complete-entry, and missing-template checks. (round 1) → Assert exact expected values, fail when fixtures are absent, and add the missing catalog/template tests.
+
+## Resolved (closed in later builds)
+
+- [Medium] `Books/` copyrighted full-text books in the repo — resolved: removed from git (commit `f87685a`) and gitignored; on-disk copies are untracked.
+- [Medium] `.agents/skills/triz-innovation/SKILL.md` references missing — resolved in Phase 2: mirror rebuilt self-contained via `scripts/build_mirror.py` (copies `references/`, `scripts/`, `branches/`, rewrites `.claude/` → `.agents/`).
+- [Medium] TRIZ-MASTER §6 missing `**Procedure:**` — resolved in Phase 2 (R8 fix 2).
+- [Low] TRIZ-MASTER TOC as extra H2 — resolved in Phase 2 (R8 fix 1, demoted to H3).
+- [Medium] TRIZ-MASTER evaluation omits scoring direction — resolved in Phase 4: §9 now states "Cost/risk/complexity: 5 = cheap/safe/simple" and "sort by total".
+- [Medium] TRIZ-MASTER §3/§10/§11 missing output contracts — resolved in Phase 2 (R8 fix 8).
+- [Medium] TRIZ-MASTER §13 ARIZ TC-selection — resolved in Phase 2 (R8 fix 6).
+- [Low] TRIZ-MASTER §17 SLP router keywords — resolved in Phase 2 (R8 fix 7).
+- [Low] `commit-and-push.cmd` deletion — resolved: user chose to leave it deleted.
+- [Low] `branches resolve --lang` not forwarded by dispatcher — resolved in Phase 2: `_FLAG_CONSUMERS` forwards `--lang` to `branches`; `triz_branches.py` accepts the flag at any position.
