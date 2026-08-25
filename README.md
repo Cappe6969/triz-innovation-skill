@@ -120,6 +120,10 @@ python .claude/skills/triz-innovation/mcp/triz_mcp_server.py --self-test
 
 CI runs the suite on Ubuntu + Windows against Python 3.9 / 3.11 / 3.13.
 
+For continuous improvement, [GAUNTLET.md](GAUNTLET.md) defines a one-change-
+per-iteration loop enforced by `pwsh scripts/gauntlet.ps1` (the CI gate plus
+compile, clean-worktree, doc-link, and marker scans).
+
 Design/history notes live in `.claude/skills/triz-innovation/docs/`;
 deferred findings in `BACKLOG.md`.
 

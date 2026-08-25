@@ -21,6 +21,9 @@ ship-app.cmd
 __pycache__/
 *.pyc
 
+# gauntlet loop journal
+.gauntlet/
+
 # copyrighted source material — never publish
 Books/
 CodingBooks/
