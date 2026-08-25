@@ -8,8 +8,8 @@ Phase 4 (2026-08-02). All seven remaining open items were closed in Phase 5
 
 The seven Phase 1–4 TRIZ items are closed (see Resolved below). The items below
 are deferred from the **coding-method** skill build (Phase: Lazy Ideality,
-branch `swarm/coding-method-skill`). Reviewed with the user at the merge
-approval.
+branch `swarm/coding-method-skill`) and from the gauntlet improvement loop.
+Reviewed with the user at the merge approval.
 
 - [Low] **Two curriculum source materials not yet on disk** — the
   algorithm-strategy catalog (step 2) and safe refactoring (step 4) are marked
@@ -24,6 +24,15 @@ approval.
   reference file. No placeholder in the curriculum; candidate merge target is
   `references/design-recipe.md` (contract-first / weakest-precondition
   verification).
+- [Low] **Four sub-tools lack the Windows-safe stdout guard** —
+  `triz_ariz.py`, `triz_contradiction_network.py`, `triz_matrix.py`, and
+  `triz_standard_solutions.py` (all under `.claude/skills/triz-innovation/scripts/`)
+  never reconfigure stdout to UTF-8/errors=replace, unlike the other seven
+  scripts. Latent only as of 2026-08-25: every string they print is
+  cp1252-safe (verified by scanning all printed CSV/JSON data). Unblock:
+  add a non-cp1252 character to any data file these tools print, or fold
+  the standard reconfigure guard in opportunistically during a future build.
+
 ## Resolved
 
 ### 2026-08-02 — data-system card added to the coding-method skill (`references/data-systems.md`)
