@@ -178,12 +178,27 @@ class TestMCPHandleMessage(unittest.TestCase):
         self.assertIn("triz_new_case", r["result"]["content"][0]["text"])
 
     def test_tools_call_triz_new_case_missing_title_invalid_params(self):
-        """Missing required 'title' -> -32602."""
+        """Missing required 'title' -> -32602 naming the missing argument."""
         r = mcp.handle_message(_req(
             "tools/call",
             {"name": "triz_new_case", "arguments": {}},
         ))
         self.assertEqual(r["error"]["code"], -32602)
+        self.assertIn("title", r["error"]["message"])
+
+    def test_tools_call_triz_new_case_invalid_lang_is_invalid_params(self):
+        """lang='de' (or a non-string) -> JSON-RPC -32602 naming valid values;
+        no crash and no traceback."""
+        for bad_lang in ("de", 7):
+            with self.subTest(lang=bad_lang):
+                r = mcp.handle_message(_req(
+                    "tools/call",
+                    {"name": "triz_new_case",
+                     "arguments": {"title": "X", "lang": bad_lang}},
+                ))
+                self.assertIn("error", r)
+                self.assertEqual(r["error"]["code"], -32602)
+                self.assertIn("'en' or 'it'", r["error"]["message"])
 
     def test_tools_call_triz_new_case_writes_to_cases_dir(self):
         """With a patched _repo_root, create_case writes into the temp cases dir."""
