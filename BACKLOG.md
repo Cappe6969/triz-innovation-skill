@@ -23,7 +23,10 @@ Reviewed with the user at the merge approval.
   material still needs conversion before its content can be distilled into a
   reference file. No placeholder in the curriculum; candidate merge target is
   `references/design-recipe.md` (contract-first / weakest-precondition
-  verification).
+  verification). Unblock: drop a converted (OCR'd / text) copy of the source
+  into `CodingBooks-md/` and re-distill it the same way as the other coding-
+  method sources (see `curriculum/how-to-add-book.md`) — the distilled content
+  merges into `references/design-recipe.md`.
 - [Low] **Four sub-tools lack the Windows-safe stdout guard** —
   `triz_ariz.py`, `triz_contradiction_network.py`, `triz_matrix.py`, and
   `triz_standard_solutions.py` (all under `.claude/skills/triz-innovation/scripts/`)
