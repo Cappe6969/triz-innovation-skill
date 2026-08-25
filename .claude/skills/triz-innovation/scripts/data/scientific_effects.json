@@ -759,7 +759,7 @@
  {
   "function_family": "generate_force",
   "effect_name": "Thermal Expansion Actuation",
-  "mechanism": "Most materials expand when heated. Confining a material so that its expansion is constrained converts thermal expansion into a large force with small travel, or differential expansion of two bonded strips produces bending.",
+  "mechanism": "As temperature rises, atoms in a solid vibrate with larger amplitude about their equilibrium positions, and because the interatomic bond-energy curve is anharmonic (steeper under compression than under tension), the mean bond length increases and the body expands. Confining this expansion converts it into a large force over small travel; bonding two metals with different expansion coefficients converts it into predictable bending.",
   "resources_needed": [
    "material with high thermal expansion coefficient",
    "heat source",
