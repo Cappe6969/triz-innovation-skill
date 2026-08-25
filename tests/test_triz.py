@@ -1471,6 +1471,49 @@ class TestBranchesAndLanguageAxis(unittest.TestCase):
         pids = [p["id"] for p in result["principles"]]
         self.assertEqual(pids, [10, 30, 4])
 
+    # ── Matrix CLI error paths (bar: evaluator R3 error-handling standard) ──
+
+    def _matrix_cli(self, *args):
+        return subprocess.run(
+            [sys.executable, str(_SCRIPTS_DIR / "triz_matrix.py"), *args],
+            capture_output=True, text=True, encoding="utf-8",
+        )
+
+    def test_matrix_cli_non_integer_ids_rejected_cleanly(self):
+        """Non-integer ids -> rc!=0, 'Error:' on stderr, empty stdout, no traceback."""
+        for args in (["abc", "35"], ["18", "xyz"], ["2.5", "7"]):
+            proc = self._matrix_cli(*args)
+            self.assertNotEqual(proc.returncode, 0, f"args={args}")
+            self.assertIn("Error", proc.stderr, f"args={args}")
+            self.assertNotIn("Traceback", proc.stderr + proc.stdout, f"args={args}")
+            self.assertEqual(proc.stdout, "", f"args={args}")
+
+    def test_matrix_cli_out_of_range_ids_rejected_cleanly(self):
+        """Out-of-range ids (0, negative, >39) -> rc!=0, '1..39' on stderr."""
+        for args in (["99", "1"], ["0", "5"], ["-3", "7"], ["1", "40"]):
+            proc = self._matrix_cli(*args)
+            self.assertNotEqual(proc.returncode, 0, f"args={args}")
+            self.assertIn("Error", proc.stderr, f"args={args}")
+            self.assertIn("1..39", proc.stderr, f"args={args}")
+            self.assertNotIn("Traceback", proc.stderr + proc.stdout, f"args={args}")
+
+    def test_matrix_cli_missing_args_prints_usage_to_stderr(self):
+        """No args or one arg -> rc=1, Usage on stderr, nothing on stdout."""
+        for argv in ([], ["18"]):
+            proc = self._matrix_cli(*argv)
+            self.assertEqual(proc.returncode, 1, f"argv={argv}")
+            self.assertIn("Usage:", proc.stderr, f"argv={argv}")
+            self.assertIn("--list", proc.stderr, f"argv={argv}")
+            self.assertEqual(proc.stdout, "", f"argv={argv}")
+
+    def test_matrix_cli_success_keeps_stderr_clean(self):
+        """Valid lookup -> rc=0, content on stdout, stderr completely clean."""
+        proc = self._matrix_cli("18", "35")
+        self.assertEqual(proc.returncode, 0)
+        self.assertIn("Illumination intensity", proc.stdout)
+        self.assertIn("Dynamization", proc.stdout)
+        self.assertEqual(proc.stderr, "")
+
 
     # ═══════════════════════════════════════════════════════════════════════
     #  R15 NEW TESTS — field branches, data-driven validation, domain
