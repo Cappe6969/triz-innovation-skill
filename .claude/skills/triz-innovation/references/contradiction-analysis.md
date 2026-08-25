@@ -30,10 +30,11 @@ effects*; "engagement" ≈ *useful function / amount of action*; "manual work" �
 
 ## Step 3 — Look up the contradiction matrix
 The matrix cross-references improving × worsening parameter → a shortlist of
-inventive principles. The richest source file in this repo:
-`triz-prompt-engineering-main/prompts/technical_triz/contradiction_solver_40_inventive_principles/`
-(`Altshuller_Contradiction_Matrix_AI.csv`, `Matrix_2003_AI.csv`,
-`40IP_Applications.csv`). Load it only when you need the exact cell.
+inventive principles. In this repo the matrix ships as data — look cells up
+with:
+`python .claude/skills/triz-innovation/scripts/triz_matrix.py <improving_id> <worsening_id>`
+(data: `scripts/data/contradiction_matrix.csv`). Use the script instead of
+reading cells by hand.
 
 If you have no matrix handy, the **most universally productive principles** are:
 **1 Segmentation, 2 Taking out, 3 Local quality, 10 Prior action, 13 The other

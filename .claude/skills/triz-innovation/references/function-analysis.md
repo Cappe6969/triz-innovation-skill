@@ -42,9 +42,8 @@ Functions still apply, just softer language:
   often **Insufficient**. *Reminder SMS prompts patient* — U but risks an
   **Excessive** harmful twin: *SMS annoys patient* (H).
 
-Use the simplified business framing from
-`triz-prompt-engineering-main/prompts/business_triz/function_analysis/` as a
-template when the audience isn't technical.
+When the audience isn't technical, use the simplified business framing above
+(roles, processes, documents, and channels as tools) as your template.
 
 ## Output
 A filled table + a 3-bullet summary: main function (and its N/I/E grade), the

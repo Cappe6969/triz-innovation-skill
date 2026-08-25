@@ -5,11 +5,13 @@ Provenance for the `triz-innovation` skill. Everything in `references/` is
 long passages were copied from the books; the books were used as conceptual
 cross-checks only.
 
-## Repo used: `triz-prompt-engineering-main`
-Structured TRIZ prompts (XML) by the ccTOPP / TRIZ-prompt-engineering project (MIT
-licensed). Files consulted and what was distilled from each:
+## External repo consulted: `triz-prompt-engineering` (ccTOPP initiative, MIT licensed)
+Structured TRIZ prompts (XML) by the ccTOPP / triz-prompt-engineering project
+(https://github.com/jenson500/triz-prompt-engineering). A snapshot was used
+during development; it is **not vendored** in this repo — paths below refer to
+that external project. What was distilled from each:
 
-| Repo file/folder | Concept distilled → our reference |
+| External file/folder | Concept distilled → our reference |
 |---|---|
 | `technical_triz/function_analysis/function_analysis.xml` | Tool→Action→Object, U/H, N/I/E grading, magic-wand test → `function-analysis.md` |
 | `business_triz/function_analysis/non-engineer_function_analysis.xml` | simplified function analysis for services → `function-analysis.md`, `business-triz.md` |

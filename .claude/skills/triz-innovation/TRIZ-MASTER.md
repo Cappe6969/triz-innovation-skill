@@ -1006,7 +1006,7 @@ MCP/LLM integration.
 
 ### Secondary enrichment
 
-**`triz-prompt-engineering-main`** — A structured collection of TRIZ prompts in XML format, developed by the ccTOPP / TRIZ-prompt-engineering project and released under the **MIT License**. The following files were consulted for additional structure, checklists, and examples:
+**ccTOPP `triz-prompt-engineering`** — external project, MIT License (snapshot consulted locally during development, not vendored in this repo). A structured collection of TRIZ prompts in XML format. The following files were consulted for additional structure, checklists, and examples:
 
 - `contradiction_solver_40_inventive_principles/40_Inventive_Principles_EN.md` — full 40 principles with engineering examples
 - `76_standard_solutions/76_Standard_Solutions_EN.md` — complete 76 standard solutions catalog
