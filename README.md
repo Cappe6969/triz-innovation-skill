@@ -1,5 +1,8 @@
 # triz-innovation-skill
 
+[![CI](https://github.com/Cappe6969/triz-innovation-skill/actions/workflows/ci.yml/badge.svg)](https://github.com/Cappe6969/triz-innovation-skill/actions/workflows/ci.yml)
+[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
+
 A **TRIZ problem-solving engine for AI coding agents** — packaged as an agent
 skill (Claude Code / opencode compatible) plus a small, dependency-free Python
 toolset. It runs a fixed 10-stage pipeline that turns a messy real-world

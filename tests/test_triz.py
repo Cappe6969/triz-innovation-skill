@@ -500,6 +500,27 @@ class TestTRIZ(unittest.TestCase):
         self.assertEqual(triz_effects.search_by_function(""), [])
         self.assertEqual(triz_effects.search_by_function("   "), [])
 
+    def test_effects_search_by_function_multiword(self):
+        """Natural-language queries: any word may match the family.
+
+        "move liquid" must hit move_transport (a whole-phrase substring
+        search would return nothing).
+        """
+        import triz_effects
+        results = triz_effects.search_by_function("move liquid")
+        self.assertGreater(
+            len(results), 0,
+            'multi-word query "move liquid" returned no effects',
+        )
+        for effect in results:
+            family = effect["function_family"].lower()
+            self.assertTrue(
+                "move" in family or "liquid" in family,
+                f"family {family!r} matched neither query word",
+            )
+        # A multi-word query with only unknown words stays empty.
+        self.assertEqual(triz_effects.search_by_function("zzz qqq"), [])
+
     def test_effects_search_by_keyword(self):
         """search_by_keyword('magnetic') returns non-empty."""
         import triz_effects

@@ -44,10 +44,16 @@ def load_effects() -> list[dict[str, Any]]:
 
 
 def search_by_function(query: str) -> list[dict[str, Any]]:
-    """Return effects whose function_family contains *query* (case-insensitive).
+    """Return effects whose function_family matches *query* (case-insensitive).
+
+    The query is split into words; a family matches if it contains **any**
+    query word as a substring. This lets natural-language queries like
+    "move liquid" hit `move_transport`, which a whole-phrase substring search
+    would miss. Single-word queries behave exactly like a plain substring
+    search.
 
     Args:
-        query: Substring to match against function family names.
+        query: One or more words to match against function family names.
 
     Returns:
         List of matching effect dicts (empty list if none match).
@@ -55,8 +61,10 @@ def search_by_function(query: str) -> list[dict[str, Any]]:
     q = query.strip().lower()
     if not q:
         return []
+    tokens = [t for t in q.split() if t]
     return [
-        effect for effect in load_effects() if q in effect["function_family"].lower()
+        effect for effect in load_effects()
+        if any(t in effect["function_family"].lower() for t in tokens)
     ]
 
 
