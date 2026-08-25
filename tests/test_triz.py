@@ -1543,6 +1543,7 @@ class TestBranchesAndLanguageAxis(unittest.TestCase):
             self.assertIn("Error", proc.stderr, f"args={args}")
             self.assertIn("1..39", proc.stderr, f"args={args}")
             self.assertNotIn("Traceback", proc.stderr + proc.stdout, f"args={args}")
+            self.assertEqual(proc.stdout, "", f"args={args}")
 
     def test_matrix_cli_missing_args_prints_usage_to_stderr(self):
         """No args or one arg -> rc=1, Usage on stderr, nothing on stdout."""
@@ -1551,6 +1552,7 @@ class TestBranchesAndLanguageAxis(unittest.TestCase):
             self.assertEqual(proc.returncode, 1, f"argv={argv}")
             self.assertIn("Usage:", proc.stderr, f"argv={argv}")
             self.assertIn("--list", proc.stderr, f"argv={argv}")
+            self.assertNotIn("Traceback", proc.stderr + proc.stdout, f"argv={argv}")
             self.assertEqual(proc.stdout, "", f"argv={argv}")
 
     def test_matrix_cli_success_keeps_stderr_clean(self):
@@ -1589,6 +1591,52 @@ class TestBranchesAndLanguageAxis(unittest.TestCase):
         self.assertEqual(proc.returncode, 1)
         self.assertIn("Usage:", proc.stderr)
         self.assertEqual(proc.stdout, "")
+
+    # ── Test-gap: network --analyze stdin contract ──────────────────────────
+
+    def _network_analyze(self, stdin_text):
+        return subprocess.run(
+            [sys.executable, "-X", "utf8",
+             str(_SCRIPTS_DIR / "triz_contradiction_network.py"), "--analyze"],
+            input=stdin_text, capture_output=True, text=True, encoding="utf-8",
+        )
+
+    def test_network_cli_analyze_valid_bare_array(self):
+        """Bare JSON array (unicode names ok) -> rc=0, analysis to stdout,
+        stderr completely clean."""
+        payload = json.dumps([
+            {"id": "C1", "improving": 14, "worsening": 1,
+             "improving_name": "Forza", "worsening_name": "Peso",
+             "description": "più forza, più peso"},
+            {"id": "C2", "improving": 1, "worsening": 12,
+             "improving_name": "Peso", "worsening_name": "Forma",
+             "description": "meno peso, forma instabile"},
+        ])
+        proc = self._network_analyze(payload)
+        self.assertEqual(proc.returncode, 0)
+        self.assertIn("contradictions", proc.stdout)
+        self.assertEqual(proc.stderr, "")
+
+    def test_network_cli_analyze_rejects_bad_input_cleanly(self):
+        """Malformed JSON / non-list / missing keys / empty stdin -> rc=1,
+        'Error:' on stderr, nothing on stdout, no traceback."""
+        good_entry = {"id": "C1", "improving": 14, "worsening": 1,
+                      "improving_name": "F", "worsening_name": "P",
+                      "description": "d"}
+        cases = [
+            ('{"bad json', "Error:"),
+            (json.dumps(good_entry), "expected a JSON array"),
+            (json.dumps([{"id": "C1", "improving": 14}]), "missing fields"),
+            ("", "no input on stdin"),
+        ]
+        for stdin_text, expected_fragment in cases:
+            with self.subTest(stdin=stdin_text[:30]):
+                proc = self._network_analyze(stdin_text)
+                self.assertNotEqual(proc.returncode, 0)
+                self.assertIn("Error:", proc.stderr)
+                self.assertIn(expected_fragment, proc.stderr)
+                self.assertNotIn("Traceback", proc.stderr + proc.stdout)
+                self.assertEqual(proc.stdout, "")
 
 
     # ═══════════════════════════════════════════════════════════════════════
