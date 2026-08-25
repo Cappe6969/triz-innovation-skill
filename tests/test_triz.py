@@ -1638,6 +1638,36 @@ class TestBranchesAndLanguageAxis(unittest.TestCase):
                 self.assertNotIn("Traceback", proc.stderr + proc.stdout)
                 self.assertEqual(proc.stdout, "")
 
+    # ── Test-gap: branches / effects / sufield CLI error paths ──────────────
+
+    def test_cli_error_paths_branches_effects_sufield(self):
+        """Unknown branch/state/family and missing resolve --lang -> rc=1,
+        clean diagnostic on stderr, nothing on stdout, no traceback."""
+        cases = [
+            (("triz_branches.py", "info", "nonexistent"),
+             "Unknown field branch", True),
+            (("triz_branches.py", "resolve"), "Usage:", False),
+            (("triz_effects.py", "--family", "nope"), "unknown family", True),
+            (("triz_standard_solutions.py", "--state", "bogus"),
+             "Unknown Su-Field state", True),
+        ]
+        for args, expected_fragment, has_error_prefix in cases:
+            with self.subTest(args=args):
+                proc = subprocess.run(
+                    [sys.executable, "-X", "utf8",
+                     str(_SCRIPTS_DIR / args[0]), *args[1:]],
+                    capture_output=True, text=True, encoding="utf-8",
+                )
+                self.assertNotEqual(proc.returncode, 0, f"args={args}")
+                if has_error_prefix:
+                    self.assertIn("Error:", proc.stderr, f"args={args}")
+                else:
+                    self.assertIn("Usage:", proc.stderr, f"args={args}")
+                self.assertIn(expected_fragment, proc.stderr, f"args={args}")
+                self.assertNotIn("Traceback", proc.stderr + proc.stdout,
+                                 f"args={args}")
+                self.assertEqual(proc.stdout, "", f"args={args}")
+
 
     # ═══════════════════════════════════════════════════════════════════════
     #  R15 NEW TESTS — field branches, data-driven validation, domain
