@@ -7,6 +7,14 @@ remains. Two parts:
 - `scripts/gauntlet.ps1` — the enforcement harness (runs everything, pass/fail)
 - this file — the iteration contract an agent (or human) follows each cycle
 
+**Iteration engine (v2):** each improvement is now driven through the
+builder/critic/blind-bar protocol in
+[`.claude/skills/gauntlet-loop/SKILL.md`](.claude/skills/gauntlet-loop/SKILL.md):
+set a named, fetchable bar for the chosen lens target, build, then let a
+fresh-context critic compare blind — ship only when ours wins. The protocol
+below defines the rails (gate, commit format, journal, guardrails); the v2
+skill defines how step 2–3 are executed.
+
 ## The iteration protocol (exactly one per run)
 
 **0. Baseline.** Run `pwsh scripts/gauntlet.ps1`. It must PASS before any new
