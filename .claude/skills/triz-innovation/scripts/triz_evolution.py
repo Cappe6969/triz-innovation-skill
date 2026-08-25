@@ -243,6 +243,18 @@ def main() -> None:
             # Assume bare signals (backward-compatible)
             signals = " ".join(sys.argv[1:])
 
+    if not signals.strip():
+        # House CLI convention: missing required input -> Usage on stderr, rc 1.
+        print(
+            'Usage: python triz_evolution.py --signals "observed signals"',
+            file=sys.stderr,
+        )
+        print(
+            '       python triz_evolution.py "observed signals"',
+            file=sys.stderr,
+        )
+        sys.exit(1)
+
     result = analyze(signals)
 
     # S-curve stage

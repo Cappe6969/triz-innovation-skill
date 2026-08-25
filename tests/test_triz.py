@@ -1561,6 +1561,35 @@ class TestBranchesAndLanguageAxis(unittest.TestCase):
         self.assertIn("Dynamization", proc.stdout)
         self.assertEqual(proc.stderr, "")
 
+    # ── CLI-UX: house no-args convention across sub-tools ──────────────────
+
+    def test_cli_no_args_convention_router_and_evolution(self):
+        """Router and evolution no-args follow the house convention.
+
+        rc=1, Usage on stderr, nothing on stdout, no traceback — matching
+        matrix/effects/ariz/case-template/network. Evolution previously
+        returned a junk 'Unknown (stage 0)' analysis on rc=0; router
+        printed usage to stdout on rc=0.
+        """
+        for script in ("triz_router.py", "triz_evolution.py"):
+            proc = subprocess.run(
+                [sys.executable, str(_SCRIPTS_DIR / script)],
+                capture_output=True, text=True, encoding="utf-8",
+            )
+            self.assertEqual(proc.returncode, 1, script)
+            self.assertIn("Usage:", proc.stderr, script)
+            self.assertNotIn("Traceback", proc.stderr + proc.stdout, script)
+
+    def test_cli_evolution_signals_without_value_rejected(self):
+        """"--signals" with no value -> rc=1 + Usage on stderr (no junk run)."""
+        proc = subprocess.run(
+            [sys.executable, str(_SCRIPTS_DIR / "triz_evolution.py"), "--signals"],
+            capture_output=True, text=True, encoding="utf-8",
+        )
+        self.assertEqual(proc.returncode, 1)
+        self.assertIn("Usage:", proc.stderr)
+        self.assertEqual(proc.stdout, "")
+
 
     # ═══════════════════════════════════════════════════════════════════════
     #  R15 NEW TESTS — field branches, data-driven validation, domain

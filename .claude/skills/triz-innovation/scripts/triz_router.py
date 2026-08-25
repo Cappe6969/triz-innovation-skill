@@ -678,13 +678,14 @@ def main() -> None:
         sys.exit(0)
 
     if not positional:
-        print(f"Usage: python triz_router.py [--lang en|it|auto] [--branch {'|'.join(_valid_branches())}] \"problem description text\"")
-        print()
-        print("Heuristic TRIZ method router. Analyzes the problem text and suggests")
-        print("which TRIZ methods to apply, ranked by relevance score.")
-        print()
-        print("Supports English and Italian problem descriptions.")
-        sys.exit(0)
+        # House CLI convention: missing required input -> Usage on stderr, rc 1.
+        print(f"Usage: python triz_router.py [--lang en|it|auto] [--branch {'|'.join(_valid_branches())}] \"problem description text\"", file=sys.stderr)
+        print(file=sys.stderr)
+        print("Heuristic TRIZ method router. Analyzes the problem text and suggests", file=sys.stderr)
+        print("which TRIZ methods to apply, ranked by relevance score.", file=sys.stderr)
+        print(file=sys.stderr)
+        print("Supports English and Italian problem descriptions.", file=sys.stderr)
+        sys.exit(1)
 
     problem = " ".join(positional)
     if lang == "auto":
