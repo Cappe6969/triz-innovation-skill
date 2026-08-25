@@ -13,7 +13,7 @@ Usage:
 --lang en|it: which template to use. No flag and --lang it both produce the
 Italian template (the default); --lang en produces the English template.
 
-Standard library only — Python 3.8+.
+Standard library only — Python 3.9+.
 """
 
 from __future__ import annotations

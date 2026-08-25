@@ -16,7 +16,7 @@ Usage:
          domain rules run), or any registered field branch id (only that
          domain's rules run).
 
-Standard library only — Python 3.8+.
+Standard library only — Python 3.9+.
 """
 
 from __future__ import annotations

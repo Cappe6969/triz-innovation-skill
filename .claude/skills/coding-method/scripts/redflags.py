@@ -10,7 +10,7 @@ Usage:
     python redflags.py              # print the checklist only
     python redflags.py <file>       # print checklist + scan the file
 
-Standard library only — Python 3.8+.
+Standard library only — Python 3.9+.
 """
 
 from __future__ import annotations

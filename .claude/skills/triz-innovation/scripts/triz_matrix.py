@@ -11,7 +11,7 @@ Usage:
     python triz_matrix.py --list              # list the 39 parameters
     python triz_matrix.py                     # print usage
 
-Standard library only — Python 3.8+.
+Standard library only — Python 3.9+.
 """
 
 from __future__ import annotations

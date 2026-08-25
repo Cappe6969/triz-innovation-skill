@@ -14,7 +14,7 @@ Usage:
     python triz_effects.py --list                        # list all function families
     python triz_effects.py --family "detect_measure"     # list effects in a family
 
-Standard library only — Python 3.8+.
+Standard library only — Python 3.9+.
 """
 
 from __future__ import annotations

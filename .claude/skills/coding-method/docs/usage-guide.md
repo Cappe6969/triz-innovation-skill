@@ -42,7 +42,7 @@ each stage as you work, and after running the experiment update the result and
 follow-up. See the canned cases in `cases/` as worked examples.
 
 ## 5. Using the Python scripts
-All scripts are plain-stdlib MVPs (no install needed; Python 3.8+).
+All scripts are plain-stdlib MVPs (no install needed; Python 3.9+).
 
 **Dispatcher — one entrypoint:**
 ```

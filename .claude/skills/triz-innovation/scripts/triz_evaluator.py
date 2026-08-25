@@ -12,7 +12,7 @@ CSV header (case-insensitive, aliases accepted):
     solution,impact,feasibility,cost,speed,risk,reversibility,complexity,ideality
     (Legacy headers affordability/safety/simplicity also accepted.)
 
-Standard library only — Python 3.8+.
+Standard library only — Python 3.9+.
 """
 
 from __future__ import annotations

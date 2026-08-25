@@ -15,7 +15,7 @@ Usage:
     python triz_branches.py check                # validate all branch files
     python triz_branches.py detect "<text>"      # print 'it' or 'en'
 
-Standard library only — Python 3.8+.
+Standard library only — Python 3.9+.
 """
 
 from __future__ import annotations

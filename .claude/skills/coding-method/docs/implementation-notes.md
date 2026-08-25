@@ -49,7 +49,7 @@ before extending it.
 5. **Scripts are heuristic MVPs.** `method.py route` is keyword/intent-based
    (first guess, not verdict); `ladder.py` maps keywords to ladder rungs;
    `redflags.py` scans for mechanically-detectable smells. No external deps,
-   Python 3.8+.
+   Python 3.9+.
 
 ## Script contracts (so MCP wrapping is trivial later)
 - `method.route(task: str) -> dict` — stage plan with signals + TRIZ hints

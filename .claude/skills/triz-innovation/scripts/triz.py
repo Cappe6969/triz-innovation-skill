@@ -41,7 +41,7 @@ Commands:
 Aliases: router->route, standard-solutions/standard_solutions/su-field->sufield,
          evaluator->evaluate, kb/knowledge-base->master.
 
-Standard library only — Python 3.8+.
+Standard library only — Python 3.9+.
 """
 
 from __future__ import annotations

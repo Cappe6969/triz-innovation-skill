@@ -13,7 +13,7 @@ uses the same framing as the request. Logs / progress go to stderr only —
 never stdout.
 
 Stdlib only (json, sys, io, argparse) — no `mcp` SDK, no pip install.
-Python 3.8+.
+Python 3.9+.
 
 Usage:
     python triz_mcp_server.py             # serve on stdio

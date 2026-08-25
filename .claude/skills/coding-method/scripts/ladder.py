@@ -11,7 +11,7 @@ Usage:
     python ladder.py "<task>"      # print the rung + IFR
     python ladder.py ladder        # print the ladder
 
-Standard library only — Python 3.8+.
+Standard library only — Python 3.9+.
 """
 
 from __future__ import annotations

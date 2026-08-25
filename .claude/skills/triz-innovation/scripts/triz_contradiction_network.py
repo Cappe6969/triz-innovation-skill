@@ -14,7 +14,7 @@ Usage:
     python triz_contradiction_network.py --analyze           # read JSON from stdin
     python triz_contradiction_network.py --demo              # built-in example
 
-Standard library only — Python 3.8+.
+Standard library only — Python 3.9+.
 """
 
 from __future__ import annotations

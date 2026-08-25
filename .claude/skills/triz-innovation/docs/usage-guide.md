@@ -46,7 +46,7 @@ Fill each section as you work; after running the experiment, update **Risultati*
 and **Follow-up**. See `cases/README.md`.
 
 ## 5. Using the Python scripts
-All scripts are plain-stdlib MVPs (no install needed; Python 3.8+).
+All scripts are plain-stdlib MVPs (no install needed; Python 3.9+).
 
 **Master dispatcher — one entrypoint:**
 ```
@@ -132,12 +132,12 @@ unknown-method request) with no client and no network, prints `SELF-TEST OK`,
 and exits 0 on success, 1 on failure.
 
 ### Register it
-Because the server is pure stdlib, any Python 3.8+ on `PATH` works — no install
+Because the server is pure stdlib, any Python 3.9+ on `PATH` works — no install
 step. Register it explicitly as a local stdio server.
 
-**Claude Code (project scope):**
+**Claude Code (project scope):** substitute your actual repo path for `<repo>`:
 ```
-claude mcp add triz -- python "C:\Dev\TRIZskill.md\.claude\skills\triz-innovation\mcp\triz_mcp_server.py"
+claude mcp add triz -- python "<repo>\.claude\skills\triz-innovation\mcp\triz_mcp_server.py"
 ```
 Windows quoting note: the absolute path is wrapped in double quotes and `python`
 must be on `PATH`.
@@ -150,7 +150,7 @@ must be on `PATH`.
     "triz-innovation": {
       "type": "stdio",
       "command": "python",
-      "args": ["C:\\Dev\\TRIZskill.md\\.claude\\skills\\triz-innovation\\mcp\\triz_mcp_server.py"]
+      "args": ["<repo>\\.claude\\skills\\triz-innovation\\mcp\\triz_mcp_server.py"]
     }
   }
 }
@@ -163,7 +163,7 @@ must be on `PATH`.
   "mcp": {
     "triz-innovation": {
       "type": "local",
-      "command": ["python", "C:/Dev/TRIZskill.md/.claude/skills/triz-innovation/mcp/triz_mcp_server.py"],
+      "command": ["python", "<repo>/.claude/skills/triz-innovation/mcp/triz_mcp_server.py"],
       "enabled": true
     }
   }

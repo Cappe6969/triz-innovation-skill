@@ -10,7 +10,7 @@ Usage:
     python triz_evolution.py --signals "..."
     python triz_evolution.py                    # prints stage Unknown + 8 trends
 
-Standard library only — Python 3.8+.
+Standard library only — Python 3.9+.
 """
 
 from __future__ import annotations

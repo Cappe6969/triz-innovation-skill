@@ -36,7 +36,7 @@ cases/                # saved analyses (template + README + generated cases) —
 4. **Scripts are heuristic MVPs, not engines.** The router uses transparent
    keyword/intent rules (easy to read and extend); the evaluator is a plain
    weighted-sum scorer; the case generator is a templater. No external deps so it
-   runs anywhere Python 3.8+ exists.
+   runs anywhere Python 3.9+ exists.
 5. **Architect/Carpenter split.** The knowledge content (SKILL.md, references,
    examples, docs) was authored directly by the Architect because LLM-synthesis
    of TRIZ method content needs domain accuracy. The three Python scripts were
