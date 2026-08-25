@@ -58,8 +58,9 @@ never rewrite history; master merges need explicit user approval.
 2. **test-gap** — find untested edges in `scripts/*.py` (empty input,
    unicode, malformed CSV/JSON rows, unknown flags, missing files) and add
    focused unittests.
-3. **data-completeness** — the catalogs are thin: scientific effects has 56
-   entries in 7 families; spot-check matrix/principles data against public
+3. **data-completeness** — the catalogs are thin: the scientific-effects
+   catalog spans only a handful of broad families, with some families much
+   smaller than others; spot-check matrix/principles data against public
    TRIZ references; extend carefully with sourced, original phrasing.
 4. **cli-ux** — inconsistent flags, error messages, or exit codes across
    sub-tools; align them with the dispatcher's conventions (`Error:` on
