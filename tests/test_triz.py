@@ -319,6 +319,53 @@ class TestTRIZ(unittest.TestCase):
                     self.assertIn(field, entry,
                                   f"Entry {i} missing field '{field}'")
 
+    def test_effects_entries_fully_populated(self):
+        """R4-standard: every effects entry is complete, not merely present.
+
+        Bar: the same completeness the standard-solutions catalog test
+        enforces — all content fields exist AND are non-empty; list fields
+        are non-empty lists. Guards against thin additions.
+        """
+        with open(_SCRIPTS_DIR / "data" / "scientific_effects.json",
+                  "r", encoding="utf-8") as fh:
+            effects = json.load(fh)
+
+        nonempty_str_fields = (
+            "effect_name", "function_family", "domain",
+            "mechanism", "output",
+        )
+        for i, entry in enumerate(effects):
+            with self.subTest(entry_index=i, name=entry.get("effect_name")):
+                for field in nonempty_str_fields:
+                    value = entry.get(field)
+                    self.assertIsInstance(value, str,
+                                          f"Entry {i} field '{field}' not a string")
+                    self.assertGreater(len(value.strip()), 0,
+                                       f"Entry {i} field '{field}' empty")
+                for field in ("resources_needed", "examples"):
+                    value = entry.get(field)
+                    self.assertIsInstance(value, list,
+                                          f"Entry {i} field '{field}' not a list")
+                    self.assertGreater(len(value), 0,
+                                       f"Entry {i} field '{field}' empty")
+
+    def test_effects_change_properties_family_min_depth(self):
+        """The thinnest family must keep growing toward catalog balance.
+
+        change_properties was the smallest family (6 entries); data-
+        completeness iterations add classic effects. Locks a floor so the
+        family cannot silently regress.
+        """
+        with open(_SCRIPTS_DIR / "data" / "scientific_effects.json",
+                  "r", encoding="utf-8") as fh:
+            effects = json.load(fh)
+        family = [e for e in effects if e["function_family"] == "change_properties"]
+        self.assertGreaterEqual(
+            len(family), 8,
+            f"change_properties family regressed below 8 entries "
+            f"(has {len(family)})",
+        )
+
         # Search for a specific known effect
         matches = [
             e for e in effects
