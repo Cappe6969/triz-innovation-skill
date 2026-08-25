@@ -1668,6 +1668,44 @@ class TestBranchesAndLanguageAxis(unittest.TestCase):
                                  f"args={args}")
                 self.assertEqual(proc.stdout, "", f"args={args}")
 
+    # ── Test-gap: evaluator score-range / type validation ───────────────────
+
+    def test_evaluator_cli_rejects_invalid_score_values(self):
+        """Out-of-range, negative, zero, and non-numeric criterion values
+        -> rc=1, 'Error:' naming the row/criterion on stderr, nothing on
+        stdout, no traceback. Guards the tool's core data-integrity
+        guarantee: only 1-5 integer scores are ever ranked."""
+        header = ("solution,impact,feasibility,cost,speed,risk,"
+                  "reversibility,complexity,ideality")
+        cases = [
+            ("fix A,9,3,3,3,3,3,3,3", "must be 1–5", "'impact'"),
+            ("fix B,4,-2,3,3,3,3,3,3", "must be 1–5", "'feasibility'"),
+            ("fix D,0,0,0,0,0,0,0,0", "must be 1–5", "'impact'"),
+            ("fix C,high,3,3,3,3,3,3,3", "not a valid integer", "'impact'"),
+        ]
+        for i, (data_row, expected_fragment, second_fragment) in enumerate(
+                cases, start=2):
+            with self.subTest(row=i):
+                with tempfile.NamedTemporaryFile(
+                    "w", suffix=".csv", delete=False, encoding="utf-8"
+                ) as fh:
+                    fh.write(header + "\n" + data_row + "\n")
+                    csv_path = fh.name
+                try:
+                    proc = subprocess.run(
+                        [sys.executable, "-X", "utf8",
+                         str(_SCRIPTS_DIR / "triz_evaluator.py"), csv_path],
+                        capture_output=True, text=True, encoding="utf-8",
+                    )
+                finally:
+                    os.unlink(csv_path)
+                self.assertNotEqual(proc.returncode, 0)
+                self.assertIn("Error:", proc.stderr)
+                self.assertIn(expected_fragment, proc.stderr)
+                self.assertIn(second_fragment, proc.stderr)
+                self.assertNotIn("Traceback", proc.stderr + proc.stdout)
+                self.assertEqual(proc.stdout, "")
+
 
     # ═══════════════════════════════════════════════════════════════════════
     #  R15 NEW TESTS — field branches, data-driven validation, domain
