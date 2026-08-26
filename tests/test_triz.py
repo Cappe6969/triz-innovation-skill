@@ -1638,6 +1638,52 @@ class TestBranchesAndLanguageAxis(unittest.TestCase):
                 self.assertNotIn("Traceback", proc.stderr + proc.stdout)
                 self.assertEqual(proc.stdout, "")
 
+    # ── Test-gap: network --add contract + router --list ────────────────────
+
+    def test_network_cli_add_contract(self):
+        """--add with valid ids -> rc=0, network JSON array on stdout,
+        stderr clean; with an out-of-range id -> rc=1, 'Error:' naming the
+        parameter and range on stderr, stdout empty."""
+        good = subprocess.run(
+            [sys.executable, "-X", "utf8",
+             str(_SCRIPTS_DIR / "triz_contradiction_network.py"),
+             "--add", "C9", "14", "1", "Strength", "Weight",
+             "more force adds mass"],
+            capture_output=True, text=True, encoding="utf-8",
+        )
+        self.assertEqual(good.returncode, 0)
+        parsed = json.loads(good.stdout)
+        self.assertIsInstance(parsed, list)
+        self.assertTrue(any(c.get("id") == "C9" for c in parsed
+                            if isinstance(c, dict)))
+        self.assertEqual(good.stderr, "")
+
+        bad = subprocess.run(
+            [sys.executable, "-X", "utf8",
+             str(_SCRIPTS_DIR / "triz_contradiction_network.py"),
+             "--add", "C9", "99", "1", "Strength", "Weight", "d"],
+            capture_output=True, text=True, encoding="utf-8",
+        )
+        self.assertNotEqual(bad.returncode, 0)
+        self.assertIn("Error:", bad.stderr)
+        self.assertIn("1..39", bad.stderr)
+        self.assertEqual(bad.stdout, "")
+        self.assertNotIn("Traceback", bad.stderr)
+
+    def test_router_cli_list_prints_branches(self):
+        """router --list -> rc=0, registered branch ids + lang values on
+        stdout, stderr clean."""
+        proc = subprocess.run(
+            [sys.executable, "-X", "utf8",
+             str(_SCRIPTS_DIR / "triz_router.py"), "--list"],
+            capture_output=True, text=True, encoding="utf-8",
+        )
+        self.assertEqual(proc.returncode, 0)
+        self.assertIn("--branch ids:", proc.stdout)
+        self.assertIn("general", proc.stdout)
+        self.assertIn("--lang values: en, it, auto", proc.stdout)
+        self.assertEqual(proc.stderr, "")
+
     # ── Test-gap: branches / effects / sufield CLI error paths ──────────────
 
     def test_cli_error_paths_branches_effects_sufield(self):
